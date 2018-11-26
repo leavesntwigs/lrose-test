@@ -1,3 +1,10 @@
+```
+git clone https://github.com/leavesntwigs/lrose-test
+```
+
+
+
+
 # lrose-test
 automatic integration, build and test of lrose code
 
