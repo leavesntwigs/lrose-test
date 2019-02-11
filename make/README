@@ -1,0 +1,18 @@
+
+
+[eol-albireo:~/git/lrose-test/make] brenda% ./Rsl_unittest 
+Running main() from ../runners/gtest_main.cc
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+[----------] 1 test from RSL
+[ RUN      ] RSL.DZ_INVF_too_big
+[       OK ] RSL.DZ_INVF_too_big (0 ms)
+[----------] 1 test from RSL (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran. (0 ms total)
+[  PASSED  ] 1 test.
+
+To generate the data set for testing ...
+    25	16:04	~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_v4244_PunSur_SUR.nc
+
