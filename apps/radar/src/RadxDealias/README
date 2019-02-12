@@ -1,0 +1,13 @@
+
+
+To generate the data set for testing ...
+    25  16:04   ~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_v4244_PunSur_SUR.nc
+
+To run the dealiasing code:
+RadxDealias -f cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_PunSur_SUR.nc -params RadxDealias.params
+
+
+To examine the unfolded data:
+
+ ~/lrose/bin/HawkEye -f output_dealiased/20150626/cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_PunSur_SUR.nc -params my_testing_params.HawkEye
+

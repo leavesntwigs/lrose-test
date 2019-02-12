@@ -1,0 +1,698 @@
+/**********************************************************************
+ * TDRP params for ./RadxDealias
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxDealias reads input radar data from a file, dealiases the data, 
+//   and writes it to a file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+//input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626";
+input_dir = "./output/20150626";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "./output_dealiased";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_prefix //////////////////
+//
+// Optional prefix for output filename.
+//
+// If empty, the standard prefix will be used. Only applies to CfRadial 
+//   files. Standard prefix is 'cfrad.'.
+//
+//
+// Type: string
+//
+
+output_filename_prefix = "";
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// delete_repeat_tilts /////////////////////
+//
+// Option to delete repeated tilts in volume.
+//
+// If TRUE, the program will use option specified in parameter.
+//
+//
+// Type: boolean
+//
+
+delete_repeat_tilts = TRUE;
+
+///////////// delete_tilt_decision ////////////////////
+//
+// Decision type for deleting sequential tilts with repeated target 
+//   elevation.
+//
+// Used if delete_repeat_tilts is true.
+//
+//
+// Type: enum
+// Options:
+//     KEEP_RECENT_TILT
+//     KEEP_PREV_TILT
+//
+
+delete_tilt_decision = KEEP_RECENT_TILT;
+
+///////////// input_num_gates /////////////////////////
+//
+// Option for padding the number of gates in the beam data so that a 
+//   constant beam geometry is processed.
+//
+// Set to a positive number to activate padding.
+//
+//
+// Type: int
+//
+
+input_num_gates = -1;
+
+///////////// required_fields /////////////////////////
+//
+// Expected fields. Dealiaser will not initialize without these fields. 
+//   All beams will be discarded until these fields are present.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+required_fields = {
+ "DBZ",
+ "VEL_HV"
+};
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override radar location.
+//
+// If TRUE, the program will use location specified in the 
+//   'radar_location' parameter.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_location //////////////////////////
+//
+// Radar location if override is set true.
+//
+// The radar_location is only used if 'override_radar_location' is set 
+//   true. Otherwise the information in the input data stream is used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double latitude;
+//      double longitude;
+//      double altitude;
+//   }
+//
+//
+
+radar_location = {
+    latitude = 0,
+    longitude = 0,
+    altitude = 0
+};
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Dealiasing Parameters .
+//
+//======================================================================
+ 
+///////////// max_rays ////////////////////////////////
+//
+// Maximum number of rays in a sweep.
+//
+// Used by FourDD to allocate memory for RSL structs.
+//
+//
+// Type: int
+//
+
+max_rays = 375;
+
+///////////// max_bins ////////////////////////////////
+//
+// Maximum number of bins per ray.
+//
+// Used by FourDD to allocate memory for RSL structs.
+//
+//
+// Type: int
+//
+
+max_bins = 1024;
+
+///////////// proximity ///////////////////////////////
+//
+// Unfolding using windowing.
+//
+// After initial dealiasing and spatial dealiasing are complete, there 
+//   often remain radar gates that cannot be dealiased. Before resorting 
+//   to the VAD, a windowing loop is used in unfoldVolume to scan through 
+//   the sweep and use area averaging to dealias these isolated gates. 
+//   PROXIMITY specifies the size of the window, which is (PROXIMITY * 2 + 
+//   1 gates) X (PROXIMITY * 2 +1 gates) in azimuth and range. This value 
+//   should be large enough to find a sufficient number of good gates, but 
+//   not too large (because it makes the code less efficient and could 
+//   introduce errors).
+//
+//
+// Type: int
+//
+
+proximity = 6;
+
+///////////// comp_thresh /////////////////////////////
+//
+// This parameter is the fraction of the Nyquist velocity used to 
+//   determine if initial dealiasing of a particular gate was successful 
+//   in the first spatial and temporal dealiasing pass through the data.
+//
+//
+// Type: float
+//
+
+comp_thresh = 0.25;
+
+///////////// comp_thresh2 ////////////////////////////
+//
+// This parameter is the fraction of the Nyquist velocity used to 
+//   determine if the dealiasing of a particular gate using vad data was 
+//   successful. This is used if the gate was not dealiased using 
+//   comp_thresh.
+//
+//  NOTE: comp_thresh should be less than comp_thresh2. Both comp_thresh 
+//   and comp_thresh2 must be between 0.2 & 1.0! Experience shows that 
+//   values below 0.5 are better for preventing errors from occurring. 
+//   Experience also shows that values less than about 0.2 make the 
+//   algorithm less efficient and less effective.
+//
+//
+// Type: float
+//
+
+comp_thresh2 = 0.49;
+
+///////////// thresh //////////////////////////////////
+//
+// This parameter is the fraction of the Nyquist velocity used to 
+//   compare a gate to its neighbor or an averaged value of a window of 
+//   neighbors and determine if it is aliased. This is used in the passes 
+//   that unfold the data based on spatial continuity.
+//
+//
+// Type: float
+//
+
+thresh = 0.4;
+
+///////////// min_good ////////////////////////////////
+//
+// Number of good values required within unfolding window to unfold the 
+//   current bin.
+//
+// This parameter specifies the minumum number of gates successfully 
+//   dealiased during initial and spatial dealiasing located within the 
+//   window (of size (PROXIMITY*2+1) X (PROXIMITY*2+1)) to consider 
+//   adequate for dealiasing a particular gate the windowing procedure.
+//
+//
+// Type: int
+//
+
+min_good = 5;
+
+///////////// std_thresh //////////////////////////////
+//
+// Fraction of the Nyquist velocity to use as a standard deviation 
+//   threshold when windowing.
+//
+// This parameter prevents very noisy data from being used for 
+//   dealiasing during the windowing routine. The lower this value, the 
+//   stricter the algorithm will be about allowing bad data to come into 
+//   play during windowing. (Check use in windowing routine).
+//
+//
+// Type: float
+//
+
+std_thresh = 0.8;
+
+///////////// low_dbz /////////////////////////////////
+//
+// All radial velocity bins with dbz values less than low_dbz will be 
+//   deleted if prep is set to true.
+//
+//
+// Type: float
+//
+
+low_dbz = 0;
+
+///////////// high_dbz ////////////////////////////////
+//
+// All bins with dbz values greater than high_dbz will be deleted if 
+//   prep is set to true.
+//
+// This parameter should be greater than 75 dBZ.
+//
+//
+// Type: float
+//
+
+high_dbz = 80;
+
+///////////// no_dbz_rm_rv ////////////////////////////
+//
+// If true, all radial velocity bins with dbz values missing will be 
+//   deleted.
+//
+//
+// Type: boolean
+//
+
+no_dbz_rm_rv = FALSE;
+
+///////////// del_num_bins ////////////////////////////
+//
+// The first del_num_bins velocity bins will be deleted along each 
+//   ray(should be between 0 and 5).
+//
+//
+// Type: int
+//
+
+del_num_bins = 0;
+
+///////////// ck_val //////////////////////////////////
+//
+// If absolute value of the radial velocity gate is less than this 
+//   value, it will not be used as a PRELIM gate.
+//
+// This parameter is a wind speed (in m/s) and should be between 0.0 m/s 
+//   and about 0.1 * Nyquist velocity. Typically, noise gates in the 
+//   radial velocity field are close to 0 m/s. This parameter specifies a 
+//   range of small radial velocities (between +/- CKVAL) which the 
+//   algorithm will ignore as possible noise during the first dealiasing 
+//   passes. Then, in subsequent passes, the algorithm sets CKVAL to zero 
+//   in order to properly examine these gates.
+//
+//
+// Type: float
+//
+
+ck_val = 1;
+
+///////////// sign ////////////////////////////////////
+//
+// Sign convention: if SIGN=-1, negative radial velocity is towards the 
+//   radar, if SIGN=1 positive value towards radar.
+//
+//
+// Type: int
+//
+
+sign = -1;
+
+///////////// max_count ///////////////////////////////
+//
+// This is the upper bound on the number of times 2Vn will be added or 
+//   subtracted to a given velocity value in attempt to dealias it.
+//
+// Should be four or greater and probably less than or equal to 10.
+//
+//
+// Type: int
+//
+
+max_count = 10;
+
+///////////// max_shear ///////////////////////////////
+//
+// Maximum vertical shear allowed in input sounding.
+//
+// This limits how much variability in the wind with height will be 
+//   allowed in the VAD or sounding. Should be greater than about 0.01 and 
+//   less than about 0.1. .
+//
+//
+// Type: float
+//
+
+max_shear = 0.05;
+
+///////////// prep ////////////////////////////////////
+//
+// Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and 
+//   lower that low_dbz will be automatically deleted.
+//
+//
+// Type: boolean
+//
+
+prep = FALSE;
+
+///////////// filt ////////////////////////////////////
+//
+// Use Bergen and Albers filter.
+//
+//
+// Type: boolean
+//
+
+filt = FALSE;
+
+///////////// output_soundVol /////////////////////////
+//
+// Output sounding or vad volume velocities INSTEAD OF dealiased 
+//   velocties.
+//
+// A debug tool.
+//
+//
+// Type: boolean
+//
+
+output_soundVol = FALSE;
+
+///////////// missing_vel /////////////////////////////
+//
+// Missing velocity value.
+//
+// This is the encoded Range value of velocity.
+//
+//
+// Type: float
+//
+
+missing_vel = -32768;
+
+///////////// strict_first_pass ///////////////////////
+//
+// If strict_first_pass is true, a gate in which a dealiasattempt has 
+//   been made will have to be within comp_thresh*NyqVelocityof the 
+//   relevant above, previous, sounding values in order to beconsidered 
+//   properly dealiased.
+//
+//
+// Type: boolean
+//
+
+strict_first_pass = FALSE;
+
+//======================================================================
+//
+// SOUNDING URL.
+//
+//======================================================================
+ 
+///////////// sounding_url ////////////////////////////
+//
+// URL for sounding data.
+//
+//
+// Type: string
+//
+
+// sounding_url = "spdbp:://localhost::./spdb";
+sounding_url = "spdbp:://rain::/scr/rain2/rsfdata/projects/pecan/spdb/sounding/ruc";
+
+///////////// sounding_look_back //////////////////////
+//
+// Time (in minutes) to search back for a sounding. Default is 1/2 hour; 
+//   max is 24 hours.
+//
+// This value is overridden by DsSpdbServer when using a hybrid sounding 
+//   database with search criteria.
+//
+// Minimum val: 0
+// Maximum val: 1440
+//
+// Type: float
+//
+
+sounding_look_back = 120;
+
+///////////// sounding_location_name //////////////////
+//
+// Name of sounding location.
+//
+// If set, we request a profile just for that sounding. If empty, all 
+//   soundings in the data base are considered valid.
+//
+//
+// Type: string
+//
+
+sounding_location_name = "SPOL";
+
+///////////// wind_alt_min ////////////////////////////
+//
+// Minimum altitude (in km) used from the sounding to calculate average 
+//   wind.
+//
+// Minimum val: 0
+// Maximum val: 10
+//
+// Type: float
+//
+
+wind_alt_min = 0;
+
+///////////// wind_alt_max ////////////////////////////
+//
+// Maximum altitude (in km) used from the sounding tocalculate average 
+//   wind.
+//
+// Minimum val: 0
+// Maximum val: 10
+//
+// Type: float
+//
+
+wind_alt_max = 5;
+
+///////////// avg_wind_u //////////////////////////////
+//
+// Horizontal component of wind dir/speed (in m/s).
+//
+// Used only when no sounding wind data are available.
+//
+// Minimum val: -1000
+// Maximum val: 1000
+//
+// Type: float
+//
+
+avg_wind_u = 0;
+
+///////////// avg_wind_v //////////////////////////////
+//
+// Vertical component of wind dir/speed (in m/s).
+//
+// Used only when no sounding wind data are available.
+//
+// Minimum val: -1000
+// Maximum val: 1000
+//
+// Type: float
+//
+
+avg_wind_v = 0;
+
+///////////// dbz_range ///////////////////////////////
+//
+// the range of dbz values used for scale/biasing (dBZ).
+//
+// this is used only when input data is floating point.
+//
+//
+// Type: float
+// 1D array - fixed length - 2 elements.
+//
+
+dbz_range = {
+ -32,
+ 80
+};
+
+///////////// vel_range ///////////////////////////////
+//
+// the range of vel values used for scale/biasing (m/s).
+//
+// this is used only when input data is floating point.
+//
+//
+// Type: float
+// 1D array - fixed length - 2 elements.
+//
+
+vel_range = {
+ -80,
+ 80
+};
+

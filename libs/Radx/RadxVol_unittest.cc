@@ -54,7 +54,7 @@ TEST(RadxVol, createRadxVolumeDeNovo) {
 
   int nSweeps = 2;
   int nRays = 4;
-  int nFields = 2;
+  // int nFields = 2;
   int nGates = 5;
 
   /* layout should be like this ...
@@ -76,7 +76,7 @@ TEST(RadxVol, createRadxVolumeDeNovo) {
 
   RadxVol *radxVol = new RadxVol();
 
-  // So, is the ray the base element? i.e. create rays first,
+  // So, is the ray the base element? (YES) i.e. create rays first,
   // then add fields (filled with data)  to the rays
   // associate the ray with a sweep number?
   // then add the ray to the volume?
@@ -97,7 +97,7 @@ TEST(RadxVol, createRadxVolumeDeNovo) {
       //      const string name = "VEL";
       //const string units = "m/s"; 
       Radx::si16 missingValue = -999;
-      const Radx::si16 *data = &rawData[0];
+      //      const Radx::si16 *data = &rawData[0];
       double scale = 1.0;
       double offset = 0.0;
       bool isLocal = false;
@@ -182,103 +182,31 @@ TEST(RadxVol, createRadxVolumeDeNovo) {
   RadxFile outFile;
   outFile.writeToPath(*radxVol, "/Users/brenda/git/lrose-test/libs/Radx/createRadxVolumeDeNovo.nc");
 
-  //EXPECT_EQ(1, timeList.getMode());
-  //EXPECT_EQ(RadxTimeList::MODE_FIRST, timeList.getMode());
-}
+  // check for some expected values ...
+  // Check the new fields because their values are dependent on the original values
+  //   wait, field1 and field2 are NOT defined anymore! 
+  //
+  RadxField *testField1 = radxVol->getField("VEL_UNF");
+  Radx::si16 *testData = testField1->getDataSi16();
 
-  /* tests for Timelist
+  EXPECT_EQ(40, testField1->getNPoints());
 
-TEST(RadxTimeList, setModeFirst) {
-  RadxTimeList timeList;
-  timeList.clearMode();
-  timeList.setModeFirst();
-  EXPECT_EQ(1, timeList.getMode());
-  EXPECT_EQ(RadxTimeList::MODE_FIRST, timeList.getMode());
-}
-
-TEST(RadxTimeList, compileListFromInterval) {
-  RadxTimeList timeList;
-  timeList.clearMode();
-  RadxTime startTime;
-  RadxTime endTime;
-
-  endTime.set(RadxTime::NOW);
-  timeList.setModeInterval(startTime, endTime);
-  timeList.setDir("/Users/brenda/data/dorade/dow"); // timrex/swp.1080620053141.SPOLRVP8.0.001.8_SUR_v040");
-  // timeList.setDir("/Users/brenda/Downloads");
-  if (timeList.compile()) {
-    cerr << timeList.getErrStr() << endl;
+  for (size_t i=0; i<testField1->getNPoints(); i++) {
+    int expectedValue = i * -1;
+    EXPECT_EQ(expectedValue, testData[i]);
   }
 
-  vector<string> pathList = timeList.getPathList();
-  if (pathList.size() <= 0) {
-    cerr << "pathList is empty" << endl;
-    cerr << timeList.getErrStr() << endl;
+  RadxField *testField2 = radxVol->getField("DBZ_UNF");
+  testData = testField2->getDataSi16();
+
+  EXPECT_EQ(40, testField2->getNPoints());
+
+  for (size_t i=0; i<testField2->getNPoints(); i++) {
+    int expectedValue = (i+50) * -1;
+    EXPECT_EQ(expectedValue, testData[i]);
   }
-  else
-    cerr << "pathList is NOT empty" << endl;
-
-  for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-    cerr << *i << endl;
-  }
-  cerr << endl;
-  
-  RadxTime firstTime;
-  RadxTime lastTime;
-  RadxTime dummyTime;
-  
-  string firstFilePath = pathList.at(0);
-  //  vector<RadxTime> validTimes = timeList.getValidTimes();
-  //firstTime = validTimes.at(0);
-
-  // getFirstAndLastTime(RadxTime &fileStartTime, RadxTime &fileEndTime)
-  timeList.getFirstAndLastTime(firstTime, lastTime);
-
-  cerr << "first time " << firstTime << endl;
-  cerr << "last time " << lastTime << endl;
 
 }
 
-TEST(RadxTimeList, findFirstTimeInDataSet) {
-  RadxTimeList timeList;
-  timeList.clearMode();
-  RadxTime startTime;
-  RadxTime endTime;
-
-  startTime.set(RadxTime::NOW);
-  timeList.setModeFirst();
-  
-  //  timeList.getStartTime();
-  timeList.setDir("/Users/brenda/data/dorade/dow"); // timrex/swp.1080620053141.SPOLRVP8.0.001.8_SUR_v040");
-  // timeList.setDir("/Users/brenda/Downloads");
-  if (timeList.compile()) {
-    cerr << "Result of timeList.compile() " << timeList.getErrStr() << endl;
-  }
-  
-  vector<string> pathList = timeList.getPathList();
-  if (pathList.size() <= 0) {
-    cerr << "pathList is empty" << endl;
-    cerr << timeList.getErrStr() << endl;
-  }
-  else
-    cerr << "pathList is NOT empty" << endl;
-
-  for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-    cerr << *i << endl;
-  }
-  cerr << endl;
-  
-
-  // I want to find the first time in the data set ...
-  vector<RadxTime> validTimes = timeList.getValidTimes();
-  if (validTimes.size() <= 0) {
-    cerr << "validTimes is empty" << endl;
-  } else {
-    //TimePath timePath = timePathSet.begin();
-    RadxTime firstTime = validTimes.at(0);
-    cerr << "first time " << firstTime << endl;
-  }
-}
-*/
 }  // namespace
 
