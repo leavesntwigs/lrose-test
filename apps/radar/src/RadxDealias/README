@@ -1,7 +1,11 @@
 
 
 To generate the data set for testing ...
-    25  16:04   ~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_v4244_PunSur_SUR.nc
+
+~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -field VEL -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_002647.542_to_20150626_003229.423_SPOL_v3842_PunSur_SUR.nc
+
+# this time point does NOT have folded data
+~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -field VEL -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_v4244_PunSur_SUR.nc
 
 To run the dealiasing code:
 RadxDealias -f cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_PunSur_SUR.nc -params RadxDealias.params
@@ -11,3 +15,20 @@ To examine the unfolded data:
 
  ~/lrose/bin/HawkEye -f output_dealiased/20150626/cfrad.20150626_214759.586_to_20150626_215341.473_SPOL_PunSur_SUR.nc -params my_testing_params.HawkEye
 
+
+~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -field VEL -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_003626.395_to_20150626_004208.261_SPOL_v3845_PunSur_SUR.nc
+~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -field VEL -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_004604.891_to_20150626_005146.759_SPOL_v3848_PunSur_SUR.nc
+~/lrose/bin/HawkEye -f output_dealiased/20150626/cfrad.20150626_002647.542_to_20150626_003229.423_SPOL_PunSur_SUR.nc -params my_testing_params.HawkEye
+   
+ls /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_004*
+ls /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_005*
+
+~/lrose/bin/RadxConvert -field DBZ -field VEL_HV -field VEL -f /scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_005543.775_to_20150626_010125.574_SPOL_v3851_PunSur_SUR.nc
+
+~/git/lrose-core/codebase/apps/radar/src/RadxDealias/RadxDealias -start "2015 06 26 00 26 00" -end "2015 06 26 02 00 00" -params RadxDealiasByTime.params
+
+NOTE: remember,
+*PunSur_SUR has 11 sweeps
+*_SUR       has  1 sweep
+
+Dealiasing code requires the number of sweeps to be the same for each file/volume of data

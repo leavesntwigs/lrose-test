@@ -371,12 +371,30 @@ fields = {
   }
   ,
   {
+    label = "VEL_UNF",
+    raw_name = "VEL_UNF",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "vel.colors",
+    shortcut = "4"
+  }
+  ,
+  {
+    label = "VEL",
+    raw_name = "VEL",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "vel.colors",
+    shortcut = "5"
+  }
+  ,
+  {
     label = "WIDTH",
     raw_name = "WIDTH",
     filtered_name = "",
     units = "m/s",
     color_map = "width.colors",
-    shortcut = "4"
+    shortcut = "6"
   }
   ,
   {
@@ -385,7 +403,7 @@ fields = {
     filtered_name = "",
     units = "m/s",
     color_map = "width.colors",
-    shortcut = "5"
+    shortcut = "7"
   }
   ,
   {
@@ -394,7 +412,7 @@ fields = {
     filtered_name = "",
     units = "dB",
     color_map = "zdr.colors",
-    shortcut = "6"
+    shortcut = "8"
   }
   ,
   {
@@ -403,17 +421,17 @@ fields = {
     filtered_name = "",
     units = "deg",
     color_map = "phidp.colors",
-    shortcut = "7"
+    shortcut = "9"
   }
-  ,
-  {
-    label = "RHOHV",
-    raw_name = "RHOHV",
-    filtered_name = "",
-    units = "unitless",
-    color_map = "rhohv.colors",
-    shortcut = "8"
-  }
+  //,
+  //{
+    //label = "RHOHV",
+    //raw_name = "RHOHV",
+    //filtered_name = "",
+    //units = "unitless",
+    //color_map = "rhohv.colors",
+    //shortcut = "8"
+  //}
 };
 
 ///////////// background_render_mins //////////////////

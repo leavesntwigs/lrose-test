@@ -59,7 +59,7 @@ instance = "Test";
 // Type: string
 //
 
-//input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626";
+// input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626";
 input_dir = "./output/20150626";
 
 ///////////// mode ////////////////////////////////////
@@ -82,7 +82,7 @@ input_dir = "./output/20150626";
 //     FILELIST
 //
 
-mode = FILELIST;
+mode = ARCHIVE;
 
 //======================================================================
 //
@@ -200,6 +200,19 @@ delete_repeat_tilts = TRUE;
 
 delete_tilt_decision = KEEP_RECENT_TILT;
 
+///////////// input_num_gates /////////////////////////
+//
+// Option for padding the number of gates in the beam data so that a 
+//   constant beam geometry is processed.
+//
+// Set to a positive number to activate padding.
+//
+//
+// Type: int
+//
+
+input_num_gates = -1;
+
 ///////////// required_fields /////////////////////////
 //
 // Expected fields. Dealiaser will not initialize without these fields. 
@@ -268,7 +281,7 @@ radar_location = {
 // Dealiasing Parameters .
 //
 //======================================================================
- 
+
 ///////////// nyquist_mps /////////////////////////////
 //
 // Nyquist velocity to override value in data file.
@@ -277,7 +290,7 @@ radar_location = {
 // Type: float
 //
 
-nyquist_mps = 13.0;
+nyquist_mps = 13.0; 
 
 ///////////// proximity ///////////////////////////////
 //

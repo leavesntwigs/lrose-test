@@ -1,48 +1,16 @@
 /**********************************************************************
- * TDRP params for ./RadxDealias
+ * TDRP params for /Users/brenda/git/lrose-core/codebase/apps/radar/src/RadxDealias/RadxDealias
  **********************************************************************/
 
 //======================================================================
 //
-// RadxDealias reads input radar data from a file, dealiases the data, 
-//   and writes it to a file.
+// RadxDealias reads input radar data from a file, dealiases the 
+//   velocity data, and writes the results to a file.  The output file 
+//   contains a new field that contains the unfolded velocity. The 
+//   unfolded velocity field has the same name with _UNF appended. .
 //
 //======================================================================
  
-//======================================================================
-//
-// DEBUGGING AND PROCESS CONTROL.
-//
-//======================================================================
- 
-///////////// debug ///////////////////////////////////
-//
-// Debug option.
-//
-// If set, debug messages will be printed appropriately.
-//
-//
-// Type: enum
-// Options:
-//     DEBUG_OFF
-//     DEBUG_NORM
-//     DEBUG_VERBOSE
-//
-
-debug = DEBUG_VERBOSE;
-
-///////////// instance ////////////////////////////////
-//
-// Process instance.
-//
-// Used for registration with procmap.
-//
-//
-// Type: string
-//
-
-instance = "Test";
-
 //======================================================================
 //
 // DATA INPUT.
@@ -59,8 +27,8 @@ instance = "Test";
 // Type: string
 //
 
-//input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur/20150626";
-input_dir = "./output/20150626";
+input_dir = "./tmpRealTime";
+// input_dir = "./tmp/output/20150626";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -82,7 +50,7 @@ input_dir = "./output/20150626";
 //     FILELIST
 //
 
-mode = FILELIST;
+mode = REALTIME;
 
 //======================================================================
 //
@@ -172,6 +140,74 @@ append_day_dir_to_output_dir = TRUE;
 
 append_year_dir_to_output_dir = FALSE;
 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_VERBOSE;
+
+///////////// output_soundVol /////////////////////////
+//
+// Output sounding or vad volume velocities INSTEAD OF dealiased 
+//   velocties.
+//
+// A debug tool.
+//
+//
+// Type: boolean
+//
+
+output_soundVol = FALSE;
+
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+///////////// required_fields /////////////////////////
+//
+// Expected fields. Dealiaser will not initialize without these fields. 
+//   All beams will be discarded until these fields are present.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+required_fields = {
+ "DBZ",
+ "VEL_HV"
+};
+
 ///////////// delete_repeat_tilts /////////////////////
 //
 // Option to delete repeated tilts in volume.
@@ -200,20 +236,19 @@ delete_repeat_tilts = TRUE;
 
 delete_tilt_decision = KEEP_RECENT_TILT;
 
-///////////// required_fields /////////////////////////
+///////////// input_num_gates /////////////////////////
 //
-// Expected fields. Dealiaser will not initialize without these fields. 
-//   All beams will be discarded until these fields are present.
+// Option for padding the number of gates in the beam data so that a 
+//   constant beam geometry is processed. The dealiasing algorithm 
+//   requires the same number of gates for all rays and sweeps.
+//
+// Set to a positive number to activate padding.
 //
 //
-// Type: string
-// 1D array - variable length.
+// Type: int
 //
 
-required_fields = {
- "DBZ",
- "VEL_HV"
-};
+input_num_gates = -1;
 
 //======================================================================
 //
@@ -259,12 +294,6 @@ radar_location = {
 
 //======================================================================
 //
-// DATA OUTPUT.
-//
-//======================================================================
- 
-//======================================================================
-//
 // Dealiasing Parameters .
 //
 //======================================================================
@@ -277,7 +306,7 @@ radar_location = {
 // Type: float
 //
 
-nyquist_mps = 13.0;
+nyquist_mps = 13;
 
 ///////////// proximity ///////////////////////////////
 //
@@ -351,7 +380,7 @@ thresh = 0.4;
 // This parameter specifies the minumum number of gates successfully 
 //   dealiased during initial and spatial dealiasing located within the 
 //   window (of size (PROXIMITY*2+1) X (PROXIMITY*2+1)) to consider 
-//   adequate for dealiasing a particular gate the windowing procedure.
+//   adequate for dealiasing a particular gate in the windowing procedure.
 //
 //
 // Type: int
@@ -374,6 +403,23 @@ min_good = 5;
 //
 
 std_thresh = 0.8;
+
+//======================================================================
+//
+// PREP VOLUME BEFORE UNFOLDING.
+//
+//======================================================================
+ 
+///////////// prep ////////////////////////////////////
+//
+// Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and 
+//   lower that low_dbz will be automatically deleted.
+//
+//
+// Type: boolean
+//
+
+prep = FALSE;
 
 ///////////// low_dbz /////////////////////////////////
 //
@@ -399,6 +445,12 @@ low_dbz = 0;
 
 high_dbz = 80;
 
+//======================================================================
+//
+// PRUNING.
+//
+//======================================================================
+ 
 ///////////// no_dbz_rm_rv ////////////////////////////
 //
 // If true, all radial velocity bins with dbz values missing will be 
@@ -478,17 +530,6 @@ max_count = 10;
 
 max_shear = 0.05;
 
-///////////// prep ////////////////////////////////////
-//
-// Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and 
-//   lower that low_dbz will be automatically deleted.
-//
-//
-// Type: boolean
-//
-
-prep = FALSE;
-
 ///////////// filt ////////////////////////////////////
 //
 // Use Bergen and Albers filter.
@@ -498,19 +539,6 @@ prep = FALSE;
 //
 
 filt = FALSE;
-
-///////////// output_soundVol /////////////////////////
-//
-// Output sounding or vad volume velocities INSTEAD OF dealiased 
-//   velocties.
-//
-// A debug tool.
-//
-//
-// Type: boolean
-//
-
-output_soundVol = FALSE;
 
 ///////////// missing_vel /////////////////////////////
 //
@@ -551,7 +579,6 @@ strict_first_pass = FALSE;
 // Type: string
 //
 
-// sounding_url = "spdbp:://localhost::./spdb";
 sounding_url = "spdbp:://rain::/scr/rain2/rsfdata/projects/pecan/spdb/sounding/ruc";
 
 ///////////// sounding_look_back //////////////////////
@@ -636,4 +663,115 @@ avg_wind_u = 0;
 //
 
 avg_wind_v = 0;
+
+///////////// angle_variance //////////////////////////
+//
+// Maximum amount ray angles can vary between successive volumes (in 
+//   degrees).
+//
+// Ray azimuth and elevation angles must be about the same between 
+//   successive volumes.
+//
+// Minimum val: 0.0001
+// Maximum val: 10
+//
+// Type: float
+//
+
+angle_variance = 0.1;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+//
+// If TRUE, will watch the latest_data_info file. If FALSE, will scan 
+//   the input directory for new files.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+//
+// If TRUE, all subdirectories with ages less than max_dir_age will be 
+//   searched. This may take considerable CPU, so be careful in its use. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+//
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+//
+// Only applies search_recursively is TRUE. This is the max depth, below 
+//   input_dir, to which the recursive directory search will be carried 
+//   out. A depth of 0 will search the top-level directory only. A depth 
+//   of 1 will search the level below the top directory, etc.
+//
+//
+// Type: int
+//
+
+max_recursion_depth = 5;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+//
+// If a directory is large and files do not arrive frequently, set this 
+//   to a higher value to reduce the CPU load from checking the directory. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+//
+// This allows you to make sure that a file coming from a remote machine 
+//   is complete before reading it. Only applies if latest_data_info_avail 
+//   is FALSE.
+//
+//
+// Type: int
+//
+
+file_quiescence = 5;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "nc";
 
