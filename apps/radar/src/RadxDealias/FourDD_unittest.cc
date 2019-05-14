@@ -1,150 +1,246 @@
-#include <limits.h>
-#include "Radx/FourDD.hh"
-#include "gtest/gtest.h"
 
+#include "FourDD.hh"
+#include "gtest/gtest.h"
 
 namespace {
 
-// Step 2. Use the TEST macro to define your tests.
-//
-// TEST has two parameters: the test case name and the test name.
-// After using the macro, you should define your test logic between a
-// pair of braces.  You can use a bunch of macros to indicate the
-// success or failure of a test.  EXPECT_TRUE and EXPECT_EQ are
-// examples of such macros.  For a complete list, see gtest.h.
-//
-// <TechnicalDetails>
-//
-// In Google Test, tests are grouped into test cases.  This is how we
-// keep test code organized.  You should put logically related tests
-// into the same test case.
-//
-// The test case name and the test name should both be valid C++
-// identifiers.  And you should not use underscore (_) in the names.
-//
-// Google Test guarantees that each test you define is run exactly
-// once, but it makes no guarantee on the order the tests are
-// executed.  Therefore, you should write your tests in such a way
-// that their results don't depend on their order.
-//
-// </TechnicalDetails>
-
-
-
-TEST(FourDD, firstGuess_Null) {
-  FourDD fourDD;
-  fourDD.clearMode();
-  timeList.setModeFirst();
-  EXPECT_EQ(1, timeList.getMode());
-  EXPECT_EQ(FourDD::MODE_FIRST, timeList.getMode());
-}
-  
-TEST(FourDD, firstGuess) {
-  FourDD fourDD_JD;
-  FourDD fourDD_Radx;
-
-  // fill trmm_rsl structure for James Dealias
-
-  // fill RadxVol structure for RadxDealias
-
-  // run the operation
-
-  // compare the results
-
-  timeList.clearMode();
-  RadxTime startTime;
-  RadxTime endTime;
-
-  endTime.set(RadxTime::NOW);
-  timeList.setModeInterval(startTime, endTime);
-  timeList.setDir("/Users/brenda/data/dorade/dow"); // timrex/swp.1080620053141.SPOLRVP8.0.001.8_SUR_v040");
-  // timeList.setDir("/Users/brenda/Downloads");
-  if (timeList.compile()) {
-    cerr << timeList.getErrStr() << endl;
-  }
-
-  vector<string> pathList = timeList.getPathList();
-  if (pathList.size() <= 0) {
-    cerr << "pathList is empty" << endl;
-    cerr << timeList.getErrStr() << endl;
-  }
-  else
-    cerr << "pathList is NOT empty" << endl;
-
-  for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-    cerr << *i << endl;
-  }
-  cerr << endl;
-  
-  RadxTime firstTime;
-  RadxTime lastTime;
-  RadxTime dummyTime;
-  
-  string firstFilePath = pathList.at(0);
+  // TODO: consider making a constructor with most of
+  // these parameters set to default values
   /*
-  size_t found;
-  found = firstFilePath.find_last_of("/\\");
-  string firstFile = firstFilePath.substr(found+1);
-  //  timeList.getDoradeTime(firstFile, firstTime);
-  timeList.getTimeFromFileName(firstFile, firstTime, dummyTime);
-  string lastFilePath = pathList.at(pathList.size()-1);
-  found = lastFilePath.find_last_of("/\\");
-  string lastFile = lastFilePath.substr(found+1);
-
-  //  timeList.getDoradeTime(lastFile, lastTime);
-  timeList.getTimeFromFileName(lastFile, lastTime, dummyTime);
+  FourDD fourDD(bool debug,
+		char *sounding_url,
+		float sounding_look_back,
+		float wind_alt_min,
+		float wind_alt_max,
+		float avg_wind_u,
+		float avg_wind_v,
+		bool prep,
+		bool filt,
+		bool output_soundVol,
+		float max_shear,
+		int sign,
+		int del_num_bins,
+		bool no_dbz_rm_rv,
+		float low_dbz,
+		float high_dbz,
+		float angle_variance,
+		float comp_thresh,
+		float comp_thresh2,
+		bool strict_first_pass,
+		int max_count,
+		float ck_val,
+		int proximity,
+		int min_good,
+		float std_thresh,
+		float epsilon);
   */
-  //  vector<RadxTime> validTimes = timeList.getValidTimes();
-  //firstTime = validTimes.at(0);
 
-  // getFirstAndLastTime(RadxTime &fileStartTime, RadxTime &fileEndTime)
-  timeList.getFirstAndLastTime(firstTime, lastTime);
+  int maxSweeps_simple = 1;
+  Volume *velocity = Rsl::new_volume(maxSweeps_simple);
+  Volume *lastVolume = Rsl::new_volume(maxSweeps_simple);
+  Volume *soundVolume = Rsl::new_volume(maxSweeps_simple);
 
-  cerr << "first time " << firstTime << endl;
-  cerr << "last time " << lastTime << endl;
-
-}
-
-TEST(FourDD, findFirstTimeInDataSet) {
-  FourDD timeList;
-  timeList.clearMode();
-  RadxTime startTime;
-  RadxTime endTime;
-
-  startTime.set(RadxTime::NOW);
-  timeList.setModeFirst();
-  
-  //  timeList.getStartTime();
-  timeList.setDir("/Users/brenda/data/dorade/dow"); // timrex/swp.1080620053141.SPOLRVP8.0.001.8_SUR_v040");
-  // timeList.setDir("/Users/brenda/Downloads");
-  if (timeList.compile()) {
-    cerr << "Result of timeList.compile() " << timeList.getErrStr() << endl;
+  /*
+  TEST(FourDD, InitialDealiasing_EverythingWorks) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    velocity->h.missing = -9.0;
+    fourDD.InitialDealiasing();
+    //    EXPECT_EQ(-9.0, fourDD.getMissingValue(velocity));
   }
-  
-  vector<string> pathList = timeList.getPathList();
-  if (pathList.size() <= 0) {
-    cerr << "pathList is empty" << endl;
-    cerr << timeList.getErrStr() << endl;
+
+  TEST(FourDD, InitialDealiasing_FirstPassSpatialContinuity_AllMissing) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    velocity->h.missing = -9.0;
+    // TODO: make copy of velocity to original
+    fourDD.FirstPassSpatialContinuity(STATE, original, velocity,  sweepIndex, del_num_bins, pfraction);
+    //    EXPECT_EQ(-9.0, fourDD.getMissingValue(velocity));
   }
-  else
-    cerr << "pathList is NOT empty" << endl;
 
-  for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-    cerr << *i << endl;
+  TEST(FourDD, InitialDealiasing_FirstPassSpatialContinuity_NoMissing) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    velocity->h.missing = -9.0;
+    // TODO: make copy of velocity to original
+    fourDD.FirstPassSpatialContinuity(STATE, original, velocity,  sweepIndex, del_num_bins, pfraction);
+    //    EXPECT_EQ(-9.0, fourDD.getMissingValue(velocity));
   }
-  cerr << endl;
-  
 
-  // I want to find the first time in the data set ...
-  vector<RadxTime> validTimes = timeList.getValidTimes();
-  if (validTimes.size() <= 0) {
-    cerr << "validTimes is empty" << endl;
-  } else {
-    //TimePath timePath = timePathSet.begin();
-    RadxTime firstTime = validTimes.at(0);
-    cerr << "first time " << firstTime << endl;
+  TEST(FourDD, InitialDealiasing_UnfoldUsingWindow) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    velocity->h.missing = -9.0;
+    // TODO: make copy of velocity to original
+    fourDD.UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(
+	       STATE, original, velocity,  sweepIndex, del_num_bins, pfraction);
+    //    EXPECT_EQ(-9.0, fourDD.getMissingValue(velocity));
   }
-}
 
-}  // namespace
 
+  TEST(FourDD, InitialDealiasing_SecondPassSoundVolumeOnly) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    velocity->h.missing = -9.0;
+    // TODO: make copy of velocity to original
+    fourDD.SecondPassSoundVolumeOnly(STATE, original, velocity,  sweepIndex, del_num_bins, fraction2, pfraction);
+    //    EXPECT_EQ(-9.0, fourDD.getMissingValue(velocity));
+  }
+
+  */
+  TEST(FourDD, Unfold_negative) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    float foldedValue = 8;
+    float referenceValue = -19;
+    int max_count = 3;
+    float NyqVelocity = 8;
+    EXPECT_EQ(-24.0, fourDD.Unfold(foldedValue, referenceValue, max_count, NyqVelocity));
+  }
+
+  TEST(FourDD, Unfold_positive) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    float foldedValue = -3;
+    float referenceValue = 23;
+    int max_count = 3;
+    float NyqVelocity = 8;
+    EXPECT_EQ(29.0, fourDD.Unfold(foldedValue, referenceValue, max_count, NyqVelocity));
+  }
+
+  TEST(FourDD, Unfold_max_count_exceeded) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    float foldedValue = 8;
+    float referenceValue = -19;
+    int max_count = 1;
+    float NyqVelocity = 8;
+    EXPECT_EQ(-8.0, fourDD.Unfold(foldedValue, referenceValue, max_count, NyqVelocity));
+  }
+
+  TEST(FourDD, Unfold_max_count_0) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    float foldedValue = 2;
+    float referenceValue = -19;
+    int max_count = 0;
+    float NyqVelocity = 8;
+    EXPECT_EQ(2.0, fourDD.Unfold(foldedValue, referenceValue, max_count, NyqVelocity));
+  }
+
+
+
+  TEST(FourDD, getMissingValue) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    velocity->h.missing = -9.0;
+    EXPECT_EQ(-9.0, fourDD.getMissingValue(velocity));
+  }
+
+  /*
+  // expect an exception here ...
+  TEST(FourDD, getMissingValue_NULL) {
+    FourDD fourDD;
+    Volume *vel = NULL;
+    EXPECT_EQ(-9.0, fourDD.getMissingValue(vel));
+  }
+
+
+  TEST(FourDD, findRay_NULL) {
+    FourDD fourDD;
+    Volume *velocity = NULL;
+    velocity->h.missing = -9.0;
+    EXPECT_EQ(-9.0, fourDD.findRay(velocity, velocity, 0, 0, 0));
+  }
+
+  TEST(FourDD, Filter3x3_NULL) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+    Volume *velocity = NULL;
+    velocity->h.missing = -9.0;
+    EXPECT_EQ(-9.0, fourDD.Filter3x3(velocity, 0, missingVal));
+  }
+  */
+  /*
+  TEST(FourDD, Filter3x3_binTooBig) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+    Volume *velocity = simpleVolume;
+    velocity->h.missing = missingVal;
+    int bin_i = simpleVolume->nbins+1;
+    EXPECT_EQ(-9.0, fourDD.Filter3x3(velocity, bin_i, missingVal));
+  }
+
+  TEST(FourDD, Filter3x3_binGood) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+    Volume *velocity = simpleVolume;
+    velocity->h.missing = missingVal;
+    int bin_i = simpleVolume->nbins-11;
+    EXPECT_EQ(-9.0, fourDD.Filter3x3(velocity, bin_i, missingVal));
+  }
+
+  TEST(FourDD, AssessNeighborhood_HappyDay) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+    Volume *velocity = simpleVolume;
+    velocity->h.missing = missingVal;
+    int bin_i = 1;
+    short **STATE;
+    int currIndex; 
+    int numRays;
+    int numberOfDealiasedNeighbors;
+    int numberOfTbdNeighbors;
+    int binindex[3]; 
+    int rayindex[3];
+
+    // TODO: initialize STATE; maybe make this a global variable?
+
+    fourDD.AssessNeighborhood(
+              STATE, currIndex, bin_i, numRays,
+	      &numberOfDealiasedNeighbors, &numberOfTbdNeighbors,
+	      binindex, rayindex);
+
+    EXPECT_EQ(9, numberOfDealiasedNeighbors);
+    EXPECT_EQ(9, numberOfTbdNeighbors);
+    EXPECT_EQ(9, binindex[0]); // TODO: ...
+    EXPECT_EQ(9, rayindex[0]);
+
+  }
+
+
+  TEST(FourDD, window_HappyDay) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+    Volume *rvVolume = simpleVolume;
+    velocity->h.missing = missingVal;
+    int bin_i = simpleVolume->maxBins-11;
+    
+    int sweepIndex;
+    int startray;
+    int endray;
+    int firstbin;
+    int lastbin;
+    float std;
+    float missingVal; 
+    unsigned short success;
+
+    EXPECT_EQ(-9.0, fourDD.window(rvVolume, sweepIndex, startray,
+	  endray, firstbin, lastbin, std,
+	  missingVal, &success));
+
+  }
+  */
+
+
+} // namespace

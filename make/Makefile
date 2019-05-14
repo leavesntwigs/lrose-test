@@ -34,7 +34,8 @@ CXXFLAGS += -g -Wall -Wextra -pthread
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = sample1_unittest
-TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest
+TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest \
+	FourDD_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -106,6 +107,9 @@ RadxVol_unittest : RadxVol_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib \
 	-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat \
 	-lRadx -lNcxx -lhdf5_cpp -lpthread $^ -o $@
+#
+# Rsl
+#
 
 Rsl_unittest.o : $(APPS_DIR)/radar/src/RadxDealias/Rsl_unittest.cc \
         $(GTEST_HEADERS)
@@ -113,3 +117,18 @@ Rsl_unittest.o : $(APPS_DIR)/radar/src/RadxDealias/Rsl_unittest.cc \
 
 Rsl_unittest : Rsl_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/Rsl.o $^ -o $@
+
+# 
+# FourDD 
+#
+
+Rsl.o : $(SRC_DIR)/apps/radar/src/RadxDealias/Rsl.cc $(SRC_DIR)/apps/radar/src/RadxDealias/Rsl.hh 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -c $(SRC_DIR)/apps/radar/src/RadxDealias/Rsl.cc 
+
+FourDD_unittest.o : $(APPS_DIR)/radar/src/RadxDealias/FourDD_unittest.cc \
+	$(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/apps/radar/src/RadxDealias -c $(APPS_DIR)/radar/src/RadxDealias/FourDD_unittest.cc
+
+FourDD_unittest : FourDD_unittest.o Rsl.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/FourDD.o  $^ -o $@
+

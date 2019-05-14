@@ -71,15 +71,15 @@ TEST(RSL, copy_volume) {
   EXPECT_NE(volume->sweep, nullptr);
   EXPECT_NE(copy->sweep, nullptr);
 
-  Sweep **sweep = volume->sweep;
-  Sweep **sweepCopy = copy->sweep;
+  //  Sweep **sweep = volume->sweep;
+  // Sweep **sweepCopy = copy->sweep;
   for (int i = 0; i < volume->h.nsweeps; i++) {
     EXPECT_EQ(volume->sweep[i]->h.nrays, copy->sweep[i]->h.nrays);
     EXPECT_EQ(copy->sweep[i]->h.nrays, nrays);
     EXPECT_NE(volume->sweep[i]->ray, nullptr);
     EXPECT_NE(copy->sweep[i]->ray, nullptr);
-    Ray **ray = sweep[i]->ray;
-    Ray **rayCopy = sweepCopy[i]->ray;
+    //    Ray **ray = sweep[i]->ray;
+    //Ray **rayCopy = sweepCopy[i]->ray;
     //cerr << " THERE ARE " << volume->sweep[i]->h.nrays << " RAYS" << endl;
     int nRays = volume->sweep[i]->h.nrays;
     //cerr << " THERE ARE " << nRays << " RAYS" << endl;
@@ -107,7 +107,7 @@ TEST(RSL, copy_volume) {
 
 
 
-
+  /*
 TEST(RSL, DZ_INVF_just_right) {
   Range x = Rsl::DZ_INVF(32.15);  
   //cout << "Range is " << x << endl;
@@ -147,6 +147,7 @@ TEST(RSL, DZ_INVF_too_big) {
     FAIL() << "Expected std::out_of_range";
   }
 }
+  */
 
  
   // Test the memory allocation and free  
