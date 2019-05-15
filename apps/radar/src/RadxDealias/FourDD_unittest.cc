@@ -221,10 +221,11 @@ namespace {
     int nPositiveFolds;
     int nNegativeFolds;
     bool noHope;
+    int del_num_bins = 0;
 
     short **STATE = fourDD.CreateSTATE(velocity, FourDD::TBD);
     fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
-			       foldedValue,
+			       del_num_bins, foldedValue,
 			       pfraction, NyqVelocity,
 			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
 
@@ -236,6 +237,119 @@ namespace {
     EXPECT_EQ(0, nNegativeFolds);
     EXPECT_EQ(false, noHope);
   }
+
+  TEST(FourDD, AssessNeighborhood_Mixed_States) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    float binsRay1[] = {-10.0, -8.0, -7.0};  // out/neg, out/== , in/
+    float binsRay2[] = {  4.0, 2.0,  -3.0};  //  in/   ,  X     , in/
+    float binsRay3[] = {  1.0,20.0, -19.0};  //  in/   , out/pos, out/neg
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    
+    velocity->sweep[0]->ray[0]->range = binsRay1;
+    velocity->sweep[0]->ray[1]->range = binsRay2;
+    velocity->sweep[0]->ray[2]->range = binsRay3;
+
+    float foldedValue = 2;
+    float NyqVelocity = 10;
+    int sweepIndex = 0;
+    int rayIndex = 1;
+    int binIdx = 1;
+    float pfraction = 1.0;
+    int nWithinNyquist; 
+    int nOutsideNyquist;
+    int nPositiveFolds;
+    int nNegativeFolds;
+    bool noHope;
+    int del_num_bins = 0;
+
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
+    // STATE [bin][ray]
+    STATE[1][0] = FourDD::TBD;
+    STATE[2][1] = FourDD::MISSING;
+
+    fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
+			       del_num_bins, foldedValue,
+			       pfraction, NyqVelocity,
+			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
+
+    fourDD.DestroySTATE(STATE, nbins);
+
+    EXPECT_EQ(3, nWithinNyquist);
+    EXPECT_EQ(3, nOutsideNyquist);
+    EXPECT_EQ(1, nPositiveFolds);
+    EXPECT_EQ(2, nNegativeFolds);
+    EXPECT_EQ(false, noHope);
+  }
+
+
+
+  TEST(FourDD, AssessNeighborhood_Mixed_States_bin_last) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    float binsRay1[] = {-10.0, -8.0, -7.0};  // out/neg, TBD    , in/
+    float binsRay2[] = {  4.0, 2.0,  -3.0};  //  in/   , in/    ,  X
+    float binsRay3[] = {  1.0,20.0, -19.0};  //  in/   , out/pos, MISSING
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    
+    velocity->sweep[0]->ray[0]->range = binsRay1;
+    velocity->sweep[0]->ray[1]->range = binsRay2;
+    velocity->sweep[0]->ray[2]->range = binsRay3;
+
+    float foldedValue = -3;
+    float NyqVelocity = 10;
+    int sweepIndex = 0;
+    int rayIndex = 1;
+    int binIdx = 2;
+    float pfraction = 1.0;
+    int nWithinNyquist; 
+    int nOutsideNyquist;
+    int nPositiveFolds;
+    int nNegativeFolds;
+    bool noHope;
+    int del_num_bins = 0;
+
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
+    // STATE [bin][ray]
+    STATE[1][0] = FourDD::TBD;
+    STATE[2][2] = FourDD::MISSING;
+
+    fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
+			       del_num_bins, foldedValue,
+			       pfraction, NyqVelocity,
+			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
+
+    fourDD.DestroySTATE(STATE, nbins);
+
+    EXPECT_EQ(2, nWithinNyquist);
+    EXPECT_EQ(1, nOutsideNyquist);
+    EXPECT_EQ(1, nPositiveFolds);
+    EXPECT_EQ(0, nNegativeFolds);
+    EXPECT_EQ(false, noHope);
+  }
+
+
+
 
   TEST(FourDD, AssessNeighborhood_All_DEALIASED) {
     FourDD fourDD;
@@ -270,10 +384,11 @@ namespace {
     int nPositiveFolds;
     int nNegativeFolds;
     bool noHope;
+    int del_num_bins = 0;
 
     short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
     fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
-			       foldedValue,
+			       del_num_bins, foldedValue,
 			       pfraction, NyqVelocity,
 			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
 
@@ -311,11 +426,12 @@ namespace {
     int nPositiveFolds;
     int nNegativeFolds;
     bool noHope;
+    int del_num_bins = 0;
 
     // create STATE with only 1 TBD or DEALIASED; all the rest are MISSING, or UNSUCCESSFUL
     short **STATE = fourDD.CreateSTATE(velocity, FourDD::MISSING);
     fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
-			       foldedValue,
+			       del_num_bins, foldedValue,
 			       pfraction, NyqVelocity,
 			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
 
