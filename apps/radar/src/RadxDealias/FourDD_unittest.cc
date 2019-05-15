@@ -292,6 +292,59 @@ namespace {
     EXPECT_EQ(false, noHope);
   }
 
+  TEST(FourDD, AssessNeighborhood_Mixed_States_bin0) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    float binsRay1[] = {-10.0, -8.0, -7.0};  //  in/   , TBD    , in/
+    float binsRay2[] = {  4.0, 2.0,  -3.0};  //  X     , in/    ,  in/
+    float binsRay3[] = {  1.0,20.0, -19.0};  //  in/   , out/pos, MISSING
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    
+    velocity->sweep[0]->ray[0]->range = binsRay1;
+    velocity->sweep[0]->ray[1]->range = binsRay2;
+    velocity->sweep[0]->ray[2]->range = binsRay3;
+
+    float foldedValue = -3;
+    float NyqVelocity = 10;
+    int sweepIndex = 0;
+    int rayIndex = 1;
+    int binIdx = 0;
+    float pfraction = 1.0;
+    int nWithinNyquist; 
+    int nOutsideNyquist;
+    int nPositiveFolds;
+    int nNegativeFolds;
+    bool noHope;
+    int del_num_bins = 0;
+
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
+    // STATE [bin][ray]
+    STATE[1][0] = FourDD::TBD;
+    STATE[2][2] = FourDD::MISSING;
+
+    fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
+			       del_num_bins, foldedValue,
+			       pfraction, NyqVelocity,
+			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
+
+    fourDD.DestroySTATE(STATE, nbins);
+
+    EXPECT_EQ(3, nWithinNyquist);
+    EXPECT_EQ(1, nOutsideNyquist);
+    EXPECT_EQ(1, nPositiveFolds);
+    EXPECT_EQ(0, nNegativeFolds);
+    EXPECT_EQ(false, noHope);
+  }
 
 
   TEST(FourDD, AssessNeighborhood_Mixed_States_bin_last) {
@@ -348,6 +401,174 @@ namespace {
     EXPECT_EQ(false, noHope);
   }
 
+  // wrap right == ray+1
+  TEST(FourDD, AssessNeighborhood_Mixed_States_bin_last_wrap_right) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    //                                          -------
+    float binsRay1[] = {-10.0, -8.0, -7.0};  // out/neg, TBD    , in/
+    float binsRay2[] = {  4.0, 2.0,  -3.0};  //  in/   , in/    , MISSING
+    float binsRay3[] = {  1.0,20.0, -19.0};  //  in/   , out/pos,  X
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    
+    velocity->sweep[0]->ray[0]->range = binsRay1;
+    velocity->sweep[0]->ray[1]->range = binsRay2;
+    velocity->sweep[0]->ray[2]->range = binsRay3;
+
+    float foldedValue = -3;
+    float NyqVelocity = 10;
+    int sweepIndex = 0;
+    int rayIndex = 2;
+    int binIdx = 2;
+    float pfraction = 1.0;
+    int nWithinNyquist; 
+    int nOutsideNyquist;
+    int nPositiveFolds;
+    int nNegativeFolds;
+    bool noHope;
+    int del_num_bins = 0;
+
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
+    // STATE [bin][ray]
+    STATE[1][0] = FourDD::TBD;
+    STATE[2][1] = FourDD::MISSING;
+
+    fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
+			       del_num_bins, foldedValue,
+			       pfraction, NyqVelocity,
+			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
+
+    fourDD.DestroySTATE(STATE, nbins);
+
+    EXPECT_EQ(2, nWithinNyquist);
+    EXPECT_EQ(1, nOutsideNyquist);
+    EXPECT_EQ(1, nPositiveFolds);
+    EXPECT_EQ(0, nNegativeFolds);
+    EXPECT_EQ(false, noHope);
+  }
+
+  // wrap left == ray-1
+  TEST(FourDD, AssessNeighborhood_Mixed_States_bin0_wrap_left) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    //                                                           -----
+    float binsRay1[] = {-10.0, -8.0, -7.0};  //   X    , TBD    , in/
+    float binsRay2[] = {  4.0, 2.0,  -3.0};  //  in/   , in/    , in/
+    float binsRay3[] = {  1.0,20.0, -19.0};  //  in/   , out/pos, MISSING
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    
+    velocity->sweep[0]->ray[0]->range = binsRay1;
+    velocity->sweep[0]->ray[1]->range = binsRay2;
+    velocity->sweep[0]->ray[2]->range = binsRay3;
+
+    float foldedValue = -3;
+    float NyqVelocity = 10;
+    int sweepIndex = 0;
+    int rayIndex = 0;
+    int binIdx = 0;
+    float pfraction = 1.0;
+    int nWithinNyquist; 
+    int nOutsideNyquist;
+    int nPositiveFolds;
+    int nNegativeFolds;
+    bool noHope;
+    int del_num_bins = 0;
+
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
+    // STATE [bin][ray]
+    STATE[1][0] = FourDD::TBD;
+    STATE[2][2] = FourDD::MISSING;
+
+    fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
+			       del_num_bins, foldedValue,
+			       pfraction, NyqVelocity,
+			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
+
+    fourDD.DestroySTATE(STATE, nbins);
+
+    EXPECT_EQ(3, nWithinNyquist);
+    EXPECT_EQ(1, nOutsideNyquist);
+    EXPECT_EQ(1, nPositiveFolds);
+    EXPECT_EQ(0, nNegativeFolds);
+    EXPECT_EQ(false, noHope);
+  }
+
+
+  // wrap left == ray-1
+  TEST(FourDD, AssessNeighborhood_Mixed_States_bin0_wrap_left4) {
+    FourDD fourDD;
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 4;
+    //                                                           vvvv
+    float binsRay1[] = {-10.0, -8.0, -7.0};   //   X    , TBD    , in/
+    float binsRay2[] = {  4.0,  2.0,  -3.0};  //  in/   , in/    , in/
+    float binsRay3[] = {  1.0, 20.0, -19.0};  //  in/   , out/pos, MISSING <---
+    float binsRay4[] = {  7.0,-30.0,   0.0};  // out/== , out/neg, in/
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    
+    velocity->sweep[0]->ray[0]->range = binsRay1;
+    velocity->sweep[0]->ray[1]->range = binsRay2;
+    velocity->sweep[0]->ray[2]->range = binsRay3;
+    velocity->sweep[0]->ray[3]->range = binsRay4;
+
+    float foldedValue = -3;
+    float NyqVelocity = 10;
+    int sweepIndex = 0;
+    int rayIndex = 0;
+    int binIdx = 0;
+    float pfraction = 1.0;
+    int nWithinNyquist; 
+    int nOutsideNyquist;
+    int nPositiveFolds;
+    int nNegativeFolds;
+    bool noHope;
+    int del_num_bins = 0;
+
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::DEALIASED);
+    // STATE [bin][ray]
+    STATE[1][0] = FourDD::TBD;
+    STATE[2][2] = FourDD::MISSING;
+
+    fourDD.AssessNeighborhood2(STATE, velocity, sweepIndex, rayIndex, binIdx,
+			       del_num_bins, foldedValue,
+			       pfraction, NyqVelocity,
+			       &nWithinNyquist, &nOutsideNyquist, &nPositiveFolds, &nNegativeFolds, &noHope);
+
+    fourDD.DestroySTATE(STATE, nbins);
+
+    EXPECT_EQ(2, nWithinNyquist);
+    EXPECT_EQ(2, nOutsideNyquist);
+    EXPECT_EQ(0, nPositiveFolds);
+    EXPECT_EQ(1, nNegativeFolds);
+    EXPECT_EQ(false, noHope);
+  }
 
 
 
@@ -461,7 +682,7 @@ namespace {
     Volume *vel = NULL;
     EXPECT_EQ(-9.0, fourDD.getMissingValue(vel));
   }
-
+  */
 
   TEST(FourDD, findRay_NULL) {
     FourDD fourDD;
@@ -470,14 +691,163 @@ namespace {
     EXPECT_EQ(-9.0, fourDD.findRay(velocity, velocity, 0, 0, 0));
   }
 
-  TEST(FourDD, Filter3x3_NULL) {
+  TEST(FourDD, findRay_HappyDay) {
     FourDD fourDD;
-    float missingVal = -999e+33;
     Volume *velocity = NULL;
     velocity->h.missing = -9.0;
-    EXPECT_EQ(-9.0, fourDD.Filter3x3(velocity, 0, missingVal));
+
+    Volume *velocity2;
+    int sweepIndex1;
+    int sweepIndex2;
+    int rayIndex;
+
+    EXPECT_EQ(-9.0, fourDD.findRay(velocity, velocity, 0, 0, 0));
   }
-  */
+  
+
+  TEST(FourDD, Filter3x3_all_missing) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    float nbins1[] = {-999e+33, -999e+33, -999e+33};
+    float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    float nbins3[] = {-999e+33, -999e+33, -999e+33};
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+
+    velocity->sweep[0]->ray[0]->range = nbins1;
+    velocity->sweep[0]->ray[1]->range = nbins2;
+    velocity->sweep[0]->ray[2]->range = nbins3;
+
+    velocity->h.missing = missingVal;
+
+    int binIdx = 1;
+    int rayIdx = 1;
+    int sweepIdx = 0;
+
+    short expected = FourDD::MISSING; 
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    EXPECT_EQ(expected, classification);
+  }
+
+  TEST(FourDD, Filter3x3_5_nonMissing) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    float nbins1[] = {      -9,        3, -900e+33};
+    float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    float nbins3[] = {      33, -999e+33,  999e+20};
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+
+    velocity->sweep[0]->ray[0]->range = nbins1;
+    velocity->sweep[0]->ray[1]->range = nbins2;
+    velocity->sweep[0]->ray[2]->range = nbins3;
+
+    velocity->h.missing = missingVal;
+
+    int binIdx = 1;
+    int rayIdx = 1;
+    int sweepIdx = 0;
+
+    short expected = FourDD::TBD; 
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    EXPECT_EQ(expected, classification);
+  }
+
+  TEST(FourDD, Filter3x3_border_3_nonMissing) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    
+    float nbins1[] = {      -9,        3, -900e+33};
+    float nbins2[] = {-999e+33, -999e+33, -999e+33};  // last element X
+    float nbins3[] = {      33, -999e+33,  999e+20};
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+
+    velocity->sweep[0]->ray[0]->range = nbins1;
+    velocity->sweep[0]->ray[1]->range = nbins2;
+    velocity->sweep[0]->ray[2]->range = nbins3;
+
+    velocity->h.missing = missingVal;
+
+    int binIdx = 2;
+    int rayIdx = 1;
+    int sweepIdx = 0;
+
+    short expected = FourDD::TBD; 
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    EXPECT_EQ(expected, classification);
+  }
+
+
+  TEST(FourDD, Filter3x3_corner_2_nonMissing) {
+    FourDD fourDD;
+    float missingVal = -999e+33;
+
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;
+    //                 vvvv
+    float nbins1[] = {      -9,        3, -999e+33};
+    float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    float nbins3[] = {      33, -999e+33,  999e+20};  // last element X
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+
+    velocity->sweep[0]->ray[0]->range = nbins1;
+    velocity->sweep[0]->ray[1]->range = nbins2;
+    velocity->sweep[0]->ray[2]->range = nbins3;
+
+    velocity->h.missing = missingVal;
+
+    int binIdx = 2;
+    int rayIdx = 2;
+    int sweepIdx = 0;
+
+    short expected = FourDD::MISSING; 
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    EXPECT_EQ(expected, classification);
+  }
+    
+
+
   /*
   TEST(FourDD, Filter3x3_binTooBig) {
     FourDD fourDD;
