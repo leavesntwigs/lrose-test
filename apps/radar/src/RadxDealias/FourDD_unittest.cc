@@ -684,25 +684,223 @@ namespace {
   }
   */
 
+
   TEST(FourDD, findRay_NULL) {
     FourDD fourDD;
     Volume *velocity = NULL;
-    velocity->h.missing = -9.0;
+    // velocity->h.missing = -9.0;
     EXPECT_EQ(-9.0, fourDD.findRay(velocity, velocity, 0, 0, 0));
   }
 
-  TEST(FourDD, findRay_HappyDay) {
+  TEST(FourDD, findRay_HappyDay_intraVolume) {
     FourDD fourDD;
-    Volume *velocity = NULL;
-    velocity->h.missing = -9.0;
+    //    Volume *velocity2;
+    //int sweepIndex1;
+    //int sweepIndex2;
+    //int rayIndex;
+    float missingVal = -999e+33;
+    int maxSweeps = 4;
+    int nbins = 3;
+    int nrays = 3;
+    //int del_num_bins = 0;
+    
+    //    float nbins1[] = {-999e+33, -999e+33, -999e+33};
+    //    float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    //    float nbins3[] = {-999e+33, -999e+33, -999e+33};
 
-    Volume *velocity2;
-    int sweepIndex1;
-    int sweepIndex2;
-    int rayIndex;
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+ 
 
-    EXPECT_EQ(-9.0, fourDD.findRay(velocity, velocity, 0, 0, 0));
+    for (int s=0; s<maxSweeps; s++) {   
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+        // Note: the azimuth need to be the same for each sweep
+        velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+      }
+    }
+
+    velocity->h.missing = missingVal;
+
+    // int binIdx = 1;
+    int rayIdx = 1;
+    int sweepIdx1 = 0;
+    int sweepIdx2 = 2;
+
+    EXPECT_EQ(rayIdx, fourDD.findRay(velocity, velocity, sweepIdx1, sweepIdx2, rayIdx));
   }
+
+  TEST(FourDD, findRay_HappyDay_interVolume) {
+    FourDD fourDD;
+    //    Volume *velocity2;
+    //int sweepIndex1;
+    //int sweepIndex2;
+    //int rayIndex;
+    float missingVal = -999e+33;
+    int maxSweeps = 4;
+    int nbins = 3;
+    int nrays = 3;
+    //int del_num_bins = 0;
+    
+    //float nbins1[] = {-999e+33, -999e+33, -999e+33};
+    //float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    //float nbins3[] = {-999e+33, -999e+33, -999e+33};
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+ 
+    for (int s=0; s<maxSweeps; s++) {   
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+      }
+    }
+    // 10, 130, 250  -->  370
+
+    Volume *sounding = Rsl::new_volume(maxSweeps);
+
+    int nRaysSounding = nrays + 2;
+    float raySpacing = 360.0/ (float) nRaysSounding;
+    for (int s=0; s<maxSweeps; s++) {   
+      sounding->sweep[s] = Rsl::new_sweep(nRaysSounding);
+      for (int r=0; r<nRaysSounding; r++) {
+        sounding->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        sounding->sweep[s]->ray[r]->h.azimuth = 0.0 + (raySpacing*r);
+      }
+    }
+    // 0, 72, 144,  216, 288 -->  360
+
+    velocity->h.missing = missingVal;
+
+    //int binIdx = 1;
+    int rayIdx = 1;
+    int sweepIdx1 = 0;
+    int sweepIdx2 = 2;
+
+    // find ray in sounding, closest to 130.0 degrees
+    int closestRayIdx = fourDD.findRay(velocity, sounding, sweepIdx1, sweepIdx2, rayIdx);
+    EXPECT_EQ(2, closestRayIdx);
+    EXPECT_EQ(130.0, velocity->sweep[sweepIdx1]->ray[rayIdx]->h.azimuth);
+    EXPECT_EQ(144.0, sounding->sweep[sweepIdx2]->ray[closestRayIdx]->h.azimuth);
+  }
+
+
+  TEST(FourDD, findRay_HappyDay_interVolume_boundary_min) {
+    FourDD fourDD;
+    //    Volume *velocity2;
+    //int sweepIndex1;
+    //int sweepIndex2;
+    //int rayIndex;
+    float missingVal = -999e+33;
+    int maxSweeps = 4;
+    int nbins = 3;
+    int nrays = 3;
+    //int del_num_bins = 0;
+    
+    //    float nbins1[] = {-999e+33, -999e+33, -999e+33};
+    //    float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    //    float nbins3[] = {-999e+33, -999e+33, -999e+33};
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+ 
+    for (int s=0; s<maxSweeps; s++) {   
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+      }
+    }
+    // 10, 130, 250  -->  370
+
+    Volume *sounding = Rsl::new_volume(maxSweeps);
+
+    int nRaysSounding = nrays + 2;
+    float raySpacing = 360.0/ (float) nRaysSounding;
+    for (int s=0; s<maxSweeps; s++) {   
+      sounding->sweep[s] = Rsl::new_sweep(nRaysSounding);
+      for (int r=0; r<nRaysSounding; r++) {
+        sounding->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        sounding->sweep[s]->ray[r]->h.azimuth = 0.0 + (raySpacing*r);
+      }
+    }
+    // 0, 72, 144,  216, 288 -->  360
+
+    velocity->h.missing = missingVal;
+
+    //int binIdx = 1;
+    int rayIdx = 0;
+    int sweepIdx1 = 0;
+    int sweepIdx2 = 2;
+
+    // find ray in sounding, closest to 130.0 degrees
+    int closestRayIdx = fourDD.findRay(velocity, sounding, sweepIdx1, sweepIdx2, rayIdx);
+    EXPECT_EQ(0, closestRayIdx);
+    EXPECT_EQ(10.0, velocity->sweep[sweepIdx1]->ray[rayIdx]->h.azimuth);
+    EXPECT_EQ(0.0, sounding->sweep[sweepIdx2]->ray[closestRayIdx]->h.azimuth);
+  }
+
+
+  TEST(FourDD, findRay_HappyDay_interVolume_boundary_max) {
+    FourDD fourDD;
+    //    Volume *velocity2;
+    //int sweepIndex1;
+    //int sweepIndex2;
+    //int rayIndex;
+    float missingVal = -999e+33;
+    int maxSweeps = 4;
+    int nbins = 3;
+    int nrays = 3;
+    //int del_num_bins = 0;
+    
+    //    float nbins1[] = {-999e+33, -999e+33, -999e+33};
+    //    float nbins2[] = {-999e+33, -999e+33, -999e+33};
+    //    float nbins3[] = {-999e+33, -999e+33, -999e+33};
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+ 
+    for (int s=0; s<maxSweeps; s++) {   
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+      }
+    }
+    // 10, 130, 250  -->  370
+
+    Volume *sounding = Rsl::new_volume(maxSweeps);
+
+    int nRaysSounding = nrays + 2;
+    float raySpacing = 360.0/ (float) nRaysSounding;
+    for (int s=0; s<maxSweeps; s++) {   
+      sounding->sweep[s] = Rsl::new_sweep(nRaysSounding);
+      for (int r=0; r<nRaysSounding; r++) {
+        sounding->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        sounding->sweep[s]->ray[r]->h.azimuth = 0.0 + (raySpacing*r);
+      }
+    }
+    // 0, 72, 144,  216, 288 -->  360
+
+    velocity->h.missing = missingVal;
+
+    //int binIdx = 1;
+    int rayIdx = nrays - 1;
+    int sweepIdx1 = 0;
+    int sweepIdx2 = 2;
+
+    // find ray in sounding, closest to 130.0 degrees
+    int closestRayIdx = fourDD.findRay(velocity, sounding, sweepIdx1, sweepIdx2, rayIdx);
+    EXPECT_EQ(3, closestRayIdx);
+    EXPECT_EQ(250.0, velocity->sweep[sweepIdx1]->ray[rayIdx]->h.azimuth);
+    EXPECT_EQ(216.0, sounding->sweep[sweepIdx2]->ray[closestRayIdx]->h.azimuth);
+  }
+
   
 
   TEST(FourDD, Filter3x3_all_missing) {
@@ -712,6 +910,7 @@ namespace {
     int maxSweeps = 1;
     int nbins = 3;
     int nrays = 3;
+    int del_num_bins = 0;
     
     float nbins1[] = {-999e+33, -999e+33, -999e+33};
     float nbins2[] = {-999e+33, -999e+33, -999e+33};
@@ -736,7 +935,8 @@ namespace {
     int sweepIdx = 0;
 
     short expected = FourDD::MISSING; 
-    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx,
+                                            del_num_bins);
     EXPECT_EQ(expected, classification);
   }
 
@@ -747,6 +947,7 @@ namespace {
     int maxSweeps = 1;
     int nbins = 3;
     int nrays = 3;
+    int del_num_bins = 0;
     
     float nbins1[] = {      -9,        3, -900e+33};
     float nbins2[] = {-999e+33, -999e+33, -999e+33};
@@ -771,7 +972,8 @@ namespace {
     int sweepIdx = 0;
 
     short expected = FourDD::TBD; 
-    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx,
+                                            del_num_bins);
     EXPECT_EQ(expected, classification);
   }
 
@@ -782,6 +984,7 @@ namespace {
     int maxSweeps = 1;
     int nbins = 3;
     int nrays = 3;
+    int del_num_bins = 0;
     
     float nbins1[] = {      -9,        3, -900e+33};
     float nbins2[] = {-999e+33, -999e+33, -999e+33};  // last element X
@@ -806,7 +1009,8 @@ namespace {
     int sweepIdx = 0;
 
     short expected = FourDD::TBD; 
-    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx,
+                                            del_num_bins);
     EXPECT_EQ(expected, classification);
   }
 
@@ -818,6 +1022,8 @@ namespace {
     int maxSweeps = 1;
     int nbins = 3;
     int nrays = 3;
+    int del_num_bins = 0;
+
     //                 vvvv
     float nbins1[] = {      -9,        3, -999e+33};
     float nbins2[] = {-999e+33, -999e+33, -999e+33};
@@ -842,7 +1048,8 @@ namespace {
     int sweepIdx = 0;
 
     short expected = FourDD::MISSING; 
-    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx);
+    short classification = fourDD.Filter3x3(velocity, binIdx, rayIdx, sweepIdx,
+                                            del_num_bins);
     EXPECT_EQ(expected, classification);
   }
     
