@@ -694,23 +694,13 @@ namespace {
 
   TEST(FourDD, findRay_HappyDay_intraVolume) {
     FourDD fourDD;
-    //    Volume *velocity2;
-    //int sweepIndex1;
-    //int sweepIndex2;
-    //int rayIndex;
     float missingVal = -999e+33;
     int maxSweeps = 4;
     int nbins = 3;
     int nrays = 3;
-    //int del_num_bins = 0;
-    
-    //    float nbins1[] = {-999e+33, -999e+33, -999e+33};
-    //    float nbins2[] = {-999e+33, -999e+33, -999e+33};
-    //    float nbins3[] = {-999e+33, -999e+33, -999e+33};
 
     Volume *velocity = Rsl::new_volume(maxSweeps);
  
-
     for (int s=0; s<maxSweeps; s++) {   
       velocity->sweep[s] = Rsl::new_sweep(nrays);
       for (int r=0; r<nrays; r++) {
@@ -733,19 +723,10 @@ namespace {
 
   TEST(FourDD, findRay_HappyDay_interVolume) {
     FourDD fourDD;
-    //    Volume *velocity2;
-    //int sweepIndex1;
-    //int sweepIndex2;
-    //int rayIndex;
     float missingVal = -999e+33;
     int maxSweeps = 4;
     int nbins = 3;
     int nrays = 3;
-    //int del_num_bins = 0;
-    
-    //float nbins1[] = {-999e+33, -999e+33, -999e+33};
-    //float nbins2[] = {-999e+33, -999e+33, -999e+33};
-    //float nbins3[] = {-999e+33, -999e+33, -999e+33};
 
     Volume *velocity = Rsl::new_volume(maxSweeps);
  
@@ -790,19 +771,10 @@ namespace {
 
   TEST(FourDD, findRay_HappyDay_interVolume_boundary_min) {
     FourDD fourDD;
-    //    Volume *velocity2;
-    //int sweepIndex1;
-    //int sweepIndex2;
-    //int rayIndex;
     float missingVal = -999e+33;
     int maxSweeps = 4;
     int nbins = 3;
     int nrays = 3;
-    //int del_num_bins = 0;
-    
-    //    float nbins1[] = {-999e+33, -999e+33, -999e+33};
-    //    float nbins2[] = {-999e+33, -999e+33, -999e+33};
-    //    float nbins3[] = {-999e+33, -999e+33, -999e+33};
 
     Volume *velocity = Rsl::new_volume(maxSweeps);
  
@@ -832,7 +804,6 @@ namespace {
 
     velocity->h.missing = missingVal;
 
-    //int binIdx = 1;
     int rayIdx = 0;
     int sweepIdx1 = 0;
     int sweepIdx2 = 2;
@@ -847,19 +818,10 @@ namespace {
 
   TEST(FourDD, findRay_HappyDay_interVolume_boundary_max) {
     FourDD fourDD;
-    //    Volume *velocity2;
-    //int sweepIndex1;
-    //int sweepIndex2;
-    //int rayIndex;
     float missingVal = -999e+33;
     int maxSweeps = 4;
     int nbins = 3;
     int nrays = 3;
-    //int del_num_bins = 0;
-    
-    //    float nbins1[] = {-999e+33, -999e+33, -999e+33};
-    //    float nbins2[] = {-999e+33, -999e+33, -999e+33};
-    //    float nbins3[] = {-999e+33, -999e+33, -999e+33};
 
     Volume *velocity = Rsl::new_volume(maxSweeps);
  
@@ -901,7 +863,132 @@ namespace {
     EXPECT_EQ(216.0, sounding->sweep[sweepIdx2]->ray[closestRayIdx]->h.azimuth);
   }
 
-  
+  TEST(FourDD, InitialDealiasing) {
+
+    // TODO: need two sweeps in velocity for aboveValue, startingValue,
+    // TODO: need prevValue, soundValue
+   
+
+    int maxSweeps = 4;
+    int nbins = 3;
+    int nrays = 3;
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+ 
+    for (int s=0; s<maxSweeps; s++) {   
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+      }
+    }
+    // 10, 130, 250  -->  370
+
+    Volume *sounding = Rsl::new_volume(maxSweeps);
+
+    int nRaysSounding = nrays + 2;
+    float raySpacing = 360.0/ (float) nRaysSounding;
+    for (int s=0; s<maxSweeps; s++) {   
+      sounding->sweep[s] = Rsl::new_sweep(nRaysSounding);
+      for (int r=0; r<nRaysSounding; r++) {
+        sounding->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        // Note: the azimuth need to be the same for each sweep
+        sounding->sweep[s]->ray[r]->h.azimuth = 0.0 + (raySpacing*r);
+      }
+    }
+    // 0, 72, 144,  216, 288 -->  360
+
+    //    velocity->h.missing = missingVal;
+
+    int rayIdx = nrays - 1;
+    int sweepIdx1 = 0;
+    int sweepIdx2 = 2;
+
+    /* 
+    int closestRayIdx = fourDD.InitialDealiasing(
+            missingValue, aboveValue, soundValue, startingValue, prevValue,
+            lastVolumeIsNull,
+            fraction, NyqVelocity,
+            &unfoldedValue, &successful);
+    */
+    //EXPECT_EQ(3, successful);
+    //EXPECT_EQ(250.0, unfoldedValue);
+  }
+
+  TEST(FourDD, DealiasVerticalAndTemporal_MissingValue) {
+    FourDD fourDD;
+
+    // in args
+    float missingValue = -999e+33;
+    float aboveValue = 0.0;
+    float soundValue = 0.0;
+    float startingValue = missingValue;
+    float prevValue = 0.0;
+    bool lastVolumeIsNull = true;
+    float fraction = 0.25;
+    float NyqVelocity = 10.0;
+    int max_count = 3;
+    bool strict_first_pass = false;
+
+    // out args
+    float unfoldedValue;
+    bool successful = false;
+
+    // find ray in sounding, closest to 130.0 degrees
+    fourDD.TryToDealiasUsingVerticalAndTemporalContinuity(
+            missingValue, aboveValue, soundValue, startingValue, prevValue,
+            lastVolumeIsNull,
+            fraction, NyqVelocity,
+            strict_first_pass,
+            max_count,
+            &unfoldedValue, &successful);
+    EXPECT_FALSE(successful);
+    EXPECT_EQ(missingValue, unfoldedValue);
+  }
+
+  TEST(FourDD, DealiasVerticalAndTemporal_strict_first_pass) {
+    FourDD fourDD;
+    // unfold startingValue until within prevValue +/- 2 
+    // aboveValue-unfolded_prevValue < .25 * 8 = 2
+    // soundValue-unfolded_prevValue < .25 * 8 = 2
+    // need aboveValue, soundValue, and prevValue within threshold
+    // will be unfolding to match prevValue
+
+    // in args
+    float missingValue = -999e+33;
+
+    // all must be within -28 +/- 2
+    float aboveValue = -29.0;
+    float soundValue = -29.99;
+    float prevValue = -27.0;
+
+    float startingValue = 4.0;  // -28 -12  x 20 36
+    bool lastVolumeIsNull = false;
+    float fraction = 0.25;  //  8 +/- 2 => 
+    float NyqVelocity = 8.0;
+    bool first_pass_only = true;
+    
+    float ck_val = 1.0;
+    int max_count = 3;
+
+    // out args
+    float unfoldedValue = missingValue;
+    bool successful = false;
+
+    // find ray in sounding, closest to 130.0 degrees
+    fourDD.TryToDealiasUsingVerticalAndTemporalContinuity(
+            missingValue, aboveValue, soundValue, startingValue, prevValue,
+            lastVolumeIsNull,
+            fraction, NyqVelocity,
+            first_pass_only,
+            max_count,
+            &unfoldedValue, &successful);
+    EXPECT_TRUE(successful);
+    EXPECT_EQ(-28.0, unfoldedValue);
+  }
+
+
 
   TEST(FourDD, Filter3x3_all_missing) {
     FourDD fourDD;
