@@ -863,26 +863,83 @@ namespace {
     EXPECT_EQ(216.0, sounding->sweep[sweepIdx2]->ray[closestRayIdx]->h.azimuth);
   }
 
-  TEST(FourDD, InitialDealiasing) {
+  TEST(FourDD, InitialDealiasing_HappyDay) {
 
     // TODO: need two sweeps in velocity for aboveValue, startingValue,
     // TODO: need prevValue, soundValue
+
+    //    float data[] = {9, 2, -7, -12, -13, 10, 13, 9, -5, -5, 20, -13, 14, -11, -7, 17, 18, 1, 0, 2, -13, 10, 7, -18, 9, -2, 17, -13, -4, -4, -3, -8, 18, -5, -2, -12, 20, 8, -17, 6, 3, -17, 8, -16, 17, 18, 2, -18, -2, -6, 18, -4, -2, 14, 3, 19, 13, 2, 8, 18, 4, -8, -4, -13, 4, 20, -14, 17, 8, 3, -12, 5, 20, 19, 2, -4, -4, 14, -2, -9, -14, 17, -20, 8, 5, -18, 16, -20, 2, -9, -14, 16, 8, 11, 15, -16, 10, 5, 7, 3, -20, -10, 10, -10, -8, 4, -10, 6, 4, 6, -15, 4, 20, 13, -1, -1, 10, 14, -14, 10};
    
+    float missingVal = -999e+33;
 
-    int maxSweeps = 4;
+    int maxSweeps = 3;
     int nbins = 3;
-    int nrays = 3;
+    int nrays = 1;  // we'll need more rays for the spatial dealiasing
+    int del_num_bins = 0;
+    
+    // data for original velocity volume; contains folded velocities
+    float obins1[] = {-5, 20, -13};
+    //float obins2[] = {14, -11, -7};
+    //float obins3[] = {17, 18, 1};
 
+    float obins4[] = {-13,   2, -7};
+    //float obins5[] = {-12,   9, 10};
+    //float obins6[] = { 13,   9, -5};
+
+    float obins7[] = {0, 2, -13};
+    //float obins8[] = {10, 7, -1};
+    //float obins9[] = {8, 9, -2};
+
+    // velocity data for previous volume; contains unfolded velocities
+    // this is the direction we want to go
+    // vary the Nyquist value to get closer and closer to desired velocity
+    float pbins1[] = {-13, -13, -13};
+    float missingValBins[] = {-999e+33, -999e+33, -999e+33};
+    //float pbins3[] = {-13, -13, -13};
+
+    // make original velocity volume
     Volume *velocity = Rsl::new_volume(maxSweeps);
- 
+    velocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    velocity->sweep[0]->ray[0]->range = obins1;
+    //    velocity->sweep[0]->ray[1]->range = nbins2;
+    //velocity->sweep[0]->ray[2]->range = nbins3;
+
+    velocity->sweep[1]->ray[0]->range = obins4;
+    //    velocity->sweep[1]->ray[1]->range = nbins5;
+    //velocity->sweep[1]->ray[2]->range = nbins6;
+
+    velocity->sweep[2]->ray[0]->range = obins7;
+    //velocity->sweep[2]->ray[1]->range = nbins8;
+    //velocity->sweep[2]->ray[2]->range = nbins9;
+    velocity->h.missing = missingVal;
+
+    // make previous velocity volume
+    Volume *prevVelocity = Rsl::new_volume(maxSweeps);
+    prevVelocity->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      prevVelocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      prevVelocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    prevVelocity->sweep[1]->ray[0]->range = pbins1;
+    //prevVelocity->sweep[1]->ray[1]->range = pbins1;
+    //prevVelocity->sweep[1]->ray[2]->range = pbins1;
+    prevVelocity->h.missing = missingVal;
+
+    // we do need azimuth info for findRay 
     for (int s=0; s<maxSweeps; s++) {   
       velocity->sweep[s] = Rsl::new_sweep(nrays);
       for (int r=0; r<nrays; r++) {
         velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
         // Note: the azimuth need to be the same for each sweep
-        velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+            velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
+        prevVelocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
       }
     }
+    /*
     // 10, 130, 250  -->  370
 
     Volume *sounding = Rsl::new_volume(maxSweeps);
@@ -900,20 +957,64 @@ namespace {
     // 0, 72, 144,  216, 288 -->  360
 
     //    velocity->h.missing = missingVal;
-
-    int rayIdx = nrays - 1;
-    int sweepIdx1 = 0;
-    int sweepIdx2 = 2;
-
-    /* 
-    int closestRayIdx = fourDD.InitialDealiasing(
-            missingValue, aboveValue, soundValue, startingValue, prevValue,
-            lastVolumeIsNull,
-            fraction, NyqVelocity,
-            &unfoldedValue, &successful);
     */
-    //EXPECT_EQ(3, successful);
-    //EXPECT_EQ(250.0, unfoldedValue);
+
+    FourDD fourDD;
+
+    //  fill STATE info
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::TBD);
+
+    //  construct rvVolume; out param
+    Volume *rvVolume = Rsl::new_volume(maxSweeps);
+    rvVolume->sweep[0] = Rsl::new_sweep(nrays);
+    for (int r=0; r<nrays; r++) {
+      rvVolume->sweep[0]->ray[r] = Rsl::new_ray(nbins);
+      rvVolume->sweep[0]->ray[r]->h.binDataAllocated = true;
+    }
+    rvVolume->sweep[0]->ray[0]->range = missingValBins;
+    rvVolume->sweep[1]->ray[0]->range = missingValBins;
+    rvVolume->sweep[2]->ray[0]->range = missingValBins;
+
+    // need lastVolume or soundVolume, or both
+    Volume *lastVolume = prevVelocity;  
+    Volume *soundVolume = NULL;
+    Volume *original = velocity;
+    int sweepIndex = 1;  // start in the middle
+    bool filt = false; // this is the 3x3 filtering
+    float fraction = 0.25;  // how close do unfolded velocities need to be?
+
+    // calls findRay, Unfold, DealiasVerticalAndTemporal ==> need sweep above
+    //                                                   ==> need previous volume in time
+    fourDD.InitialDealiasing(rvVolume, lastVolume, soundVolume,
+                      original, sweepIndex, del_num_bins, STATE,
+                      filt, fraction); 
+
+    //    EXPECT_EQ(false);
+    EXPECT_EQ(-13.0, rvVolume->sweep[1]->ray[0]->range[0]);
+  }
+
+
+  //   TEST(FourDD, prepVolume_NULL) {
+  //   TEST(FourDD, prepVolume_high_low_dbz) {
+  //   TEST(FourDD, prepVolume_yes_dbz_rm_rv) {
+  //   TEST(FourDD, prepVolume_del_num_bins) {
+  //   TEST(FourDD, prepVolume_manyDBZ_to_oneRV) {
+  //
+  TEST(FourDD, prepVolume_HappyDay) {
+    FourDD fourDD;
+    Volume* DBZVolume; 
+    Volume* rvVolume; 
+    int del_num_bins = 0;
+    float missingVal = -999e+33;
+    float low_dbz;
+    float high_dbz;
+    bool no_dbz_rm_rv = false;
+
+    fourDD.prepVolume(DBZVolume, rvVolume, del_num_bins, missingVal,
+               low_dbz, high_dbz, no_dbz_rm_rv);
+
+    // test values of rvVolume for missingVal
+    EXPECT_EQ(missingVal, rvVolume);
   }
 
   TEST(FourDD, DealiasVerticalAndTemporal_MissingValue) {
