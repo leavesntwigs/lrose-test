@@ -21,6 +21,7 @@ GTEST_DIR = /usr/local/gtest
 # USER_DIR = ../samples
 USER_DIR = ../libs/Radx
 APPS_DIR = ../apps
+LIBS_DIR = ../libs
 SRC_DIR = ../../lrose-core/codebase
 
 # Flags passed to the preprocessor.
@@ -35,7 +36,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread
 # created to the list.
 # TESTS = sample1_unittest
 TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest \
-	FourDD_unittest
+	FourDD_unittest Boundary_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -131,4 +132,18 @@ FourDD_unittest.o : $(APPS_DIR)/radar/src/RadxDealias/FourDD_unittest.cc \
 
 FourDD_unittest : FourDD_unittest.o Rsl.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/FourDD.o  $^ -o $@
+
+# 
+# Soloii - Boundary
+#
+
+# Rsl.o : $(SRC_DIR)/libs/Solo/src/Solo/Rsl.cc $(SRC_DIR)/libs/Solo/src/Solo/Rsl.hh 
+	# $(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -c $(SRC_DIR)/libs/Solo/src/Solo/Rsl.cc 
+
+Boundary_unittest.o : $(LIBS_DIR)/Solo/Boundary_unittest.cc \
+	$(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/Boundary_unittest.cc
+
+Boundary_unittest : Boundary_unittest.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/libs/Solo/src/Solo/Boundary.o  $^ -o $@
 
