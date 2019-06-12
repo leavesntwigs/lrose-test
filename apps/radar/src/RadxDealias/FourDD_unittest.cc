@@ -1014,7 +1014,7 @@ namespace {
                low_dbz, high_dbz, no_dbz_rm_rv);
 
     // test values of rvVolume for missingVal
-    EXPECT_EQ(missingVal, rvVolume);
+    EXPECT_EQ(NULL, rvVolume);
   }
 
   TEST(FourDD, DealiasVerticalAndTemporal_MissingValue) {
