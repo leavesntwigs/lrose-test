@@ -145,5 +145,5 @@ Boundary_unittest.o : $(LIBS_DIR)/Solo/Boundary_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/Boundary_unittest.cc
 
 Boundary_unittest : Boundary_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/libs/Solo/src/Solo/Boundary.o  $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp -lpthread $^ -o $@
 
