@@ -870,7 +870,7 @@ namespace {
 
     //    float data[] = {9, 2, -7, -12, -13, 10, 13, 9, -5, -5, 20, -13, 14, -11, -7, 17, 18, 1, 0, 2, -13, 10, 7, -18, 9, -2, 17, -13, -4, -4, -3, -8, 18, -5, -2, -12, 20, 8, -17, 6, 3, -17, 8, -16, 17, 18, 2, -18, -2, -6, 18, -4, -2, 14, 3, 19, 13, 2, 8, 18, 4, -8, -4, -13, 4, 20, -14, 17, 8, 3, -12, 5, 20, 19, 2, -4, -4, 14, -2, -9, -14, 17, -20, 8, 5, -18, 16, -20, 2, -9, -14, 16, 8, 11, 15, -16, 10, 5, 7, 3, -20, -10, 10, -10, -8, 4, -10, 6, 4, 6, -15, 4, 20, 13, -1, -1, 10, 14, -14, 10};
    
-    float missingVal = -999e+33;
+    float missingVal = -999; // e+33;
 
     int maxSweeps = 3;
     int nbins = 3;
@@ -878,31 +878,40 @@ namespace {
     int del_num_bins = 0;
     
     // data for original velocity volume; contains folded velocities
-    float obins1[] = {-5, 20, -13};
+    float obins1[] = {0, 0, 0};   // these values shouldn't matter
     //float obins2[] = {14, -11, -7};
     //float obins3[] = {17, 18, 1};
 
-    float obins4[] = {-13,   2, -7};
+    float obins4[] = {20,   -13, -13};
     //float obins5[] = {-12,   9, 10};
     //float obins6[] = { 13,   9, -5};
 
-    float obins7[] = {0, 2, -13};
+    float obins7[] = {-13, -13, -13};
     //float obins8[] = {10, 7, -1};
     //float obins9[] = {8, 9, -2};
+
+    float NyquistVelocity = 16.0;
 
     // velocity data for previous volume; contains unfolded velocities
     // this is the direction we want to go
     // vary the Nyquist value to get closer and closer to desired velocity
     float pbins1[] = {-13, -13, -13};
-    float missingValBins[] = {-999e+33, -999e+33, -999e+33};
+    float missingValBins[3];
+    missingValBins[0] = missingVal;
+    missingValBins[1] = missingVal;
+    missingValBins[2] = missingVal;
     //float pbins3[] = {-13, -13, -13};
+
+    printf("before make original velocity volume\n");
 
     // make original velocity volume
     Volume *velocity = Rsl::new_volume(maxSweeps);
-    velocity->sweep[0] = Rsl::new_sweep(nrays);
-    for (int r=0; r<nrays; r++) {
-      velocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
-      velocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    for (int s=0; s<maxSweeps; s++) {
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+      }
     }
     velocity->sweep[0]->ray[0]->range = obins1;
     //    velocity->sweep[0]->ray[1]->range = nbins2;
@@ -917,28 +926,39 @@ namespace {
     //velocity->sweep[2]->ray[2]->range = nbins9;
     velocity->h.missing = missingVal;
 
+    printf("before make previous velocity volume\n");
+
     // make previous velocity volume
     Volume *prevVelocity = Rsl::new_volume(maxSweeps);
-    prevVelocity->sweep[0] = Rsl::new_sweep(nrays);
-    for (int r=0; r<nrays; r++) {
-      prevVelocity->sweep[0]->ray[r] = Rsl::new_ray(nbins);
-      prevVelocity->sweep[0]->ray[r]->h.binDataAllocated = true;
+    for (int s=0; s<maxSweeps; s++) {
+      prevVelocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        prevVelocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        prevVelocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+      }
     }
     prevVelocity->sweep[1]->ray[0]->range = pbins1;
     //prevVelocity->sweep[1]->ray[1]->range = pbins1;
     //prevVelocity->sweep[1]->ray[2]->range = pbins1;
     prevVelocity->h.missing = missingVal;
 
+    printf("before setting azimuth for volume\n");
+
+
     // we do need azimuth info for findRay 
     for (int s=0; s<maxSweeps; s++) {   
-      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      //velocity->sweep[s] = Rsl::new_sweep(nrays);
       for (int r=0; r<nrays; r++) {
-        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        //velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
         // Note: the azimuth need to be the same for each sweep
             velocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
         prevVelocity->sweep[s]->ray[r]->h.azimuth = 10.0 + (120.0*r);
       }
     }
+
+    printf("velocity volume ...\n");
+    Rsl::print_volume(velocity);
+
     /*
     // 10, 130, 250  -->  370
 
@@ -966,14 +986,19 @@ namespace {
 
     //  construct rvVolume; out param
     Volume *rvVolume = Rsl::new_volume(maxSweeps);
-    rvVolume->sweep[0] = Rsl::new_sweep(nrays);
-    for (int r=0; r<nrays; r++) {
-      rvVolume->sweep[0]->ray[r] = Rsl::new_ray(nbins);
-      rvVolume->sweep[0]->ray[r]->h.binDataAllocated = true;
+    rvVolume->h.missing = missingVal;
+    for (int s=0; s<maxSweeps; s++) {
+      rvVolume->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        rvVolume->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        rvVolume->sweep[s]->ray[r]->h.binDataAllocated = true;
+        rvVolume->sweep[s]->ray[0]->h.nyq_vel = NyquistVelocity;
+      }
     }
     rvVolume->sweep[0]->ray[0]->range = missingValBins;
     rvVolume->sweep[1]->ray[0]->range = missingValBins;
-    rvVolume->sweep[2]->ray[0]->range = missingValBins;
+    // setup test so that higher sweep has been dealiased
+    rvVolume->sweep[2]->ray[0]->range = obins7;  
 
     // need lastVolume or soundVolume, or both
     Volume *lastVolume = prevVelocity;  
@@ -983,14 +1008,25 @@ namespace {
     bool filt = false; // this is the 3x3 filtering
     float fraction = 0.25;  // how close do unfolded velocities need to be?
 
+    printf("original volume ...\n");
+    Rsl::print_volume(original);
+
+    float ck_val = 1.0;  // below this value, consider it noise
+    bool strict_first_pass = false;
+    int max_count = 10;
+
+    printf("Before calling InitialDealiasing\n");
     // calls findRay, Unfold, DealiasVerticalAndTemporal ==> need sweep above
     //                                                   ==> need previous volume in time
     fourDD.InitialDealiasing(rvVolume, lastVolume, soundVolume,
                       original, sweepIndex, del_num_bins, STATE,
-                      filt, fraction); 
+                             filt, fraction, ck_val, strict_first_pass, max_count); 
+    printf("After calling InitialDealiasing\n");
 
     //    EXPECT_EQ(false);
-    EXPECT_EQ(-13.0, rvVolume->sweep[1]->ray[0]->range[0]);
+    EXPECT_EQ(-12.0, rvVolume->sweep[1]->ray[0]->range[0]);
+    EXPECT_EQ(-13.0, rvVolume->sweep[1]->ray[0]->range[1]);
+    EXPECT_EQ(-13.0, rvVolume->sweep[1]->ray[0]->range[2]);
   }
 
 
