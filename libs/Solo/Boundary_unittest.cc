@@ -124,7 +124,7 @@ namespace {
   // NOTE: this linked list of boundaries is managed externally  
 
   TEST(SoloBoundary, OneBoundary_simple) {
-
+    /*
     OneBoundary *boundary = new OneBoundary();
 
     boundaryList->xse_add_bnd_pt(3, 4, boundary);
@@ -134,6 +134,7 @@ namespace {
     boundaryList->xse_add_bnd_pt(30, 21, boundary);
 
     boundaryList->xse_add_bnd_pt(5, 23, boundary);
+    */
     EXPECT_EQ(0, 1);
   }
 
@@ -156,14 +157,14 @@ TEST(SoloBoundary, get_boundary_mask_same_origin) {
   short *boundaryMask = new short(nBoundaryPoints);
 
   // boundary is a list of <list of x,y-points>
-  
+  /*
   radar->latitude = latitude;
   radar->longitude = longitude;
   radar->altitude = altitude;
   radar->earth_radius = dd_earthr(radar->latitude);
   radar->tilt = dd_tilt_angle(dgi);
   radar->tilt = dgi->dds->swib->fixed_angle;
-
+  */
   /* TODO: where I'd like to be ...
   boundaryMask = BoundaryPointMap::get_boundary_mask(boundary, 
                                                      float latitude,
@@ -197,8 +198,9 @@ TEST(SoloBoundary, get_boundary_mask_same_origin) {
   boundary_origin.longitude = 0.0;
   boundary_origin.altitude = 0.0;
 
+  BoundaryPointMap bpm;
  
-  boundaryMask = BoundaryPointMap::get_boundary_mask(boundaryList,
+  boundaryMask = bpm.get_boundary_mask(boundaryList,
                                              &radar_origin,
                                              &boundary_origin,
                                              nGates,
