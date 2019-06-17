@@ -122,20 +122,26 @@ namespace {
   */
 
   // NOTE: this linked list of boundaries is managed externally  
-
+  // OneBoundary is a linked list of boundaries
+  // The BoundaryPointManagement objects are a linked list of
+  // boundary points, and other information, i.e. intersections, ...
   TEST(SoloBoundary, OneBoundary_simple) {
-    /*
+    
     OneBoundary *boundary = new OneBoundary();
+    BoundaryPointMap map;
 
-    boundaryList->xse_add_bnd_pt(3, 4, boundary);
+    map.xse_add_bnd_pt(3, 4, boundary);
+    
+    map.xse_add_bnd_pt(17, 10, boundary);
+    
+    map.xse_add_bnd_pt(30, 21, boundary);
 
-    boundaryList->xse_add_bnd_pt(17, 10, boundary);
-
-    boundaryList->xse_add_bnd_pt(30, 21, boundary);
-
-    boundaryList->xse_add_bnd_pt(5, 23, boundary);
-    */
-    EXPECT_EQ(0, 1);
+    map.xse_add_bnd_pt(5, 23, boundary);
+    
+    EXPECT_EQ( 3.0, boundary->min_x);
+    EXPECT_EQ(30.0, boundary->max_x);
+    EXPECT_EQ( 4.0, boundary->min_y);
+    EXPECT_EQ(23.0, boundary->max_y);
   }
 
 
@@ -200,8 +206,9 @@ TEST(SoloBoundary, get_boundary_mask_same_origin) {
 
   BoundaryPointMap bpm;
  
+  /*
   boundaryMask = bpm.get_boundary_mask(boundaryList,
-                                             &radar_origin,
+                                           &radar_origin,
                                              &boundary_origin,
                                              nGates,
                                              gateSize,
@@ -212,12 +219,13 @@ TEST(SoloBoundary, get_boundary_mask_same_origin) {
                                              tilt_angle,
                                              rotation_angle);
 
-
+  
 
   EXPECT_EQ(0, boundaryMask[0]);
   EXPECT_EQ(0, boundaryMask[1]);
   EXPECT_EQ(0, boundaryMask[2]);
   EXPECT_EQ(0, boundaryMask[3]);
+  */
   /*
   outData = remove_ac_motion(oneRayData, boundaryMask, otherInfo);
 
