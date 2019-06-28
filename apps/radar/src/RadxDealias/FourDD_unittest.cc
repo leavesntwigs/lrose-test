@@ -1053,6 +1053,302 @@ namespace {
     EXPECT_EQ(NULL, rvVolume);
   }
 
+
+  // These tests are easier; only need one sweep; only looking at rays and bins;
+  // horizontal plane
+  TEST(FourDD, UnfoldTbdBinsAssumingSpatialContinuity_HappyDay_NoChanges) {
+    FourDD fourDD;   
+    float missingVal = -999; // e+33;
+
+    int maxSweeps = 1;
+    int nbins = 3;
+    int nrays = 3;  // we'll need more rays for the spatial dealiasing
+    int del_num_bins = 0;
+    
+    // data for original velocity volume; contains folded velocities
+    float obins1[] = {  10, 13,  10};  
+    float obins2[] = {  13, 11,   7};
+    float obins3[] = {   9, 12,  11};
+
+    float NyquistVelocity = 10.0;
+
+    printf("before make original velocity volume\n");
+
+    // make original velocity volume
+    // create original; only one sweep
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    for (int s=0; s<maxSweeps; s++) {
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+      }
+    }
+    velocity->sweep[0]->ray[0]->range = obins1;
+    velocity->sweep[0]->ray[1]->range = obins2;
+    velocity->sweep[0]->ray[2]->range = obins3;
+
+    // create working volume
+    float missingValBins[3];
+    missingValBins[0] = missingVal;
+    missingValBins[1] = missingVal;
+    missingValBins[2] = missingVal;
+
+    //  construct rvVolume; out param
+    Volume *rvVolume = Rsl::new_volume(maxSweeps);
+    rvVolume->h.missing = missingVal;
+    for (int s=0; s<maxSweeps; s++) {
+      rvVolume->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        rvVolume->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        rvVolume->sweep[s]->ray[r]->h.binDataAllocated = true;
+        //        rvVolume->sweep[s]->ray[0]->h.nyq_vel = NyquistVelocity;
+      }
+    }
+    rvVolume->sweep[0]->ray[0]->range = missingValBins;
+    rvVolume->sweep[0]->ray[1]->range = missingValBins;
+    rvVolume->sweep[0]->ray[2]->range = missingValBins;
+
+    // create the STATE
+    //  fill STATE info
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::TBD);
+
+    // we need a seed, to get the dealiasing started, i.e. one of the 
+    // neighbors must be dealiased.
+    int dealiasedBin = 1;
+    int dealiasedRay = 1;
+    int sweepIndex = 0;
+    STATE[dealiasedBin][dealiasedRay] = FourDD::DEALIASED;
+    rvVolume->sweep[sweepIndex]->ray[dealiasedRay]->range[dealiasedBin] = 
+      velocity->sweep[sweepIndex]->ray[dealiasedRay]->range[dealiasedBin];
+
+    // Now, unfold STATE=TBD bins assuming spatial continuity:   
+    float pfraction = 1.0; // TODO: ????                     
+    int max_count = 4;               
+    fourDD.UnfoldTbdBinsAssumingSpatialContinuity(STATE, velocity, rvVolume, sweepIndex,
+                                                  del_num_bins, NyquistVelocity, pfraction,
+                                                  max_count);
+    
+    // expect no changes in the working volume; it should have the same values as the original
+    /*
+    float obins1[] = {  10, 13,  10};  
+    float obins2[] = {  13, 11,   7};
+    float obins3[] = {   9, 12,  11};
+    */
+
+    EXPECT_EQ(10, rvVolume->sweep[0]->ray[0]->range[0]);
+    EXPECT_EQ(13, rvVolume->sweep[0]->ray[0]->range[1]);
+    EXPECT_EQ(10, rvVolume->sweep[0]->ray[0]->range[2]);
+
+    EXPECT_EQ(13,  rvVolume->sweep[0]->ray[1]->range[0]);
+    EXPECT_EQ(11, rvVolume->sweep[0]->ray[1]->range[1]);
+    EXPECT_EQ( 7,  rvVolume->sweep[0]->ray[1]->range[2]);
+
+    EXPECT_EQ( 9, rvVolume->sweep[0]->ray[2]->range[0]);
+    EXPECT_EQ(12, rvVolume->sweep[0]->ray[2]->range[1]);
+    EXPECT_EQ(11,  rvVolume->sweep[0]->ray[2]->range[2]);
+
+    // expect the STATE to change to DEALIASED for all bins
+    short dealiasedValue = FourDD::DEALIASED;
+    for (int r=0; r<nrays; r++) {
+      for (int b=0; b<nbins; b++) {
+        EXPECT_EQ(dealiasedValue, STATE[b][r]);
+      }
+    }    
+    
+  }
+
+  TEST(FourDD, UnfoldTbdBinsAssumingSpatialContinuity_HappyDay_Unfolding) {
+    FourDD fourDD;
+    
+    // create original; only one sweep
+
+    // create working volume
+
+    // create the STATE
+    /*
+    // Now, unfold STATE=TBD bins assuming spatial continuity:                                       
+    fourDD.UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex,
+                                           del_num_bins, pfraction);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldTbdBinsAssumingSpatialContinuity_del_num_bins) {
+    FourDD fourDD;
+    /*
+    // Now, unfold STATE=TBD bins assuming spatial continuity:                                       
+    UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex,
+                                           del_num_bins, pfraction);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldTbdBinsAssumingSpatialContinuity_pfraction) {
+    FourDD fourDD;
+    /*
+    // Now, unfold STATE=TBD bins assuming spatial continuity:                                       
+    UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex,
+                                           del_num_bins, pfraction);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldTbdBinsAssumingSpatialContinuity_sweepIndex_negative) {
+    FourDD fourDD;
+    int sweepIndex = -3;
+    short **STATE = NULL;
+    Volume *original = NULL;
+    Volume *rvVolume = NULL;
+    int del_num_bins = 0;
+    float pfraction = 0.0;
+    int max_count = 3;
+    float NyqVelocity = 13;
+    try {
+      fourDD.UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex,
+                                                    del_num_bins, NyqVelocity,
+                                                    pfraction, max_count);
+      FAIL() << "exception  std::invalid_argument not thrown";
+    } catch(std::invalid_argument &err) {
+      EXPECT_EQ(err.what(), std::string("sweepIndex negative"));
+    } catch (...) {
+      FAIL() << "Expected std::invalid_argument";
+    }    
+  }
+
+  TEST(FourDD, UnfoldTbdBinsAssumingSpatialContinuity_sweepIndex_exceed) {
+    FourDD fourDD;
+    /*
+    // Now, unfold STATE=TBD bins assuming spatial continuity:                                       
+    UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex,
+                                           del_num_bins, pfraction);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+
+  // windowing
+
+  TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_HappyDay) {
+    FourDD fourDD;
+    /*
+    UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
+                                                    sweepIndex, del_num_bins,
+                                                    pfraction, _proximity, _std_thresh,
+                                                    NyqVelocity,
+                                                    soundVolume==NULL, lastVolume==NULL);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_del_num_bins) {
+    FourDD fourDD;
+    /*
+    UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
+                                                    sweepIndex, del_num_bins,
+                                                    pfraction, _proximity, _std_thresh,
+                                                    NyqVelocity,
+                                                    soundVolume==NULL, lastVolume==NULL);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_pfraction) {
+    FourDD fourDD;
+    /*
+    UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
+                                                    sweepIndex, del_num_bins,
+                                                    pfraction, _proximity, _std_thresh,
+                                                    NyqVelocity,
+                                                    soundVolume==NULL, lastVolume==NULL);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_sweepIndex_negative) {
+    FourDD fourDD;
+    /*
+    UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
+                                                    sweepIndex, del_num_bins,
+                                                    pfraction, _proximity, _std_thresh,
+                                                    NyqVelocity,
+                                                    soundVolume==NULL, lastVolume==NULL);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_sweepIndex_exceed) {
+    FourDD fourDD;
+    /*
+    UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
+                                                    sweepIndex, del_num_bins,
+                                                    pfraction, _proximity, _std_thresh,
+                                                    NyqVelocity,
+                                                    soundVolume==NULL, lastVolume==NULL);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  // sound volume only
+
+
+  TEST(FourDD, SecondPassUsingSoundVolumeOnly_HappyDay) {
+    FourDD fourDD;
+    /*
+    SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
+                                       sweepIndex, del_num_bins,
+                                       fraction2, pfraction,
+                                       NyqVelocity, _max_count, _ck_val);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, SecondPassUsingSoundVolumeOnly_del_num_bins) {
+    FourDD fourDD;
+    /*
+    SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
+                                       sweepIndex, del_num_bins,
+                                       fraction2, pfraction,
+                                       NyqVelocity, _max_count, _ck_val);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, SecondPassUsingSoundVolumeOnly_pfraction) {
+    FourDD fourDD;
+    /*
+    SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
+                                       sweepIndex, del_num_bins,
+                                       fraction2, pfraction,
+                                       NyqVelocity, _max_count, _ck_val);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, SecondPassUsingSoundVolumeOnly_sweepIndex_negative) {
+    FourDD fourDD;
+    /*
+    SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
+                                       sweepIndex, del_num_bins,
+                                       fraction2, pfraction,
+                                       NyqVelocity, _max_count, _ck_val);
+    */
+    EXPECT_EQ(0, 1);
+  }
+
+  TEST(FourDD, SecondPassUsingSoundVolumeOnly_sweepIndex_exceed) {
+    FourDD fourDD;
+    /*
+    SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
+                                       sweepIndex, del_num_bins,
+                                       fraction2, pfraction,
+                                       NyqVelocity, _max_count, _ck_val);
+    */
+    EXPECT_EQ(0, 1);
+  }
+  
+
   TEST(FourDD, DealiasVerticalAndTemporal_MissingValue) {
     FourDD fourDD;
 
