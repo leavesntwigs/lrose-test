@@ -15,7 +15,8 @@
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
 # GTEST_DIR = ..
-GTEST_DIR = /usr/local/gtest
+# GTEST_DIR = /usr/local/gtest
+GTEST_DIR = /usr/local
 
 # Where to find user code.
 # USER_DIR = ../samples
@@ -30,13 +31,15 @@ SRC_DIR = ../../lrose-core/codebase
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -std=c++11 -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = sample1_unittest
 TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest \
-	FourDD_unittest Boundary_unittest
+        Despeckle_unittest
+
+# 	Boundary_unittest FourDD_unittests
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -86,8 +89,8 @@ sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
 	$(USER_DIR)/sample1.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc
 
-sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+sample1_unittest : sample1.o sample1_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
 
 
 # RadxTimeList.o : $(USER_DIR)/RadxTimeList.cc $(USER_DIR)/RadxTimeList.h $(GTEST_HEADERS)
@@ -97,17 +100,17 @@ RadxTimeList_unittest.o : $(USER_DIR)/RadxTimeList_unittest.cc \
 	$(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include  -c $(USER_DIR)/RadxTimeList_unittest.cc
 
-RadxTimeList_unittest : RadxTimeList_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $^ -o $@
+RadxTimeList_unittest : RadxTimeList_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
 RadxVol_unittest.o : $(USER_DIR)/RadxVol_unittest.cc \
 	$(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include  -c $(USER_DIR)/RadxVol_unittest.cc
 
-RadxVol_unittest : RadxVol_unittest.o gtest_main.a
+RadxVol_unittest : RadxVol_unittest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib \
 	-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat \
-	-lRadx -lNcxx -lhdf5_cpp -lpthread $^ -o $@
+	-lRadx -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 #
 # Rsl
 #
@@ -116,8 +119,8 @@ Rsl_unittest.o : $(APPS_DIR)/radar/src/RadxDealias/Rsl_unittest.cc \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/apps/radar/src/RadxDealias -c $(APPS_DIR)/radar/src/RadxDealias/Rsl_unittest.cc
 
-Rsl_unittest : Rsl_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/Rsl.o $^ -o $@
+Rsl_unittest : Rsl_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/Rsl.o $^ -o $@
 
 # 
 # FourDD 
@@ -130,8 +133,8 @@ FourDD_unittest.o : $(APPS_DIR)/radar/src/RadxDealias/FourDD_unittest.cc \
 	$(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/apps/radar/src/RadxDealias -c $(APPS_DIR)/radar/src/RadxDealias/FourDD_unittest.cc
 
-FourDD_unittest : FourDD_unittest.o Rsl.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/FourDD.o  $^ -o $@
+FourDD_unittest : FourDD_unittest.o Rsl.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lRadx -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $(SRC_DIR)/apps/radar/src/RadxDealias/FourDD.o  $^ -o $@
 
 # 
 # Soloii - Boundary
@@ -144,6 +147,20 @@ Boundary_unittest.o : $(LIBS_DIR)/Solo/Boundary_unittest.cc \
 	$(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/Boundary_unittest.cc
 
-Boundary_unittest : Boundary_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp -lpthread $^ -o $@
+Boundary_unittest : Boundary_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
+
+# 
+# Soloii - Despeckle
+#
+
+# Rsl.o : $(SRC_DIR)/libs/Solo/src/Solo/Rsl.cc $(SRC_DIR)/libs/Solo/src/Solo/Rsl.hh 
+	# $(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -c $(SRC_DIR)/libs/Solo/src/Solo/Rsl.cc 
+
+Despeckle_unittest.o : $(LIBS_DIR)/Solo/Despeckle_unittest.cc \
+	$(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/Despeckle_unittest.cc
+
+Despeckle_unittest : Despeckle_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
