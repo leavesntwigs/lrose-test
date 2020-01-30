@@ -1,5 +1,6 @@
 #include <limits.h>
 #include "gtest/gtest.h"
+#include "Solo/SoloFunctions.hh"
 
 namespace {
 
@@ -44,7 +45,7 @@ namespace {
     size_t clip_gate = nGates;
     float newData_expected[NGATES1] = {3, 4, 5, 6};
 
-    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd)
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
     for (int i=0; i<NGATES1; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
     

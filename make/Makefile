@@ -36,8 +36,7 @@ CXXFLAGS += -std=c++11 -g -Wall -Wextra -pthread
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = sample1_unittest
-TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest \
-        Despeckle_unittest
+TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest Despeckle_unittest Boundary_unittest
 
 # 	Boundary_unittest FourDD_unittests
 
