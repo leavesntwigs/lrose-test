@@ -39,7 +39,7 @@ namespace {
     float newData[NGATES1] = {0,0,0,0};
     bool bnd[NGATES1] = {1,1,1,1};
     float bad_flag = -3;
-    int a_speckle = 5;
+    int a_speckle = 1;
 
     size_t nGates = NGATES1;
     size_t clip_gate = nGates;
@@ -51,7 +51,43 @@ namespace {
     
   }
 
+  TEST(SoloDespeckle, speckle_outside_clip_gate__no_boundary) {
 
+    // testing this pattern b|b|g|b  but clip gate should prevent the g (good) value
+    // from being set to b (bad), i.e. considered a speckle and zapped.
+    float data[NGATES1] = {-3,-3,5,-3};
+    float newData[NGATES1] = {0,0,0,0};
+    bool bnd[NGATES1] = {1,1,1,1};
+    float bad_flag = -3;
+    int a_speckle = 1;
+
+    size_t nGates = NGATES1;
+    size_t clip_gate = 2;
+    float newData_expected[NGATES1] = {-3,-3,5,-3};  // no changed 
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES1; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+  TEST(SoloDespeckle, speckle_inside_clip_gate__no_boundary) {
+
+    // testing this pattern b|b|g|b  clip gate is just past good value
+    // good value should be  considered a speckle and zapped.
+    float data[NGATES1] = {-3,-3,5,-3};
+    float newData[NGATES1] = {0,0,0,0};
+    bool bnd[NGATES1] = {1,1,1,1};
+    float bad_flag = -3;
+    int a_speckle = 1;
+
+    size_t nGates = NGATES1;
+    size_t clip_gate = 3;
+    float newData_expected[NGATES1] = {-3,-3,-3,-3};  // zapped 
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES1; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
 
 }  // namespace
 
