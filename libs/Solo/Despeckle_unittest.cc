@@ -32,21 +32,21 @@ namespace {
 // Keep the interface simple
 // Inside the C++ code, the structures can be more complicated
 //
-#define NGATES1 4
+#define NGATES_4 4
   TEST(SoloDespeckle, no_clipping__no_bad_flags__no_boundary) {
 
-    float data[NGATES1] = {3,4,5,6};
-    float newData[NGATES1] = {0,0,0,0};
-    bool bnd[NGATES1] = {1,1,1,1};
+    float data[NGATES_4] = {3,4,5,6};
+    float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
     int a_speckle = 1;
 
-    size_t nGates = NGATES1;
+    size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
-    float newData_expected[NGATES1] = {3, 4, 5, 6};
+    float newData_expected[NGATES_4] = {3, 4, 5, 6};
 
     se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
-    for (int i=0; i<NGATES1; i++)
+    for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
     
   }
@@ -55,37 +55,202 @@ namespace {
 
     // testing this pattern b|b|g|b  but clip gate should prevent the g (good) value
     // from being set to b (bad), i.e. considered a speckle and zapped.
-    float data[NGATES1] = {-3,-3,5,-3};
-    float newData[NGATES1] = {0,0,0,0};
-    bool bnd[NGATES1] = {1,1,1,1};
+    float data[NGATES_4] = {-3,-3,5,-3};
+    float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
     int a_speckle = 1;
 
-    size_t nGates = NGATES1;
+    size_t nGates = NGATES_4;
     size_t clip_gate = 2;
-    float newData_expected[NGATES1] = {-3,-3,5,-3};  // no changed 
+    float newData_expected[NGATES_4] = {-3,-3,5,-3};  // no changed 
 
     se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
-    for (int i=0; i<NGATES1; i++)
+    for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
   TEST(SoloDespeckle, speckle_inside_clip_gate__no_boundary) {
 
     // testing this pattern b|b|g|b  clip gate is just past good value
-    // good value should be  considered a speckle and zapped.
-    float data[NGATES1] = {-3,-3,5,-3};
-    float newData[NGATES1] = {0,0,0,0};
-    bool bnd[NGATES1] = {1,1,1,1};
+    // good value is NOT  considered a speckle and zapped.
+    float data[NGATES_4] = {-3,-3,5,-3};
+    float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
     int a_speckle = 1;
 
-    size_t nGates = NGATES1;
+    size_t nGates = NGATES_4;
     size_t clip_gate = 3;
-    float newData_expected[NGATES1] = {-3,-3,-3,-3};  // zapped 
+    float newData_expected[NGATES_4] = {-3,-3,5,-3};  // no change 
 
     se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
-    for (int i=0; i<NGATES1; i++)
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+
+  // TODO:  Is this a speckle?  b|b|g|g|    when it is at the very end?  But we don't know the next value?
+  // If end of data, then it is a speckle.
+  // If it is the end of a clip gate, then it may or may NOT be a speckle, since we don't know the next value
+
+// from soloii code ...
+        /* if a run of cells less than or equal to this                                                       
+         * number is surrounded by bad flagged data,                                                          
+         * the run is also bad flagged                                                                        
+         */
+
+  TEST(SoloDespeckle, no_clipping__speckle__no_boundary) {
+
+#define NGATES_7 7
+
+    float data[NGATES_7] =    {3,-3, 5, 5, 5,-3 ,6};
+    float newData[NGATES_7] = {0, 0, 0, 0, 0, 0, 0};
+    bool bnd[NGATES_7] =      {1, 1, 1, 1, 1, 1, 1};
+    float bad_flag = -3;
+    int a_speckle = 3;
+
+    size_t nGates = NGATES_7;
+    size_t clip_gate = nGates;
+    float newData_expected[NGATES_7] = {-3,-3,-3,-3,-3,-3, -3};  // 3 speckles zapped 
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_7; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+
+  // should clear first speckle, but not second speckle because clip_gate ends 
+  // before second speckle
+  //   
+  TEST(SoloDespeckle, clipping_ends_before_second_speckle__no_boundary) {
+    // double bar (||) indicates clip_gate
+    //                       g|b | b|  g| g| g|  b| g||g|  b|
+#define NGATES_10 10
+
+    float data[NGATES_10] =                { 3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+    float newData[NGATES_10] =             { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
+    float newData_expected[NGATES_10] =    {-3,-3, -3,-3,-3,-3, -3, 5, 5, -3}; // 2 speckles zapped
+    bool  bnd[NGATES_10] =                 { 1, 1,  1, 1, 1, 1,  1, 1, 1,  1};
+    float bad_flag = -3;
+    int a_speckle = 3;
+
+    size_t nGates = NGATES_10;
+    size_t clip_gate = 8;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+
+
+  TEST(SoloDespeckle, clipping__speckle__boundary_ends_before_speckle) {
+    //  no data changed
+    float data[NGATES_10] =             { 3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
+    float newData_expected[NGATES_10] = {-3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+
+    bool  bnd[NGATES_10] =              { 1, 1,  0, 0, 0, 0,  0, 0, 0,  0};
+    float bad_flag = -3;
+    int a_speckle = 3;
+
+    int nGates = NGATES_10;
+    int clip_gate = 8;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+  TEST(SoloDespeckle, clipping__speckle__boundary_ends_in_middle_of_speckle) {
+
+    //  no data changed
+    float data[NGATES_10] =             {-3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
+    float newData_expected[NGATES_10] = {-3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+    bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 0, 0,  0, 0, 0,  0};
+
+    float bad_flag = -3;
+    size_t a_speckle = 3;
+    size_t nGates = NGATES_10;
+    size_t clip_gate = 8;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+   }
+
+  TEST(SoloDespeckle, clipping__speckle__boundary_ends_beyond_speckle) {
+ 
+    float data[NGATES_10] =             {-3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
+    float newData_expected[NGATES_10] = {-3,-3, -3, 5, 5, 5, -3,-3,-3, -3}; 
+
+    bool   bnd[NGATES_10] =             { 0, 0,  0, 0, 0, 0,  1, 1, 1,  1};
+
+    float bad_flag = -3;
+    size_t a_speckle = 3;
+    size_t nGates = NGATES_10;
+    size_t clip_gate = nGates;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+
+  }
+
+
+  TEST(SoloDespeckle, no_clipping__speckle__boundary_spans_speckle) {
+ 
+    float data[NGATES_10] =             {-3,-3, -3, 5, 5, 5, -3, 5, 5, -3};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
+    float newData_expected[NGATES_10] = {-3,-3, -3,-3,-3,-3, -3, 5, 5, -3}; // 1st speckle zapped
+
+    bool  bnd[NGATES_10] =              { 0, 0,  1, 1, 1, 1,  1, 1, 0,  0};
+
+    float bad_flag = -3;
+    size_t a_speckle = 3;
+    size_t nGates = NGATES_10;
+    size_t clip_gate = nGates;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+
+  }
+
+  TEST(SoloDespeckle, clipping__speckle_at_beginning__skip_speckle_at_end__no_boundary) {
+
+    float data[NGATES_7] =             { 5, -3, -3, -3, 5, 5,-3};
+    float newData[NGATES_7] =          { 0,  0,  0,  0, 0, 0, 0};
+    float newData_expected[NGATES_7] = {-3, -3, -3, -3, 5, 5,-3};
+
+    bool  bnd[NGATES_7] = {1,1,1,1,1,1,1};
+    float bad_flag = -3;
+    size_t a_speckle = 3;
+    size_t nGates = NGATES_7;
+    size_t clip_gate = 5;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_7; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+  TEST(SoloDespeckle, speckle_at_boundary_edges_ignored) {
+    //                                   b,  g,  g,  b, b, g, g
+    float data[NGATES_7] =             {-3,  5,  5, -3,-3, 5, 5};
+    float newData[NGATES_7] =          { 0,  0,  0,  0, 0, 0, 0};
+    float newData_expected[NGATES_7] = {-3,  5,  5, -3,-3, 5, 5}; // no change
+
+    bool  bnd[NGATES_7] =              { 0,  0,  1,  1, 1, 1, 0};
+    float bad_flag = -3;
+    size_t a_speckle = 3;
+    size_t nGates = NGATES_7;
+    size_t clip_gate = 5;
+
+    se_despeckle(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    for (int i=0; i<NGATES_7; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
