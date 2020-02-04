@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <math.h>
 #include "gtest/gtest.h"
 #include "Solo/SoloFunctions.hh"
 
@@ -32,6 +33,17 @@ namespace {
 // Keep the interface simple
 // Inside the C++ code, the structures can be more complicated
 //
+
+// test variables are:
+//  --- amount of change ---| ------  which data are changed -|
+// adjust= ac vel | nyquist                          | clip_gate | boundary | bad data |
+//                | data folding | aircraft velocity |           |          |          |
+//                |              |  folding          |           |          |          |
+//                | w/o          | with   | w/o      |          
+//                | max vel      | max vel| max vel  |
+// ---------------|--------------|-------------------|-----------|----------|----------|
+//  
+
 #define NGATES_4 4
   TEST(SoloRemoveAcMotion, no_adjust__no_clipping__no_bad_flags__no_boundary) {
 
@@ -48,7 +60,8 @@ namespace {
     // ac_vel should be zero
 
     // Nyquist stuff ...
-    // keep the Nyquist velocity greater than any data value
+    // keep the Nyquist velocity greater than any data value, 
+    // to avoid any folding/unfolding
     float eff_unamb_vel = 0.0; // TODO: this comes from data file?
     float nyquist_velocity = 10.0; // TODO: ???
 
@@ -64,50 +77,180 @@ namespace {
       EXPECT_EQ(newData[i], newData_expected[i]);
     
   }
-  /*
-  TEST(SoloRemoveAcMotion, speckle_outside_clip_gate__no_boundary) {
 
-    // testing this pattern b|b|g|b  but clip gate should prevent the g (good) value
-    // from being set to b (bad), i.e. considered a speckle and zapped.
-    float data[NGATES_4] = {-3,-3,5,-3};
+  TEST(SoloRemoveAcMotion, no_adjust__unfold__no_clipping__no_bad_flags__no_boundary) {
+
+    float data[NGATES_4] = {3,4,-5,6};
     float newData[NGATES_4] = {0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
-    int a_speckle = 1;
+    float vert_velocity = 1;
+    float ew_velocity = 1;
+    float ns_velocity = 1;
+    float ew_gndspd_corr = 1;
+    float elevation = 0.0; // or any multiple of pi help make ac_vel = 0
+    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
+    // ac_vel should be zero
+
+    // Nyquist stuff ...
+    // the Nyquist velocity is less than some data values, 
+    // should see unfolding
+    float eff_unamb_vel = 0.0; // TODO: this comes from data file?
+    float nyquist_velocity = 3.2; 
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    float newData_expected[NGATES_4] = {3, -2, 1, 0};
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+			ew_gndspd_corr, tilt, elevation,
+			data, newData, nGates, bad_flag, clip_gate,
+			eff_unamb_vel, nyquist_velocity, bnd);
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+    
+  }
+  
+ 
+  TEST(SoloRemoveAcMotion, adjust__no_folding__clip_gate__bad_flags__no_boundary) {
+
+    float data[NGATES_4] =    {-3,6,5,-3};
+    float newData[NGATES_4] = { 0,0,0, 0};
+    bool bnd[NGATES_4] = {1,1,1,1};
+    float bad_flag = -3;
+
+    float vert_velocity = 3; // goes with sin(elevation)
+    float ew_velocity = 1;   // these three go with sin(tilt)
+    float ns_velocity = 1;
+    float ew_gndspd_corr = 1;
+    float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
+    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
+    // ac_vel should be zero
+
+    // Nyquist stuff ...
+    // keep the Nyquist velocity greater than any data value, 
+    // to avoid any folding/unfolding
+    float eff_unamb_vel = 0.0; 
+    float nyquist_velocity = 10.0;
 
     size_t nGates = NGATES_4;
     size_t clip_gate = 2;
-    float newData_expected[NGATES_4] = {-3,-3,5,-3};  // no changed 
+    float newData_expected[NGATES_4] = {-3,9,5,-3};  // no changed 
 
-    se_remove_ac_motion(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, tilt, elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
-  TEST(SoloRemoveAcMotion, speckle_inside_clip_gate__no_boundary) {
+  TEST(SoloRemoveAcMotion, adjust__folding_clip_gate__bad_flags__no_boundary) {
 
-    // testing this pattern b|b|g|b  clip gate is just past good value
-    // good value is NOT  considered a speckle and zapped.
-    float data[NGATES_4] = {-3,-3,5,-3};
+    float data[NGATES_4] = {-3,6,5,-3};
     float newData[NGATES_4] = {0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
-    int a_speckle = 1;
+
+    float vert_velocity = 3;
+    float ew_velocity = 1;
+    float ns_velocity = 1;
+    float ew_gndspd_corr = 1;
+    float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
+    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
+    // ac_vel should be zero
+
+    // Nyquist stuff ...
+    // keep the Nyquist velocity greater than any data value, 
+    // to avoid any folding/unfolding
+    float eff_unamb_vel = 0.0; 
+    float nyquist_velocity = 5.0; // causes folding
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = 2;
+    float newData_expected[NGATES_4] = {-3,-1,5,-3};  // no changed 
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, tilt, elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+  
+  TEST(SoloRemoveAcMotion, ac_vel_folded__clip_gate__no_boundary) {
+
+    float data[NGATES_4] = {-4,-3, 5, 8};
+    float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {1,1,1,1};
+    float bad_flag = -3;
+
+    float vert_velocity = 3;
+    float ew_velocity = 10.0;
+    float ns_velocity = 0.0;
+    float ew_gndspd_corr = 1;  // ac_vel should be 11.0
+    float tilt = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
+    float elevation = 0.0; // or any multiple of pi help make ac_vel = 0
+    // ac_vel should be unfolded to -1.0
+
+    // Nyquist stuff ...
+    // keep the Nyquist velocity greater than any data value, 
+    // to avoid any folding/unfolding
+    float eff_unamb_vel = 0.0; 
+    float nyquist_velocity = 6.0; // causes folding
 
     size_t nGates = NGATES_4;
     size_t clip_gate = 3;
-    float newData_expected[NGATES_4] = {-3,-3,5,-3};  // no change 
+    float newData_expected[NGATES_4] = {-5,-3,4,8};  // no change 
 
-    se_remove_ac_motion(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, tilt, elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
+  TEST(SoloRemoveAcMotion, ac_vel_folded__with_max_vel_instead_of_nyquist__clip_gate__no_boundary) {
 
-  // TODO:  Is this a speckle?  b|b|g|g|    when it is at the very end?  But we don't know the next value?
-  // If end of data, then it is a speckle.
-  // If it is the end of a clip gate, then it may or may NOT be a speckle, since we don't know the next value
+    float data[NGATES_4] = {-4,-3, 5, 8};
+    float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {1,1,1,1};
+    float bad_flag = -3;
 
+    float vert_velocity = 3;
+    float ew_velocity = 10.0;
+    float ns_velocity = 0.0;
+    float ew_gndspd_corr = 1;  // ac_vel should be 11.0
+    float tilt = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
+    float elevation = 0.0; // or any multiple of pi help make ac_vel = 0
+    // ac_vel should be unfolded to -1.0
+
+    // Nyquist stuff ...
+    // keep the Nyquist velocity greater than any data value, 
+    // to avoid any folding/unfolding
+    float eff_unamb_vel = 6.0;  // causes folding
+    float nyquist_velocity = 0.0; 
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = 3;
+    float newData_expected[NGATES_4] = {-5,-3,4,8};  // no change 
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, tilt, elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+  // Boundary tests ...
+
+  /*
 
   TEST(SoloRemoveAcMotion, no_clipping__speckle__no_boundary) {
 
