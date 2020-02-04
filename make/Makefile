@@ -36,7 +36,8 @@ CXXFLAGS += -std=c++11 -g -Wall -Wextra -pthread
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = sample1_unittest
-TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest Despeckle_unittest Boundary_unittest
+TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest RemoveAcMotion_unittest \
+	RemoveAcMotion_unittest Boundary_unittest 
 
 # 	Boundary_unittest FourDD_unittests
 
@@ -150,16 +151,27 @@ Boundary_unittest : Boundary_unittest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
 # 
-# Soloii - Despeckle
+# Soloii - RemoveAcMotion
 #
 
 # Rsl.o : $(SRC_DIR)/libs/Solo/src/Solo/Rsl.cc $(SRC_DIR)/libs/Solo/src/Solo/Rsl.hh 
 	# $(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -c $(SRC_DIR)/libs/Solo/src/Solo/Rsl.cc 
 
-Despeckle_unittest.o : $(LIBS_DIR)/Solo/Despeckle_unittest.cc \
+RemoveAcMotion_unittest.o : $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc \
 	$(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/Despeckle_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc
 
-Despeckle_unittest : Despeckle_unittest.o
+RemoveAcMotion_unittest : RemoveAcMotion_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
+
+# 
+# Soloii - RemoveAcMotion
+#
+
+RemoveAcMotion_unittest.o : $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc \
+	$(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc
+
+RemoveAcMotion_unittest : RemoveAcMotion_unittest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
