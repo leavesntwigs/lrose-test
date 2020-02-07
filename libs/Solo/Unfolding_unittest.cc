@@ -37,7 +37,7 @@ namespace {
 
 // test variables are:
 //  --- amount of change ---| ------  which data are changed -|
-// adjust= ac vel | nyquist                          | clip_gate | boundary | bad data |
+// fold= ac vel | nyquist                          | clip_gate | boundary | bad data |
 //                | data folding | aircraft velocity |           |          |          |
 //                |              |  folding          |           |          |          |
 //                | w/o          | with   | w/o      |          
@@ -46,6 +46,7 @@ namespace {
 //  
 
 #define NGATES_4 4
+  /*
   TEST(SoloUnfolding, test_running_average_queue) {
     float v0 = 3.4;
     size_t ngates_averaged = NGATES_4;
@@ -55,77 +56,74 @@ namespace {
       EXPECT_EQ(raq0[i], v0);
     EXPECT_EQ(v4, 3.4);
   }
+  */
+  
 
-  /*
-
-  TEST(SoloUnfolding, no_adjust__no_clipping__no_bad_flags__no_boundary) {
+  TEST(SoloGenericUnfolding, no_folding__no_clipping__no_bad_flags__no_boundary) {
 
     float data[NGATES_4] = {3,4,5,6};
     float newData[NGATES_4] = {0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
-    float vert_velocity = 1;
-    float ew_velocity = 1;
-    float ns_velocity = 1;
-    float ew_gndspd_corr = 1;
-    float elevation = 0.0; // or any multiple of pi help make ac_vel = 0
-    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
-    // ac_vel should be zero
+    size_t ngates_averaged = 3;
+    float v0 = 1.0;
+    int max_pos_folds = 5;
+    int max_neg_folds = 5;
 
-    // Nyquist stuff ...
-    // keep the Nyquist velocity greater than any data value, 
-    // to avoid any folding/unfolding
-    float eff_unamb_vel = 0.0; // TODO: this comes from data file?
-    float nyquist_velocity = 10.0; // TODO: ???
+    float nyquist_velocity = 10.0;
 
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     float newData_expected[NGATES_4] = {3, 4, 5, 6};
 
-    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
-			ew_gndspd_corr, tilt, elevation,
-			data, newData, nGates, bad_flag, clip_gate,
-			eff_unamb_vel, nyquist_velocity, bnd);
+    se_BB_generic_unfold(data, newData, nGates, 
+			 &v0, ngates_averaged,
+			 nyquist_velocity,
+			 max_pos_folds, max_neg_folds,
+			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
+    // verify running average of velocity
+    EXPECT_EQ(v0, 5.0);
     
   }
-
-  TEST(SoloUnfolding, no_adjust__unfold__no_clipping__no_bad_flags__no_boundary) {
+  
+  TEST(SoloGenericUnfolding, fold__no_clipping__no_bad_flags__no_boundary) {
 
     float data[NGATES_4] = {3,4,-5,6};
     float newData[NGATES_4] = {0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
-    float vert_velocity = 1;
-    float ew_velocity = 1;
-    float ns_velocity = 1;
-    float ew_gndspd_corr = 1;
-    float elevation = 0.0; // or any multiple of pi help make ac_vel = 0
-    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
-    // ac_vel should be zero
 
     // Nyquist stuff ...
     // the Nyquist velocity is less than some data values, 
     // should see unfolding
-    float eff_unamb_vel = 0.0; // TODO: this comes from data file?
     float nyquist_velocity = 3.2; 
 
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
-    float newData_expected[NGATES_4] = {3, -2, 1, 0};
+    float newData_expected[NGATES_4] = {3, 4, 7, 6};
 
-    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
-			ew_gndspd_corr, tilt, elevation,
-			data, newData, nGates, bad_flag, clip_gate,
-			eff_unamb_vel, nyquist_velocity, bnd);
+    size_t ngates_averaged = 3;
+    float v0 = 1.0;
+    int max_pos_folds = 5;
+    int max_neg_folds = 5;
+
+    se_BB_generic_unfold(data, newData, nGates, 
+			 &v0, ngates_averaged,
+			 nyquist_velocity,
+			 max_pos_folds, max_neg_folds,
+			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
+    // verify running average of velocity
+    float expected_avg = (4 + 7 + 6)/3.0;
+    EXPECT_EQ(v0, expected_avg);
     
   }
   
- 
-  TEST(SoloUnfolding, adjust__no_folding__clip_gate__bad_flags__no_boundary) {
+  /*
+  TEST(SoloUnfolding, fold__no_folding__clip_gate__bad_flags__no_boundary) {
 
     float data[NGATES_4] =    {-3,6,5,-3};
     float newData[NGATES_4] = { 0,0,0, 0};
@@ -158,7 +156,7 @@ namespace {
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
-  TEST(SoloUnfolding, adjust__folding_clip_gate__bad_flags__no_boundary) {
+  TEST(SoloUnfolding, fold__folding_clip_gate__bad_flags__no_boundary) {
 
     float data[NGATES_4] = {-3,6,5,-3};
     float newData[NGATES_4] = {0,0,0,0};
@@ -261,16 +259,16 @@ namespace {
 
   // Boundary tests ...
 
-  // *  TEST(SoloUnfolding, no_adjust__unfold__no_clipping__no_bad_flags__boundary) 
-  // *   TEST(SoloUnfolding, adjust__no_folding__clip_gate__bad_flags__boundary) 
-  // *     TEST(SoloUnfolding, adjust__folding_clip_gate__bad_flags__boundary) 
+  // *  TEST(SoloUnfolding, no_fold__unfold__no_clipping__no_bad_flags__boundary) 
+  // *   TEST(SoloUnfolding, fold__no_folding__clip_gate__bad_flags__boundary) 
+  // *     TEST(SoloUnfolding, fold__folding_clip_gate__bad_flags__boundary) 
   // *	TEST(SoloUnfolding, ac_vel_folded__clip_gate__boundary) 
   //   *  TEST(SoloUnfolding, ac_vel_folded__with_max_vel_instead_of_nyquist__clip_gate__boundary)
 
   // *  TEST( ... remove_multifolded_ac_vel_remove_single_folded_velocity NOTE:  shortcoming of remove aircraft vel
   
 
-  TEST(SoloUnfolding, no_adjust__unfold__no_clipping__no_bad_flags__boundary) {
+  TEST(SoloUnfolding, no_fold__unfold__no_clipping__no_bad_flags__boundary) {
 
 #define NGATES_7 7
 
@@ -307,7 +305,7 @@ namespace {
   }
 
 
-  TEST(SoloUnfolding, adjust__no_folding__clip_gate__bad_flags__boundary) {
+  TEST(SoloUnfolding, fold__no_folding__clip_gate__bad_flags__boundary) {
 #define NGATES_10 10
 
     float data[NGATES_10] =                { 3,-3, -3, 5, 5,-2, -3, 5, 5, -3};
@@ -322,7 +320,7 @@ namespace {
     float ew_gndspd_corr = 1;
     float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
     float tilt = 0.0; // or any multiple of pi help make ac_vel = 0 
-    // adjust should be 3.0
+    // fold should be 3.0
 
     // Nyquist stuff ...     
     // keep the Nyquist velocity greater than any data value,
@@ -344,7 +342,7 @@ namespace {
 
 
   
-  TEST(SoloUnfolding, adjust__folding__no_clip_gate__bad_flags__boundary) {
+  TEST(SoloUnfolding, fold__folding__no_clip_gate__bad_flags__boundary) {
 
     float data[NGATES_10] =             { 3,-3,  4,-8, 6, 5, -3, 5, 5, -3};
     float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
@@ -360,7 +358,7 @@ namespace {
     float ew_gndspd_corr = 1;
     float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
     float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
-    // adjust should be 3 
+    // fold should be 3 
 
     // Nyquist stuff ...    
     // keep the Nyquist velocity greater than any data value,
@@ -385,7 +383,7 @@ namespace {
 
     float data[NGATES_10] =             {-3,-3, -3, 5,-5, 5, -3, 5, 5, -3};
     float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
-    //   add adjust                              x,12, 2
+    //   add fold                              x,12, 2
     //   unfold                                  x,-8, 2
     float newData_expected[NGATES_10] = {-3,-3, -3,-8, 2, 5, -3, 5, 5, -3};
     bool  bnd[NGATES_10] =              { 0, 0,  1, 1, 1, 0,  0, 0, 0,  0};
@@ -398,7 +396,7 @@ namespace {
     float ew_gndspd_corr = 1;
     float elevation = - M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
     float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
-    // adjust should be 7.0 
+    // fold should be 7.0 
 
     // Nyquist stuff ...    
     // keep the Nyquist velocity greater than any data value,
@@ -422,7 +420,7 @@ namespace {
  
     float data[NGATES_10] =             {-3,-3, -3, 5,-5, 5, -3, 5, 5,  5};
     float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
-    //   add adjust                              x,12, 2           12
+    //   add fold                              x,12, 2           12
     //   unfold                                  x,-8, 2           -8
     float newData_expected[NGATES_10] = {-3,-3, -3,-8, 2, 5, -3, 5,-8,  5};
     bool  bnd[NGATES_10] =              { 0, 0,  1, 1, 1, 0,  0, 0, 1,  1};
@@ -435,7 +433,7 @@ namespace {
     float ew_gndspd_corr = 1;
     float elevation = - M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
     float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
-    // adjust should be 7.0 
+    // fold should be 7.0 
 
     // Nyquist stuff ...    
     // keep the Nyquist velocity greater than any data value,
@@ -460,7 +458,7 @@ namespace {
  
     float data[NGATES_10] =             {-3,-3, -3, 5, 6,-4, -3,10,-12, -3};
     float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,   0};
-    //    adjust by -1                              4  5 -5   x  9 -13
+    //    fold by -1                              4  5 -5   x  9 -13
     //   unfold                                     0  1 -1   x  5  -9
     float newData_expected[NGATES_10] = {-3,-3, -3, 0, 1,-1, -3, 5, -9, -3};
     bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 1, 1,  1, 1,  1,  1};
