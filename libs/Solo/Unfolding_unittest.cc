@@ -84,7 +84,7 @@ namespace {
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
     // verify running average of velocity
-    EXPECT_EQ(v0, 5.0);
+    EXPECT_EQ(v0, 3.0);
     
   }
   
@@ -121,9 +121,8 @@ namespace {
 			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
-    // verify running average of velocity
-    float expected_avg = 1.0;
-    EXPECT_EQ(v0, expected_avg); 
+    // verify last good initial velocity
+    EXPECT_EQ(v0, 1.0); 
   }
   
   TEST(SoloGenericUnfolding, fold__clip_gate__bad_flags__no_boundary) {
@@ -159,9 +158,9 @@ namespace {
 			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
-    // verify running average of velocity
-    float expected_avg = 1.0;
-    EXPECT_EQ(v0, expected_avg);
+    // verify last good initial  velocity
+    float expected_v0 = 1.0;
+    EXPECT_EQ(v0, expected_v0);
 
   }
   
@@ -200,9 +199,9 @@ namespace {
 			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
-    // verify running average of velocity
-    float expected_avg = (10.0 + (10-2*nyquist_interval) + (10+1*nyquist_interval))/3.0;
-    EXPECT_FLOAT_EQ(v0, expected_avg);
+    // verify last good initial velocity
+    float expected_v0 = -10.0; //(10.0 + (10-2*nyquist_interval) + (10+1*nyquist_interval))/3.0;
+    EXPECT_FLOAT_EQ(v0, expected_v0);
 
   }
 
@@ -229,7 +228,7 @@ namespace {
     // these will be limited by the max number of unfolds
     //    newData_expected[1] = data[1] + (max_pos_folds) * (int) nyquist_interval;
     //newData_expected[2] = data[2] - (max_neg_folds) * (int) nyquist_interval;
-    float expected_avg = v0; // (10.0 + (10+2*nyquist_interval) + (10-1*nyquist_interval))/3.0;
+    float expected_v0 = v0; // (10.0 + (10+2*nyquist_interval) + (10-1*nyquist_interval))/3.0;
 
     data[1] = v0 - (max_pos_folds) * (int) nyquist_interval;
     data[2] = v0 + (max_neg_folds) * (int) nyquist_interval;
@@ -241,8 +240,8 @@ namespace {
 			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
-    // verify running average of velocity
-    EXPECT_EQ(v0, expected_avg);
+    // verify last good initial velocity
+    EXPECT_EQ(v0, expected_v0);
 
   }
 
