@@ -90,7 +90,7 @@ namespace {
   
   TEST(SoloGenericUnfolding, fold__no_clipping__no_bad_flags__no_boundary) {
 
-    float data[NGATES_4] = {3,4,-5,6};
+    float data[NGATES_4] = {1,1,1,1};
     float newData[NGATES_4] = {0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
@@ -100,9 +100,14 @@ namespace {
     // should see unfolding
     float nyquist_velocity = 3.2; 
 
+    // fold some data
+    int nyquist_interval = 2 * nyquist_velocity;
+    data[1] = data[1] + 2 * (int) nyquist_interval;
+    data[3] = data[3] - 1 * (int) nyquist_interval;
+
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
-    float newData_expected[NGATES_4] = {3, 4, 7, 6};
+    float newData_expected[NGATES_4] = {1,1,1,1};
 
     size_t ngates_averaged = 3;
     float v0 = 1.0;
@@ -117,78 +122,131 @@ namespace {
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
     // verify running average of velocity
-    float expected_avg = (4 + 7 + 6)/3.0;
-    EXPECT_EQ(v0, expected_avg);
-    
+    float expected_avg = 1.0;
+    EXPECT_EQ(v0, expected_avg); 
   }
   
-  /*
-  TEST(SoloUnfolding, fold__no_folding__clip_gate__bad_flags__no_boundary) {
+  TEST(SoloGenericUnfolding, fold__clip_gate__bad_flags__no_boundary) {
 
-    float data[NGATES_4] =    {-3,6,5,-3};
-    float newData[NGATES_4] = { 0,0,0, 0};
+    float data[NGATES_4] =    {-3,1,1,1};
+    float newData[NGATES_4] = { 0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
 
-    float vert_velocity = 3; // goes with sin(elevation)
-    float ew_velocity = 1;   // these three go with sin(tilt)
-    float ns_velocity = 1;
-    float ew_gndspd_corr = 1;
-    float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
-    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
-
     // Nyquist stuff ...
-    // keep the Nyquist velocity greater than any data value, 
-    // to avoid any folding/unfolding
-    float eff_unamb_vel = 0.0; 
-    float nyquist_velocity = 10.0;
+    // the Nyquist velocity is less than some data values, 
+    // should see unfolding
+    float nyquist_velocity = 3.2; 
+
+    // fold some data
+    int nyquist_interval = 2 * nyquist_velocity;
+    data[1] = data[1] + 2 * (int) nyquist_interval;
+    data[3] = data[3] - 1 * (int) nyquist_interval;
 
     size_t nGates = NGATES_4;
-    size_t clip_gate = 2;
-    float newData_expected[NGATES_4] = {-3,9,5,-3};  // no changed 
+    size_t clip_gate = 3;
+    float newData_expected[NGATES_4] = {-3,1,1,-5};
 
-    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
-                        ew_gndspd_corr, tilt, elevation,
-                        data, newData, nGates, bad_flag, clip_gate,
-                        eff_unamb_vel, nyquist_velocity, bnd);
+    size_t ngates_averaged = 3;
+    float v0 = 1.0;
+    int max_pos_folds = 5;
+    int max_neg_folds = 5;
 
+    se_BB_generic_unfold(data, newData, nGates, 
+			 &v0, ngates_averaged,
+			 nyquist_velocity,
+			 max_pos_folds, max_neg_folds,
+			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
+    // verify running average of velocity
+    float expected_avg = 1.0;
+    EXPECT_EQ(v0, expected_avg);
+
   }
+  
+  TEST(SoloGenericUnfolding, fold_exceeds_max_folds__no_clip_gate__bad_flags__no_boundary) {
 
-  TEST(SoloUnfolding, fold__folding_clip_gate__bad_flags__no_boundary) {
-
-    float data[NGATES_4] = {-3,6,5,-3};
+    float data[NGATES_4] = {-3,10,-3,10};
     float newData[NGATES_4] = {0,0,0,0};
     bool bnd[NGATES_4] = {1,1,1,1};
     float bad_flag = -3;
 
-    float vert_velocity = 3;
-    float ew_velocity = 1;
-    float ns_velocity = 1;
-    float ew_gndspd_corr = 1;
-    float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0
-    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0
+    size_t ngates_averaged = 3;
+    float v0 = 10.0;
+    // think about which way we need to unfold, in the negative direction, or in the positive direction
+    int max_pos_folds = 3;  // used when velocity < running average; need to move in positive direction
+    int max_neg_folds = 2;  // used when velocity > running average; need to move the velocity in the negative direction
 
-    // Nyquist stuff ...
-    // keep the Nyquist velocity greater than any data value, 
-    // to avoid any folding/unfolding
-    float eff_unamb_vel = 0.0; 
     float nyquist_velocity = 5.0; // causes folding
+    // fold some data
+    int nyquist_interval = 2 * nyquist_velocity;
+
+    float newData_expected[NGATES_4] = {-3,1,-3,1};
+    // these will be limited by the max number of unfolds
+    newData_expected[1] = data[1] - (2) * (int) nyquist_interval; // 10 - 20 = -10
+    newData_expected[3] = data[3] + (1) * (int) nyquist_interval; // 10 + 10 =  20
+
+    data[1] = data[1] - (max_pos_folds+2) * (int) nyquist_interval; // 10 - 50 = -40
+    data[3] = data[3] + (max_neg_folds+1) * (int) nyquist_interval; // 10 + 30 =  40
 
     size_t nGates = NGATES_4;
-    size_t clip_gate = 2;
-    float newData_expected[NGATES_4] = {-3,-1,5,-3};  // no changed 
+    size_t clip_gate = nGates;
 
-    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
-                        ew_gndspd_corr, tilt, elevation,
-                        data, newData, nGates, bad_flag, clip_gate,
-                        eff_unamb_vel, nyquist_velocity, bnd);
-
+    se_BB_generic_unfold(data, newData, nGates, 
+			 &v0, ngates_averaged,
+			 nyquist_velocity,
+			 max_pos_folds, max_neg_folds,
+			 bad_flag, clip_gate, bnd);
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
+    // verify running average of velocity
+    float expected_avg = (10.0 + (10-2*nyquist_interval) + (10+1*nyquist_interval))/3.0;
+    EXPECT_FLOAT_EQ(v0, expected_avg);
+
   }
-  
+
+  TEST(SoloGenericUnfolding, fold_at_max_folds__no_clip_gate__bad_flags__no_boundary) {
+
+    float data[NGATES_4] = {-3,7,7,-3};
+    float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {1,1,1,1};
+    float bad_flag = -3;
+
+    size_t ngates_averaged = 3;
+    float v0 = 7.0;
+    int max_pos_folds = 3;
+    int max_neg_folds = 2;
+
+    float nyquist_velocity = 5.0; // causes folding
+    // fold some data
+    int nyquist_interval = 2 * nyquist_velocity;
+
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    float newData_expected[NGATES_4] = {-3,7,7,-3};
+    // these will be limited by the max number of unfolds
+    //    newData_expected[1] = data[1] + (max_pos_folds) * (int) nyquist_interval;
+    //newData_expected[2] = data[2] - (max_neg_folds) * (int) nyquist_interval;
+    float expected_avg = v0; // (10.0 + (10+2*nyquist_interval) + (10-1*nyquist_interval))/3.0;
+
+    data[1] = v0 - (max_pos_folds) * (int) nyquist_interval;
+    data[2] = v0 + (max_neg_folds) * (int) nyquist_interval;
+
+    se_BB_generic_unfold(data, newData, nGates, 
+			 &v0, ngates_averaged,
+			 nyquist_velocity,
+			 max_pos_folds, max_neg_folds,
+			 bad_flag, clip_gate, bnd);
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+    // verify running average of velocity
+    EXPECT_EQ(v0, expected_avg);
+
+  }
+
+  /*  
   TEST(SoloUnfolding, ac_vel_folded__clip_gate__no_boundary) {
 
     float data[NGATES_4] = {-4,-3, 5, 8};
