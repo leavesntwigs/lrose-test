@@ -1473,7 +1473,7 @@ namespace {
       sum += obins5[i];
       n += 1;
     }
-    float expectedStdDev = sqrt(fabs((sumsq-(sum*sum)/n)/(n-1)));
+    // float expectedStdDev = sqrt(fabs((sumsq-(sum*sum)/n)/(n-1)));
     float expectedAverage = sum/n;
     float NyquistVelocity = 10.0;
 
@@ -1529,10 +1529,178 @@ namespace {
     EXPECT_EQ(0, 1);
   }
 
-  TEST(FourDD, window_HappyDay_missing_data) {
+  TEST(FourDD, window_HappyDay_missing_data_inadequate_good) {
     FourDD fourDD;
+    float missingVal = -999; // e+33;
 
-    EXPECT_EQ(0, 1);
+    // the window is roughly square; x +/- n in all directions
+    // so the number of bins and the number of rays must be odd?
+    int maxSweeps = 1;
+    int nbins = 5;
+    int nrays = 5;  // we'll need more rays for the spatial dealiasing
+    
+    // data for original velocity volume; contains folded velocities
+    float obins1[] = {-999, -10,  10,  5, -999};  
+    float obins2[] = {-999,  11,   7, 10,   10};
+    float obins3[] = {   9,  12,  33, 10, -999};
+    float obins4[] = {-999,  10,-999, 10,   10};
+    float obins5[] = {-999,  10,  13, 10, -999};
+
+    // calculate expected std deviation
+    float sumsq = 0.0;
+    float sum = 0.0;
+    float n = 0.0;
+    for (int i = 0; i<nbins; i++) {
+      sumsq += obins1[i]*obins1[i];
+      sum += obins1[i];
+      n += 1;
+      sumsq += obins2[i]*obins2[i];
+      sum += obins2[i];
+      n += 1;
+      sumsq += obins3[i]*obins3[i];
+      sum += obins3[i];
+      n += 1;
+      sumsq += obins4[i]*obins4[i];
+      sum += obins4[i];
+      n += 1;
+      sumsq += obins5[i]*obins5[i];
+      sum += obins5[i];
+      n += 1;
+    }
+    float num_missing = 8;
+    sum -= (-999)*num_missing;
+    n -= num_missing;
+    //float expectedStdDev = sqrt(fabs((sumsq-(sum*sum)/n)/(n-1)));
+    float expectedAverage = sum/n;
+    float NyquistVelocity = 10.0;
+
+    // make original velocity volume
+    // create original; only one sweep
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    for (int s=0; s<maxSweeps; s++) {
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+      }
+      Rsl::setMaxBinsInSweep(velocity->sweep[s], nbins);
+    }
+    velocity->sweep[0]->ray[0]->range = obins1;
+    velocity->sweep[0]->ray[1]->range = obins2;
+    velocity->sweep[0]->ray[2]->range = obins3;
+    velocity->sweep[0]->ray[3]->range = obins4;
+    velocity->sweep[0]->ray[4]->range = obins5;
+
+    // velocity is in/out volume
+
+    //int proximity = 2; // test negative value; zero; positive; exceeds max
+    size_t sweepIndex = 0;
+    size_t startray = 0;  // test startray > endray ??
+    size_t endray = 4;
+    size_t firstbin = 0;
+    size_t lastbin = 4;
+    size_t min_good = 18;  // number of gates with non-missing values
+    float std_thresh = 1.0; // (std <= std_thresh * NyqVelocity) for success
+    bool success = false;  
+    // window(Volume* rvVolume, int sweepIndex, int startray,
+    // int endray, size_t firstbin, size_t lastbin,
+    //  int min_good, float std_thresh, bool* success)
+    //
+    float average = fourDD.window(velocity, 
+				       sweepIndex, startray, endray,
+				       firstbin, lastbin,
+				       min_good, std_thresh, NyquistVelocity,
+				       missingVal, &success);
+    EXPECT_TRUE(success);
+    EXPECT_EQ(missingVal, average);
+  }
+
+  TEST(FourDD, window_HappyDay_missing_data_enough_good) {
+    FourDD fourDD;
+    float missingVal = -999; // e+33;
+
+    // the window is roughly square; x +/- n in all directions
+    // so the number of bins and the number of rays must be odd?
+    int maxSweeps = 1;
+    int nbins = 5;
+    int nrays = 5;  // we'll need more rays for the spatial dealiasing
+    
+    // data for original velocity volume; contains folded velocities
+    float obins1[] = {-999, -10,  10,  5,   10};  
+    float obins2[] = {  13,  11,   7, 10,   10};
+    float obins3[] = {   9,  12,  33, 10, -999};
+    float obins4[] = {   4,  10,-999, 10,   10};
+    float obins5[] = {  14,  10,  13, 10, -999};
+
+    // calculate expected std deviation
+    float sumsq = 0.0;
+    float sum = 0.0;
+    float n = 0.0;
+    for (int i = 0; i<nbins; i++) {
+      sumsq += obins1[i]*obins1[i];
+      sum += obins1[i];
+      n += 1;
+      sumsq += obins2[i]*obins2[i];
+      sum += obins2[i];
+      n += 1;
+      sumsq += obins3[i]*obins3[i];
+      sum += obins3[i];
+      n += 1;
+      sumsq += obins4[i]*obins4[i];
+      sum += obins4[i];
+      n += 1;
+      sumsq += obins5[i]*obins5[i];
+      sum += obins5[i];
+      n += 1;
+    }
+    float num_missing = 4;
+    sum -= (-999)*num_missing;
+    n -= num_missing;
+    //float expectedStdDev = sqrt(fabs((sumsq-(sum*sum)/n)/(n-1)));
+    float expectedAverage = sum/n;
+    float NyquistVelocity = 10.0;
+
+    // make original velocity volume
+    // create original; only one sweep
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    for (int s=0; s<maxSweeps; s++) {
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+      }
+      Rsl::setMaxBinsInSweep(velocity->sweep[s], nbins);
+    }
+    velocity->sweep[0]->ray[0]->range = obins1;
+    velocity->sweep[0]->ray[1]->range = obins2;
+    velocity->sweep[0]->ray[2]->range = obins3;
+    velocity->sweep[0]->ray[3]->range = obins4;
+    velocity->sweep[0]->ray[4]->range = obins5;
+
+    // velocity is in/out volume
+
+    //int proximity = 2; // test negative value; zero; positive; exceeds max
+    size_t sweepIndex = 0;
+    size_t startray = 0;  // test startray > endray ??
+    size_t endray = 4;
+    size_t firstbin = 0;
+    size_t lastbin = 4;
+    size_t min_good = 8;  // number of gates with non-missing values
+    float std_thresh = 1.0; // (std <= std_thresh * NyqVelocity) for success
+    bool success = false;  
+    // window(Volume* rvVolume, int sweepIndex, int startray,
+    // int endray, size_t firstbin, size_t lastbin,
+    //  int min_good, float std_thresh, bool* success)
+    //
+    float average = fourDD.window(velocity, 
+				       sweepIndex, startray, endray,
+				       firstbin, lastbin,
+				       min_good, std_thresh, NyquistVelocity,
+				       missingVal, &success);
+    EXPECT_TRUE(success);
+    EXPECT_EQ(expectedAverage, average);
   }
 
 
