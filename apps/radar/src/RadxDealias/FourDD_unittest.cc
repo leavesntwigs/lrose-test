@@ -1019,7 +1019,8 @@ namespace {
     // calls findRay, Unfold, DealiasVerticalAndTemporal ==> need sweep above
     //                                                   ==> need previous volume in time
     fourDD.InitialDealiasing(rvVolume, lastVolume, soundVolume,
-                      original, sweepIndex, del_num_bins, STATE,
+			     original, missingVal,
+			     sweepIndex, del_num_bins, STATE,
                              filt, fraction, ck_val, strict_first_pass, max_count); 
     printf("After calling InitialDealiasing\n");
 
@@ -1037,20 +1038,113 @@ namespace {
   //   TEST(FourDD, prepVolume_manyDBZ_to_oneRV) {
   //
   TEST(FourDD, prepVolume_HappyDay) {
-    FourDD fourDD;
-    Volume* DBZVolume; 
-    Volume* rvVolume; 
-    int del_num_bins = 0;
     float missingVal = -999e+33;
-    float low_dbz;
-    float high_dbz;
-    bool no_dbz_rm_rv = false;
+    float low_dbz = 1.0;
+    float high_dbz= 10.0;
+    bool dbz_rm_rv = true;
 
-    fourDD.prepVolume(DBZVolume, rvVolume, del_num_bins, missingVal,
-               low_dbz, high_dbz, no_dbz_rm_rv);
+    float dbzMissing = -333e+33;
+    int maxSweeps = 2;
+    int nbins = 5;
+    int nrays = 2;  
+    int del_num_bins = 2;
+    
+    // make original velocity volume
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    for (int s=0; s<maxSweeps; s++) {
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+        velocity->sweep[s]->ray[r]->range = new Range[nbins];
+      }
+    }
+    // velocity volume
+    // sweep ray   bins
+    //   0    0    13 .... 
+    //   0    1    13 ....
+    //   1    0    13 .... 
+    //   1    1    13 ....
+
+    printf("before make reflectivity volume\n");
+    // reflectivity volume; x = missing
+    // sweep ray   bins
+    //   0    0    0 1 2  13 4 
+    //   0    1    0 1 2  -3 14
+    //   1    0    0 1 2   3 x
+    //   1    1    0 1 20  x 2.5
+
+    // make reflectivity volume
+    Volume *reflectivity = Rsl::new_volume(maxSweeps);
+    for (int s=0; s<maxSweeps; s++) {
+      reflectivity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        reflectivity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        reflectivity->sweep[s]->ray[r]->h.binDataAllocated = true;
+        reflectivity->sweep[s]->ray[r]->range = new Range[nbins];       
+      }
+    }
+    reflectivity->h.missing = dbzMissing;
+
+    for (int s=0; s<maxSweeps; s++) {   
+      for (int r=0; r<nrays; r++) {
+	for (int b=0; b<nbins; b++) {
+	  velocity->sweep[s]->ray[r]->range[b] = 13.0;
+	  reflectivity->sweep[s]->ray[r]->range[b] = b;
+	}
+      }
+    }
+
+    reflectivity->sweep[0]->ray[0]->range[3] = 13;
+    reflectivity->sweep[0]->ray[1]->range[3] = -3;
+    reflectivity->sweep[0]->ray[1]->range[4] = 14;
+    reflectivity->sweep[1]->ray[0]->range[4] = dbzMissing;
+    reflectivity->sweep[1]->ray[1]->range[2] = 20;
+    reflectivity->sweep[1]->ray[1]->range[3] = dbzMissing;
+    reflectivity->sweep[1]->ray[1]->range[4] = 2.5;
+   
+    printf("velocity volume ...\n");
+    Rsl::print_volume(velocity);
+
+    FourDD fourDD;
+    fourDD.prepVolume(reflectivity, velocity, del_num_bins, missingVal,
+		      dbzMissing,
+		      low_dbz, high_dbz, dbz_rm_rv);
 
     // test values of rvVolume for missingVal
-    EXPECT_EQ(NULL, rvVolume);
+    for (int s=0; s<maxSweeps; s++) {   
+      for (int r=0; r<nrays; r++) {
+	for (int b=0; b<del_num_bins; b++) {
+	  EXPECT_EQ(velocity->sweep[s]->ray[r]->range[b], missingVal);
+	}
+      }
+    }
+
+
+    EXPECT_EQ(velocity->sweep[0]->ray[0]->range[0], missingVal);
+    EXPECT_EQ(velocity->sweep[0]->ray[0]->range[1], missingVal);
+    EXPECT_EQ(velocity->sweep[0]->ray[0]->range[2], 13);
+    EXPECT_EQ(velocity->sweep[0]->ray[0]->range[3], missingVal);
+    EXPECT_EQ(velocity->sweep[0]->ray[0]->range[4], 13);
+
+    EXPECT_EQ(velocity->sweep[0]->ray[1]->range[0], missingVal);
+    EXPECT_EQ(velocity->sweep[0]->ray[1]->range[1], missingVal);
+    EXPECT_EQ(velocity->sweep[0]->ray[1]->range[2], 13);
+    EXPECT_EQ(velocity->sweep[0]->ray[1]->range[3], missingVal); 
+    EXPECT_EQ(velocity->sweep[0]->ray[1]->range[4], missingVal);
+
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[0], missingVal);
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[1], missingVal);
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[2], 13);
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[3], 13);
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[4], missingVal); 
+
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[0], missingVal);
+    EXPECT_EQ(velocity->sweep[1]->ray[0]->range[1], missingVal);
+    EXPECT_EQ(velocity->sweep[1]->ray[1]->range[2], missingVal); //  = 20;
+    EXPECT_EQ(velocity->sweep[1]->ray[1]->range[3], missingVal); //  = dbzMissing;
+    EXPECT_EQ(velocity->sweep[1]->ray[1]->range[4], 13); //  = 2.5;
+
   }
 
 
