@@ -2519,6 +2519,188 @@ namespace {
 
   }
 
+  TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_remain_TBD) {
+    FourDD fourDD;
+    float missingVal = -999; // e+33;
+
+    // the window is roughly square; x +/- n in all directions
+    // so the number of bins and the number of rays must be odd?
+    int maxSweeps = 1;
+    int nbins = 5;
+    int nrays = 5;  // we'll need more rays for the spatial dealiasing
+    
+    // data for original velocity volume; contains folded velocities
+    float obins1[] = {-999, -10,  10,  5,   10};  
+    float obins2[] = {  13,  11,   7, 10,   10};
+    float obins3[] = {  37,  12,  33, 10, -999}; // 37 unfolds to 37-20=17; but min_good is not met
+    float obins4[] = {   4,  10,-999, 10,   10};
+    float obins5[] = {  14,  10,  13, 10, -999};
+
+    // data for working velocity volume; contains unfolded velocities
+    float wbins1[] = {-999,-999,  10,  5,   10};  
+    float wbins2[] = {  13,  11,   7, 10,   10};
+    float wbins3[] = {   9,  12,-999, 10, -999};
+    float wbins4[] = {   4,  10,-999, 10,   10};
+    float wbins5[] = {  14,  10,  13, 10, -999};
+
+    float NyquistVelocity = 10.0;
+
+    // In windowing, both the original volume and the working volume values are important
+    // the original volume velocities are unfolded against the average of the
+    // working velocities surrounding the gate.
+
+
+    // make original velocity volume
+    // create original; only one sweep
+
+    Volume *velocity = Rsl::new_volume(maxSweeps);
+    for (int s=0; s<maxSweeps; s++) {
+      velocity->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        velocity->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        velocity->sweep[s]->ray[r]->h.binDataAllocated = true;
+      }
+      Rsl::setMaxBinsInSweep(velocity->sweep[s], nbins);
+    }
+    velocity->sweep[0]->ray[0]->range = obins1;
+    velocity->sweep[0]->ray[1]->range = obins2;
+    velocity->sweep[0]->ray[2]->range = obins3;
+    velocity->sweep[0]->ray[3]->range = obins4;
+    velocity->sweep[0]->ray[4]->range = obins5;
+
+    // velocity is in/out volume
+
+    //  construct rvVolume; out param
+    Volume *rvVolume = Rsl::new_volume(maxSweeps);
+    rvVolume->h.missing = missingVal;
+    for (int s=0; s<maxSweeps; s++) {
+      rvVolume->sweep[s] = Rsl::new_sweep(nrays);
+      for (int r=0; r<nrays; r++) {
+        rvVolume->sweep[s]->ray[r] = Rsl::new_ray(nbins);
+        //rvVolume->sweep[s]->ray[r]->range = new Range[nbins];
+	// for (size_t b=0; b<nbins; b++) {
+	//  rvVolume->sweep[s]->ray[r]->range[b] = missingVal;
+	//}
+        rvVolume->sweep[s]->ray[r]->h.binDataAllocated = true;
+        //        rvVolume->sweep[s]->ray[0]->h.nyq_vel = NyquistVelocity;
+      }
+      Rsl::setMaxBinsInSweep(rvVolume->sweep[s], nbins);
+    }
+    rvVolume->sweep[0]->ray[0]->range = wbins1;
+    rvVolume->sweep[0]->ray[1]->range = wbins2;
+    rvVolume->sweep[0]->ray[2]->range = wbins3;
+    rvVolume->sweep[0]->ray[3]->range = wbins4;
+    rvVolume->sweep[0]->ray[4]->range = wbins5;
+
+
+    // create the STATE
+    //  fill STATE info
+    // any STATE that is TBD or UNSUCCESSFUL is subject to window averaging
+    short **STATE = fourDD.CreateSTATE(velocity, FourDD::TBD);
+
+    // Now, unfold STATE=TBD bins assuming spatial continuity:   
+    float pfraction = 1.0;
+
+    int proximity = 2; // test negative value; zero; positive; exceeds max
+    size_t sweepIndex = 0;
+    size_t min_good = 20;  // number of gates with non-missing values
+    float std_thresh = 1.0; // (std <= std_thresh * NyqVelocity) for success
+    //bool success = false;  
+    int del_num_bins = 0;
+    // window(Volume* rvVolume, int sweepIndex, int startray,
+    // int endray, size_t firstbin, size_t lastbin,
+    //  int min_good, float std_thresh, bool* success)
+    //
+   
+    // NOTE: both of the volumes must be NON-NULL in order to get second pass TBD states
+    Volume soundVolume;
+    Volume lastVolume;
+    // send velocity as the work in progress;  
+    fourDD.UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, velocity,
+						  sweepIndex, del_num_bins,
+						  pfraction, proximity,
+						  min_good, std_thresh,
+						  NyquistVelocity,
+						  &soundVolume==NULL, &lastVolume==NULL);
+    
+
+    /* expected values; those with a * are expected to be dealiased
+    float wbins1[] = {-999,-999,  10,  5,   10};  
+    float wbins2[] = {  13,  11,   7, 10,   10};
+    float wbins3[] = {   9,  12,-999, 10, -999};
+    float wbins4[] = {   4,  10,-999, 10,   10};
+    float wbins5[] = {  14,  10,  13, 10, -999};
+    */
+   
+    EXPECT_EQ(missingVal, rvVolume->sweep[0]->ray[0]->range[0]);
+    EXPECT_EQ(missingVal, rvVolume->sweep[0]->ray[0]->range[1]);
+    EXPECT_EQ(10, rvVolume->sweep[0]->ray[0]->range[2]);
+    EXPECT_EQ(5, rvVolume->sweep[0]->ray[0]->range[3]);
+    EXPECT_EQ(10, rvVolume->sweep[0]->ray[0]->range[4]);
+
+    EXPECT_EQ(13,  rvVolume->sweep[0]->ray[1]->range[0]);
+    EXPECT_EQ(11, rvVolume->sweep[0]->ray[1]->range[1]);
+    EXPECT_EQ( 7,  rvVolume->sweep[0]->ray[1]->range[2]);
+    EXPECT_EQ(10,  rvVolume->sweep[0]->ray[1]->range[3]);
+    EXPECT_EQ(10,  rvVolume->sweep[0]->ray[1]->range[4]);
+
+    EXPECT_EQ( 9, rvVolume->sweep[0]->ray[2]->range[0]); 
+    EXPECT_EQ(12, rvVolume->sweep[0]->ray[2]->range[1]);
+    EXPECT_EQ(missingVal,  rvVolume->sweep[0]->ray[2]->range[2]);
+    EXPECT_EQ(10,  rvVolume->sweep[0]->ray[2]->range[3]);
+    EXPECT_EQ(missingVal,  rvVolume->sweep[0]->ray[2]->range[4]);
+
+    EXPECT_EQ(4,  rvVolume->sweep[0]->ray[3]->range[0]);
+    EXPECT_EQ(10, rvVolume->sweep[0]->ray[3]->range[1]);
+    EXPECT_EQ(missingVal,  rvVolume->sweep[0]->ray[3]->range[2]);
+    EXPECT_EQ(10,  rvVolume->sweep[0]->ray[3]->range[3]);
+    EXPECT_EQ(10,  rvVolume->sweep[0]->ray[3]->range[4]);
+
+    EXPECT_EQ(14,  rvVolume->sweep[0]->ray[4]->range[0]);
+    EXPECT_EQ(10, rvVolume->sweep[0]->ray[4]->range[1]);
+    EXPECT_EQ(13,  rvVolume->sweep[0]->ray[4]->range[2]);
+    EXPECT_EQ(10,  rvVolume->sweep[0]->ray[4]->range[3]);
+    EXPECT_EQ(missingVal,  rvVolume->sweep[0]->ray[4]->range[4]);
+    
+    short expectedState =  FourDD::DEALIASED;
+    short missingState =  FourDD::MISSING;
+    short tbdState =  FourDD::TBD;
+
+    EXPECT_EQ(tbdState, STATE[2][2]);
+    EXPECT_EQ(tbdState, STATE[1][0]);
+    //------                    [bin][ray]
+    EXPECT_EQ(tbdState,  STATE[0][0]);
+    EXPECT_EQ(tbdState, STATE[1][0]);
+    EXPECT_EQ(tbdState, STATE[2][0]);
+    EXPECT_EQ(tbdState, STATE[3][0]);
+    EXPECT_EQ(tbdState, STATE[4][0]);
+
+    EXPECT_EQ(tbdState, STATE[0][1]);
+    EXPECT_EQ(tbdState, STATE[1][1]);
+    EXPECT_EQ(tbdState, STATE[2][1]);
+    EXPECT_EQ(tbdState, STATE[3][1]);
+    EXPECT_EQ(tbdState, STATE[4][1]);
+
+    EXPECT_EQ(tbdState, STATE[0][2]);
+    EXPECT_EQ(tbdState, STATE[1][2]);
+    EXPECT_EQ(tbdState, STATE[2][2]);
+    EXPECT_EQ(tbdState, STATE[3][2]);
+    EXPECT_EQ(tbdState,  STATE[4][2]);
+
+    EXPECT_EQ(tbdState, STATE[0][3]);
+    EXPECT_EQ(tbdState, STATE[1][3]);
+    EXPECT_EQ(tbdState,  STATE[2][3]);
+    EXPECT_EQ(tbdState, STATE[3][3]);
+    EXPECT_EQ(tbdState, STATE[4][3]);
+
+    EXPECT_EQ(tbdState, STATE[0][4]);
+    EXPECT_EQ(tbdState, STATE[1][4]);
+    EXPECT_EQ(tbdState, STATE[2][4]); 
+    EXPECT_EQ(tbdState, STATE[3][4]);
+    EXPECT_EQ(tbdState,  STATE[4][4]);
+
+  }
+
   TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_sweepIndex_negative) {
     FourDD fourDD;
 
