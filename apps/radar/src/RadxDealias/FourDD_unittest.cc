@@ -2121,8 +2121,42 @@ namespace {
     EXPECT_EQ(missingVal,  rvVolume->sweep[0]->ray[4]->range[4]);
     
     short expectedState =  FourDD::DEALIASED;
+    short missingState =  FourDD::MISSING;
+
     EXPECT_EQ(expectedState, STATE[2][2]);
     EXPECT_EQ(expectedState, STATE[1][0]);
+    //------                    [bin][ray]
+    EXPECT_EQ(missingState,  STATE[0][0]);
+    EXPECT_EQ(expectedState, STATE[1][0]);
+    EXPECT_EQ(expectedState, STATE[2][0]);
+    EXPECT_EQ(expectedState, STATE[3][0]);
+    EXPECT_EQ(expectedState, STATE[4][0]);
+
+    EXPECT_EQ(expectedState, STATE[0][1]);
+    EXPECT_EQ(expectedState, STATE[1][1]);
+    EXPECT_EQ(expectedState, STATE[2][1]);
+    EXPECT_EQ(expectedState, STATE[3][1]);
+    EXPECT_EQ(expectedState, STATE[4][1]);
+
+    EXPECT_EQ(expectedState, STATE[0][2]);
+    EXPECT_EQ(expectedState, STATE[1][2]);
+    EXPECT_EQ(expectedState, STATE[2][2]);
+    EXPECT_EQ(expectedState, STATE[3][2]);
+    EXPECT_EQ(missingState,  STATE[4][2]);
+
+    EXPECT_EQ(expectedState, STATE[0][3]);
+    EXPECT_EQ(expectedState, STATE[1][3]);
+    EXPECT_EQ(missingState,  STATE[2][3]);
+    EXPECT_EQ(expectedState, STATE[3][3]);
+    EXPECT_EQ(expectedState, STATE[4][3]);
+
+    EXPECT_EQ(expectedState, STATE[0][4]);
+    EXPECT_EQ(expectedState, STATE[1][4]);
+    EXPECT_EQ(expectedState, STATE[2][4]);
+    EXPECT_EQ(expectedState, STATE[3][4]);
+    EXPECT_EQ(missingState,  STATE[4][4]);
+
+
   }
 
   //   TEST(FourDD, UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow_still_missing_success) {
