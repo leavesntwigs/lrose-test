@@ -689,7 +689,17 @@ namespace {
     FourDD fourDD;
     Volume *velocity = NULL;
     // velocity->h.missing = -9.0;
-    EXPECT_EQ(-9.0, fourDD.findRay(velocity, velocity, 0, 0, 0));
+    try {
+      fourDD.findRay(velocity, velocity, 0, 0, 0);
+      FAIL() << "exception  std::invalid_argument not thrown";
+    } catch(std::invalid_argument &err) {
+      EXPECT_EQ(err.what(), std::string("Volume is NULL"));
+    } catch (...) {
+      FAIL() << "Expected std::invalid_argument";
+    }    
+
+
+
   }
 
   TEST(FourDD, findRay_HappyDay_intraVolume) {
@@ -2789,7 +2799,7 @@ namespace {
   }
 
   // sound volume only
-
+  // use same tests as spatial dealiasing, but using soundVolume instead of previous volume??
 
   TEST(FourDD, SecondPassUsingSoundVolumeOnly_HappyDay) {
     FourDD fourDD;
