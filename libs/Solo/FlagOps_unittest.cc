@@ -35,56 +35,124 @@ namespace {
 // Inside the C++ code, the structures can be more complicated
 //
 
-// test variables are:
-//  --- amount of change ---| ------  which data are changed -|
-// fold= ac vel | nyquist                          | clip_gate | boundary | bad data |
-//                | data folding | aircraft velocity |           |          |          |
-//                |              |  folding          |           |          |          |
-//                | w/o          | with   | w/o      |          
-//                | max vel      | max vel| max vel  |
-// ---------------|--------------|-------------------|-----------|----------|----------|
-//  
-
 #define NGATES_4 4
-  /*
-  TEST(SoloUnfolding, test_running_average_queue) {
-    float v0 = 3.4;
-    size_t ngates_averaged = NGATES_4;
-    std::vector<float> raq0 (ngates_averaged, v0);
-    float v4 = 2.5; // running_average(raq0);
-    for (int i=0; i<NGATES_4; i++)
-      EXPECT_EQ(raq0[i], v0);
-    EXPECT_EQ(v4, 3.4);
-  }
-  */
   
-
-  TEST(FlagOps, flag_glitches_happy_day) {
-
-    float data[NGATES_4] = {3,4,5,6};
-    float newData[NGATES_4] = {0,0,0,0};
-    bool bnd[NGATES_4] = {1,1,1,1};
+  TEST(FlagOps, set_bad_flags_where_below) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
     float bad_flag = -3;
- //   size_t ngates_averaged = 3;
-    float v0 = 1.0;
 
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
-    float newData_expected[NGATES_4] = {3, 4, 5, 6};
-    float deglitch_threshold = 0;
-    float deglitch_radius = 0;
-    float deglitch_min_bins = 0;
-    bool bad_flag_mask[NGATES_4];
+    bool bad_flag_mask[NGATES_4] = {false, false, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
+
+    char where[] = "below";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+  }
+
+  TEST(FlagOps, set_bad_flags_where_below_with_boundary) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {false, false, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
+
+    char where[] = "below";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      printf("i=%d\n", i);
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
+  }
+
+  TEST(FlagOps, set_bad_flags_where_below_with_bad_data) {
+    float data[NGATES_4] = {3,-3,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
+
+    char where[] = "below";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      printf("i=%d\n", i);
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
+  }
+
+  TEST(FlagOps, set_bad_flags_where_below_with_clip_gate) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates-2;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {true, false, false, false};
+
+    char where[] = "below";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+  }
+  
+  TEST(FlagOps, flag_glitches_happy_day) {
+
+    float data[NGATES_4] = {3,4,5,-6};
+    //float newData[NGATES_4] = {0,0,0,0};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
+    float deglitch_threshold = 3;
+    int deglitch_radius = 1;
+    int deglitch_min_bins = 3;
+    bool bad_flag_mask[NGATES_4] = {false, false, false, false};
  
     se_flag_glitches(deglitch_threshold, deglitch_radius,
                          deglitch_min_bins,
-                         data, newData, nGates, 
+                         data, nGates, 
 			 bad_flag, clip_gate, bnd,
                          bad_flag_mask);
-    for (int i=0; i<NGATES_4; i++)
-      EXPECT_EQ(newData[i], newData_expected[i]);
-    // verify running average of velocity
-    EXPECT_EQ(v0, 3.0);
+    for (int i=0; i<NGATES_4; i++) {
+      std::cout << "i=" << i << std::endl;
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
     
   }
 /*   
