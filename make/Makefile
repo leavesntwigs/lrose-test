@@ -37,9 +37,9 @@ CXXFLAGS += -std=c++11 -g -Wall -Wextra -pthread
 # created to the list.
 # TESTS = sample1_unittest
 TESTS = RadxVol_unittest RadxTimeList_unittest Rsl_unittest RemoveAcMotion_unittest \
-	RemoveAcMotion_unittest Unfolding_unittest Boundary_unittest 
-
-# 	Boundary_unittest FourDD_unittests
+	RemoveAcMotion_unittest Unfolding_unittest \
+	FlagOps_unittest
+#  	FourDD_unittest Boundary_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -185,5 +185,16 @@ Unfolding_unittest.o : $(LIBS_DIR)/Solo/Unfolding_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/Unfolding_unittest.cc
 
 Unfolding_unittest : Unfolding_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
+
+# 
+# Soloii - FlagOps
+#
+
+FlagOps_unittest.o : $(LIBS_DIR)/Solo/FlagOps_unittest.cc \
+	$(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/FlagOps_unittest.cc
+
+FlagOps_unittest : FlagOps_unittest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
