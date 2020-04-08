@@ -315,6 +315,139 @@ namespace {
       EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
   }
 
+  //
+  // assert_bad_flags  
+  //
+
+  TEST(FlagOps, assert_bad_flags) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {true, false, false, true};
+
+    float newData[NGATES_4] =         {0,0,0,0};
+    float newDataExpected[NGATES_4] = {-3,4,5,-3};
+
+    se_assert_bad_flags(data, newData, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newDataExpected[i]);
+  }
+
+  TEST(FlagOps, assert_bad_flags_with_boundary) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {false, false, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, true, true, true};
+
+    float newData[NGATES_4] =         {0,0,0,0};
+    float newDataExpected[NGATES_4] = {3,4,-3,-3};
+
+    se_assert_bad_flags(data, newData, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      //printf("i=%d\n", i);
+      EXPECT_EQ(newData[i], newDataExpected[i]);
+    }
+  }
+
+  TEST(FlagOps, assert_bad_flags_with_clip_gate_negative) {
+    float data[NGATES_4] = {3,-3,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = -3;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    float newData[NGATES_4] =         {0,0,0,0};
+    float newDataExpected[NGATES_4] = {3,-3,5,-6};
+
+    se_assert_bad_flags(data, newData, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      //printf("i=%d\n", i);
+      EXPECT_EQ(newData[i], newDataExpected[i]);
+    }
+  }
+
+  //
+  // flagged_add / multiply
+  //
+
+  TEST(FlagOps, flagged_add) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, true, true, true};
+    bool multiply = true;
+    float some_const = 10.0;
+
+    float newData[NGATES_4] =         {0,0,0,0};
+    float newDataExpected[NGATES_4] = {3,40,50,-60};
+
+    se_flagged_add(some_const, multiply, data, newData, nGates,
+                     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newDataExpected[i]);
+  }
+
+  TEST(FlagOps, flagged_add_clip_gate_out_of_bounds) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates*2;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+    bool multiply = false;
+    float some_const = 2.0;
+
+    float newData[NGATES_4] =         {0,0,0,0};
+    float newDataExpected[NGATES_4] = {3,6,5,-6};
+
+    se_flagged_add(some_const, multiply, data, newData, nGates,
+                     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newDataExpected[i]);
+  }
+
+  TEST(FlagOps, flagged_add_with_clip_gate) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates-2;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+    bool multiply = false;
+    float some_const = 2.0;
+
+    float newData[NGATES_4] =         {0,0,0,0};
+    float newDataExpected[NGATES_4] = {3,6,5,-6};
+
+    se_flagged_add(some_const, multiply, data, newData, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(newData[i], newDataExpected[i]);
+  }
+
+
   // These don't work???
   
   TEST(FlagOps, flag_glitches_happy_day) {
