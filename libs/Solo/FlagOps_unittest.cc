@@ -78,7 +78,7 @@ namespace {
 		     bad_flag, clip_gate, bnd, bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      printf("i=%d\n", i);
+      //printf("i=%d\n", i);
       EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
@@ -102,7 +102,7 @@ namespace {
 		     bad_flag, clip_gate, bnd, bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      printf("i=%d\n", i);
+      //printf("i=%d\n", i);
       EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
@@ -128,6 +128,194 @@ namespace {
     for (int i=0; i<NGATES_4; i++)
       EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
   }
+
+  
+  TEST(FlagOps, set_bad_flags_where_above) {
+    float data[NGATES_4] = {-8,4,5,6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, false, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {false, false, true, true};
+
+    char where[] = "above";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+  }
+
+  TEST(FlagOps, set_bad_flags_where_above_with_boundary) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, false, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, false, true, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
+
+    char where[] = "above";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      //printf("i=%d\n", i);
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
+  }
+
+  TEST(FlagOps, set_bad_flags_where_above_with_bad_data) {
+    float data[NGATES_4] = {6,-3,5,6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {true, false, true, true};
+
+    char where[] = "above";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      //printf("i=%d\n", i);
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
+  }
+
+  TEST(FlagOps, set_bad_flags_where_above_with_clip_gate) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates-2;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
+
+    char where[] = "above";
+    float scaled_thr1 = 4;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+  }
+
+  
+  TEST(FlagOps, set_bad_flags_where_between) {
+    float data[NGATES_4] = {-8,4,5,6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, false, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {false, true, true, false};
+
+    char where[] = "between";
+    float scaled_thr1 = 0;
+    float scaled_thr2 = 5;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+  }
+
+  TEST(FlagOps, set_bad_flags_where_between_with_boundary) {
+    float data[NGATES_4] = {3,4,5,-6};
+    bool bnd[NGATES_4] = {true, false, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, false, true, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
+
+    char where[] = "between";
+    float scaled_thr1 = -14;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      //printf("i=%d\n", i);
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
+  }
+
+  TEST(FlagOps, set_bad_flags_where_between_with_bad_data) {
+    float data[NGATES_4] = {-6,-3,5,0};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
+
+    char where[] = "between";
+    float scaled_thr1 = -14;
+    float scaled_thr2 = 0;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++) {
+      //printf("i=%d\n", i);
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
+  }
+
+  TEST(FlagOps, set_bad_flags_where_between_with_clip_gate) {
+    float data[NGATES_4] = {3,-4,5,-6};
+    bool bnd[NGATES_4] = {true, true, true, true};
+    float bad_flag = -3;
+
+    size_t nGates = NGATES_4;
+    size_t clip_gate = nGates-2;
+    bool bad_flag_mask[NGATES_4] = {false, true, false, false};
+
+    bool bad_flag_mask_expected[NGATES_4] = {true, true, true, false};
+
+    char where[] = "between";
+    float scaled_thr1 = -4;
+    float scaled_thr2 = 5;
+
+    se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
+		     bad_flag, clip_gate, bnd, bad_flag_mask);
+
+    for (int i=0; i<NGATES_4; i++)
+      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+  }
+
+  // These don't work???
   
   TEST(FlagOps, flag_glitches_happy_day) {
 
