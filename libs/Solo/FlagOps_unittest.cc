@@ -577,29 +577,32 @@ namespace {
     }
   }
 
-  // These don't work???
-  
+  // These don't work??? They are supposed to mark gates with above average changes
+  // but the code marks the gates strangely.
+ 
+#define NGATES_8 8
+ 
   TEST(FlagOps, flag_glitches_happy_day) {
-
-    float data[NGATES_4] = {3,4,5,-6};
-    //float newData[NGATES_4] = {0,0,0,0};
-    bool bnd[NGATES_4] = {true, true, true, true};
+    //                      F F T  F  T T T T  
+    float data[NGATES_8] = {3,4,5,-6,-7,4,4,5};
+    //float newData[NGATES_8] = {0,0,0,0};
+    bool bnd[NGATES_8] = {true, true, true, true, true, true, true, true};
     float bad_flag = -3;
 
-    size_t nGates = NGATES_4;
+    size_t nGates = NGATES_8;
     size_t clip_gate = nGates;
-    bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
+    bool bad_flag_mask_expected[NGATES_8] = {false, false, true, false, true, true, true, true};
     float deglitch_threshold = 3;
     int deglitch_radius = 1;
     int deglitch_min_bins = 3;
-    bool bad_flag_mask[NGATES_4] = {false, false, false, false};
+    bool bad_flag_mask[NGATES_8] = {false, false, false, false, true, true, true, true};
  
     se_flag_glitches(deglitch_threshold, deglitch_radius,
                          deglitch_min_bins,
                          data, nGates, 
 			 bad_flag, clip_gate, bnd,
                          bad_flag_mask);
-    for (int i=0; i<NGATES_4; i++) {
+    for (int i=0; i<NGATES_8; i++) {
       std::cout << "i=" << i << std::endl;
       EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
