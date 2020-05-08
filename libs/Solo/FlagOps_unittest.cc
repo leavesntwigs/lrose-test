@@ -48,7 +48,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -70,7 +70,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -94,7 +94,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -118,7 +118,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, false, false};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -141,7 +141,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, true};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -163,7 +163,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -187,7 +187,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, true, true};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
@@ -206,20 +206,22 @@ namespace {
     float bad_flag = -3;
 
     size_t nGates = NGATES_4;
-    size_t clip_gate = nGates-2;
+    size_t clip_gate = nGates-1;
     bool bad_flag_mask[NGATES_4] = {false, true, false, false};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
 
     se_set_bad_flags(where, scaled_thr1, scaled_thr2, data, nGates,
 		     bad_flag, clip_gate, bnd, bad_flag_mask);
 
-    for (int i=0; i<NGATES_4; i++)
+    for (int i=0; i<NGATES_4; i++) {
+      // printf("i=%d\n", i);
       EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+    }
   }
 
   
@@ -234,7 +236,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {false, true, true, false};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = 0;
     float scaled_thr2 = 5;
 
@@ -256,7 +258,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = -14;
     float scaled_thr2 = 0;
 
@@ -280,7 +282,7 @@ namespace {
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = -14;
     float scaled_thr2 = 0;
 
@@ -302,9 +304,9 @@ namespace {
     size_t clip_gate = nGates-2;
     bool bad_flag_mask[NGATES_4] = {false, true, false, false};
 
-    bool bad_flag_mask_expected[NGATES_4] = {true, true, true, false};
+    bool bad_flag_mask_expected[NGATES_4] = {true, true, false, false};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = -4;
     float scaled_thr2 = 5;
 
@@ -501,20 +503,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {true, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, false, false};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 5;
     float scaled_thr2 = 0;
-    char logical_operator[] = "and";
+    Logical logical_operator = AND;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -526,20 +530,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, true, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, true, false};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 5;
     float scaled_thr2 = 0;
-    char logical_operator[] = "xor";
+    Logical logical_operator = XOR;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -551,20 +557,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {true, true, false, true};
 
-    char where[] = "below";
+    Where where = BELOW;
     float scaled_thr1 = 5;
     float scaled_thr2 = 0;
-    char logical_operator[] = "or";
+    Logical logical_operator = OR;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -577,20 +585,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, false, true};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
-    char logical_operator[] = "and";
+    Logical logical_operator = AND;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -604,20 +614,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
-    char logical_operator[] = "xor";
+    Logical logical_operator = XOR;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++)
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
   }
 
   TEST(FlagOps, bad_flags_logic_above_or) {
@@ -628,20 +640,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, true};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
-    char logical_operator[] = "or";
+    Logical logical_operator = OR;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++)
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
   }
 
 
@@ -653,20 +667,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {true, false, true, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = 0;
     float scaled_thr2 = 5;
-    char logical_operator[] = "and";
+    Logical logical_operator = AND;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -678,20 +694,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, true, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {true, false, false, false};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = -20;
     float scaled_thr2 =   5;
-    char logical_operator[] = "xor";
+    Logical logical_operator = XOR;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -703,20 +721,22 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, true, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, true, true, true};
 
-    char where[] = "between";
+    Where where = BETWEEN;
     float scaled_thr1 = 5;
     float scaled_thr2 = 6;
-    char logical_operator[] = "or";
+    Logical logical_operator = OR;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -729,21 +749,23 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates;
     bool bad_flag_mask[NGATES_4] = {false, false, true, false};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
 
     bool bad_flag_mask_expected[NGATES_4] = {false, false, true, false};
 
-    char where[] = "above";
+    Where where = ABOVE;
     float scaled_thr1 = 4;
     float scaled_thr2 = 0;
-    char logical_operator[] = "and";
+    Logical logical_operator = AND;
 
     se_bad_flags_logic(scaled_thr1, scaled_thr2, where,
                      logical_operator, data, nGates,
-                     bad_flag, clip_gate, bnd, bad_flag_mask);
+                     bad_flag, clip_gate, bnd, bad_flag_mask,
+                     new_bad_flag_mask);
 
     for (int i=0; i<NGATES_4; i++) {
       //printf("i=%d\n", i);
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
     }
   }
 
@@ -756,26 +778,28 @@ namespace {
 
     size_t nGates = NGATES_4;
     bool bad_flag_mask[NGATES_4] = {true, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
     bool bad_flag_mask_expected[NGATES_4] = {false, true, true, false};
     bool complement = true;
 
-    se_clear_bad_flags(complement, nGates, bad_flag_mask);
+    se_clear_bad_flags(complement, bad_flag_mask, new_bad_flag_mask, nGates);
 
     for (int i=0; i<NGATES_4; i++)
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
   }
 
   TEST(FlagOps, clear_bad_flags) {
 
     size_t nGates = NGATES_4;
     bool bad_flag_mask[NGATES_4] = {true, false, false, true};
+    bool new_bad_flag_mask[NGATES_4] = {true, false, false, true};
     bool bad_flag_mask_expected[NGATES_4] = {false, false, false, false};
     bool complement = false;
 
-    se_clear_bad_flags(complement, nGates, bad_flag_mask);
+    se_clear_bad_flags(complement, bad_flag_mask, new_bad_flag_mask, nGates);
 
     for (int i=0; i<NGATES_4; i++)
-      EXPECT_EQ(bad_flag_mask[i], bad_flag_mask_expected[i]);
+      EXPECT_EQ(new_bad_flag_mask[i], bad_flag_mask_expected[i]);
   }
 
   //
@@ -807,7 +831,7 @@ namespace {
     size_t nGates = NGATES_4;
     size_t clip_gate = nGates-2;
     bool bad_flag_mask[NGATES_4] = {true, false, false, true};
-    bool bad_flag_mask_expected[NGATES_4] = {true, false, true, true};
+    bool bad_flag_mask_expected[NGATES_4] = {true, false, false, true};
 
     se_copy_bad_flags(data, nGates, bad_flag, clip_gate,
                       bnd, bad_flag_mask);
