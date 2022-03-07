@@ -198,3 +198,13 @@ FlagOps_unittest.o : $(LIBS_DIR)/Solo/FlagOps_unittest.cc \
 FlagOps_unittest : FlagOps_unittest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
+#
+# Soloii - RemoveSurface
+#
+
+RemoveSurface_unittest.o : $(LIBS_DIR)/Solo/RemoveSurface_unittest.cc \
+	$(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/RemoveSurface_unittest.cc
+
+RemoveSurface_unittest : RemoveSurface_unittest.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
