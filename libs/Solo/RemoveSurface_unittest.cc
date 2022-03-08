@@ -47,7 +47,7 @@ namespace {
 #define NGATES_4 4
 #define NGATES_MANY 124
 #define MISS -9999999
-  TEST(SoloRemoveSurface, no_adjust__no_clipping__no_bad_flags__no_boundary) {
+  TEST(SoloRemoveSurface, cfrad_data) {
 
     //float data[NGATES_MANY] = {3,4,5,6};
     float newData[NGATES_MANY]; // = {0,0,0,0};
@@ -229,9 +229,20 @@ expected output ..
   */
 
     Surface_Type which_removal = ONLY_SURFACE;  // internal value based on function call
-       float optimal_beamwidth = 3;      // script parameter; origin seds->optimal_beamwidth
+       float optimal_beamwidth = 0;      // script parameter; origin seds->optimal_beamwidth
        int seds_surface_gate_shift = 0;       // script parameter; origin seds->surface_gate_shift
        float vert_beam_width = 2; // radarBeamWidthDegV:         // from radar angles???; origin dgi->dds->radd->vert_beam_width
+// =============== DoradeData platform ===============
+//  id: ASIB
+//  nbytes: 80
+//  sizeof(platform_t): 80
+//  longitude: -86.3244
+//  latitude: 29.0469
+//  altitude_msl: 1.91292
+//  altitude_agl: 1.95904
+// from https://www.eol.ucar.edu/node/1883   
+//Antenna Altitude above ground level (AGL) in m
+// DORADE has altitude_agl in meters, but cfrad/RadxVol has altitudeKmAgl in Km       
        float asib_altitude_agl = 1.95904;  // altitudeKmAgl: 1.95904  // altitude angle (gets multiplied by 1000; so in km?)
        float dds_ra_elevation = -19.9924;       // radar angles!! requires cfac values and calculation
                                      // origin dds->ra->elevation, ra = radar_angles
@@ -270,6 +281,415 @@ expected output ..
       EXPECT_EQ(newData[i], newData_expected[i]);
     
   }
+
+
+
+TEST(SoloRemoveSurface, original_dorade_data) {
+
+    //float data[NGATES_MANY] = {3,4,5,6};
+    float newData[NGATES_MANY]; // = {0,0,0,0};
+    bool bnd[NGATES_MANY]; // = {1,1,1,1};
+    float data[NGATES_MANY] =
+{15.670, 15.850, 16.720, 14.930, 15.110, 16.810, 15.620, 
+13.990, 15.490, 18.210, 15.480, 17.740, 20.350, 15.950, 
+15.040, 14.570, 14.320, 14.010, 13.760, 12.910, -9999999, -9999999,
+13.530, -9999999, 15.870, 14.500, 14.820, 14.740, 11.500, 
+11.200, 7.760, 2.030, -2.550, -9999999, -8.590, -7.410, 
+-5.330, -4.240, -4.710, -4.130, -12.380, -15.300, -14.740, 
+-14.760, -9999999, 2.810, 2.030, -0.290, -5.100, -6.620, 
+1.740, 0.090, -9999999, -9999999, -9999999, -9999999, -7.090, -2.760, -3.740, -1.170, 
+-19.660, -1.560, -4.370, -2.910, -2.660, -1.560, -1.540, 
+-0.280, 0.410, -3.200, -9.940, -3.950, 1.190, 0.720, 
+-1.500, -1.690, 0.330, 1.140, 2.970, 0.470, 0.510, 
+0.400, 0.600, -1.500, 0.370, -1.460, -1.150, 1.000, 
+-0.150, -0.640, -3.010, -3.700, -5.840, 0.110, 0.030, 
+-1.640, -0.610, -1.130, -1.710, -0.190, -0.510, 0.060, 
+-0.770, -1.380, -1.280, -1.430, -1.960, -2.470, -2.470, -1.980, 
+-0.450, -0.280, -1.210, -3.120, -2.400, -1.500,-0.870, 
+-1.760, -2.250, -2.340, -2.540, 0.300, -0.190, -0.540 
+};
+
+    size_t nGates = NGATES_MANY;
+    size_t clip_gate = nGates;
+    float newData_expected[NGATES_MANY] = 
+{ 15.670, 15.850, 16.720, 14.930, 15.110, 16.810, 15.620, 
+13.990, 15.490, 18.210, 15.480, 17.740, 20.350, 15.950, 
+15.040, 14.570, 14.320, 14.010, 13.760, 12.910, -9999999, -9999999, 
+13.530, -9999999, 15.870, 14.500, 14.820, 14.740, 11.500, 
+11.200, 7.760, 2.030, -2.550, -9999999, -8.590, -7.410, 
+-5.330, -4.240, -4.710, -4.130, -12.380, -15.300, -14.740, 
+-14.760, -9999999, 2.810, 2.030, -0.290, -5.100, -6.620, 
+1.740, 0.090, -9999999, -9999999, -9999999, -9999999, -7.090, -2.760, -3.740, -1.170, 
+-19.660, -1.560, -4.370, -2.910, -2.660, -1.560, -1.540, 
+-0.280, 0.410, -3.200, -9.940, -3.950, 1.190, 0.720, 
+-1.500, -1.690, 0.330, 1.140, 2.970, 0.470, MISS,
+MISS, MISS, MISS, MISS, MISS, MISS, MISS, 
+MISS, MISS, MISS, MISS, MISS, MISS, MISS, 
+MISS, MISS, MISS, MISS, MISS, MISS, MISS, 
+MISS, MISS, MISS, MISS, MISS, MISS, MISS, 
+MISS, MISS, MISS, MISS, MISS, MISS, MISS, MISS, 
+MISS, MISS, MISS, MISS, MISS, MISS,MISS 
+}; 
+
+
+
+    /*
+from ~/data/from_Alex/radarqc_scans/radarqc_scans-main/airborne_qc/input/cfrad.20181010_122951.196_to_20181010_122955.166_N42RF-TS_AIR.nc
+
+=============== RadxCfactors ===============
+Correction factors:
+  azimuthCorr: 0
+  elevationCorr: 0
+  rangeCorr: 0
+  longitudeCorr: 0
+  latitudeCorr: 0
+  pressureAltCorr: 0
+  altitudeCorr: 0
+  ewVelCorr: 0
+  nsVelCorr: 0
+  vertVelCorr: 0
+  headingCorr: 0
+  rollCorr: 0
+  pitchCorr: 0
+  driftCorr: 0
+  rotationCorr: 0
+  tiltCorr: 0
+
+
+=============== RadxRay ===============
+  volNum: 3394
+  sweepNum: 0
+  calibIndex: 0
+  sweepMode: elevation_surveillance
+  polarizationMode: horizontal
+  prtMode: fixed
+  followMode: none
+  timeSecs: 2018/10/10 12:29:51.549000
+  az: 99.6872
+  elev: -19.9924
+  fixedAngle: -20.0006
+  targetScanRate: -9999
+  trueScanRate: -9999
+  isIndexed: 0
+  angleRes: 1
+  antennaTransition: 0
+  nSamples: 35
+  pulseWidthUsec: 13.3025
+  prtSec: 0.000320513
+  prtRatio: 1
+  nyquistMps: 24.96
+  unambigRangeKm: 48.0437
+  measXmitPowerDbmH: -9999
+  measXmitPowerDbmV: -9999
+  eventFlagsSet: N
+  georefApplied: Y
+  nGates: 627
+  RadxRangeGeom:
+    rangeGeomSet: Y
+    startRangeKm: 0
+    gateSpacingKm: 0.075
+  nFields: 1
+    VG:m/s
+
+
+    Geo-reference variables:
+  time: 2018/10/10 12:29:51.549000 UTC
+  unitNum: 0
+  unitId: 0
+  longitude: -86.3242
+  latitude: 29.0472
+  altitudeKmMsl: 1.9117
+  altitudeKmAgl: 1.95904
+  ewVelocity: 63.45
+  nsVelocity: 107.39
+  vertVelocity: -0.81
+  heading: 27.9492
+  track: -9999
+  roll: 8.14636
+  pitch: 1.97205
+  drift: 2.62573
+  rotation: 99.6872
+  tilt: -19.9924
+  ewWind: 5.09053
+  nsWind: -4.84845
+  vertWind: -1.42
+  headingRate: 0.769043
+  pitchRate: -0.170288
+  rollRate: -9999
+  driveAngle1: -9999
+  driveAngle2: -9999
+
+  cfac.aft
+eol-albireo:cfac brenda$ more cfac.aft
+azimuth_corr           =   0.000
+elevation_corr         =   0.000
+range_delay_corr       = -16.641
+longitude_corr         =   0.000
+latitude_corr          =   0.000
+pressure_alt_corr      =   4.969
+radar_alt_corr         =   0.000
+ew_gndspd_corr         =   0.000
+ns_gndspd_corr         =   0.000
+vert_vel_corr          =   0.000
+heading_corr           =   0.000
+roll_corr              =   0.000
+pitch_corr             =   0.009
+drift_corr             =   0.119
+rot_angle_corr         =  -0.016
+tilt_corr              =   0.713
+
+  ---- from DORADE swp file: input/swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
+  eol-albireo:input brenda$ ~/lrose/bin/RadxPrint -native  -f swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394  -field VG -rays -data | less
+
+
+  radar_type: RADAR_AIR_TAIL
+
+  id: CFAC
+  nbytes: 72
+  sizeof(correction_t): 72
+  azimuth_corr: 0
+  elevation_corr: 0
+  range_delay_corr: 0
+  longitude_corr: 0
+  latitude_corr: 0
+  pressure_alt_corr: 0
+  radar_alt_corr: 0
+  ew_gndspd_corr: 0
+  ns_gndspd_corr: 0
+  vert_vel_corr: 0
+  heading_corr: 0
+  roll_corr: 0
+  pitch_corr: 0
+  drift_corr: 0
+  rot_angle_corr: 0
+  tilt_corr: 0
+=================
+
+=============== DoradeData ray ===============
+  id: RYIB
+  nbytes: 44
+  sizeof(ray_t): 44
+  sweep_num: 0
+  julian_day: 283
+  hour: 12
+  minute: 29
+  second: 51
+  millisecond: 549
+  azimuth: 99.6872
+  elevation: -19.9924
+  peak_power: -999
+  true_scan_rate: -9999
+  ray_status: 0
+==============================================
+=============== DoradeData platform ===============
+  id: ASIB
+  nbytes: 80
+  sizeof(platform_t): 80
+  longitude: -86.3242
+  latitude: 29.0472
+  altitude_msl: 1.9117
+  altitude_agl: 1.95904
+  ew_velocity: 63.45
+  ns_velocity: 107.39
+  vert_velocity: -0.81
+  heading: 27.9492
+  roll: 8.14636
+  pitch: 1.97205
+  drift_angle: 2.62573
+  rotation_angle: 99.6872
+  tilt: -19.9924
+  ew_horiz_wind: 5.09053
+  ns_horiz_wind: -4.84845
+  vert_wind: -1.42
+  heading_change: 0.769043
+  pitch_change: -0.170288
+===================================================
+=============== DoradeData paramdata ===============  
+
+  ================== Data ===================
+15.670 15.850 16.720 14.930 15.110 16.810 15.620 
+13.990 15.490 18.210 15.480 17.740 20.350 15.950 
+15.040 14.570 14.320 14.010 13.760 12.910 2*MISS 
+13.530 MISS 15.870 14.500 14.820 14.740 11.500 
+11.200 7.760 2.030 -2.550 MISS -8.590 -7.410 
+-5.330 -4.240 -4.710 -4.130 -12.380 -15.300 -14.740 
+-14.760 MISS 2.810 2.030 -0.290 -5.100 -6.620 
+1.740 0.090 4*MISS -7.090 -2.760 -3.740 -1.170 
+-19.660 -1.560 -4.370 -2.910 -2.660 -1.560 -1.540 
+-0.280 0.410 -3.200 -9.940 -3.950 1.190 0.720 
+-1.500 -1.690 0.330 1.140 2.970 0.470 0.510 
+0.400 0.600 -1.500 0.370 -1.460 -1.150 1.000 
+-0.150 -0.640 -3.010 -3.700 -5.840 0.110 0.030 
+-1.640 -0.610 -1.130 -1.710 -0.190 -0.510 0.060 
+-0.770 -1.380 -1.280 -1.430 -1.960 2*-2.470 -1.980 
+-0.450 -0.280 -1.210 -3.120 -2.400 -1.500 -0.870 
+-1.760 -2.250 -2.340 -2.540 0.300 -0.190 -0.540 
+0.170 3.040 -1.050 MISS 0.860 3*MISS 1.930 
+10*MISS -4.280 2*MISS 9.990 10.670 3*MISS 12.530 
+13.880 12.040 10.870 10*MISS -0.030 2*MISS 0.710 
+2.240 -0.110 1.010 -2.410 -2.690 0.180 -0.090 
+-0.390 -0.520 2.950 1.800 2.600 6.600 8.490 
+0.760 -1.450 0.440 0.240 -0.390 0.310 -1.590 
+2.140 0.810 1.540 MISS -0.330 1.060 1.170 
+1.730 1.320 5*MISS -9.920 2*MISS -0.830 MISS 
+...
+
+
+expected output ..
+
+================== Data ===================
+15.670 15.850 16.720 14.930 15.110 16.810 15.620 
+13.990 15.490 18.210 15.480 17.740 20.350 15.950 
+15.040 14.570 14.320 14.010 13.760 12.910 2*MISS 
+13.530 MISS 15.870 14.500 14.820 14.740 11.500 
+11.200 7.760 2.030 -2.550 MISS -8.590 -7.410 
+-5.330 -4.240 -4.710 -4.130 -12.380 -15.300 -14.740 
+-14.760 MISS 2.810 2.030 -0.290 -5.100 -6.620 
+1.740 0.090 4*MISS -7.090 -2.760 -3.740 -1.170 
+-19.660 -1.560 -4.370 -2.910 -2.660 -1.560 -1.540 
+-0.280 0.410 -3.200 -9.940 -3.950 1.190 0.720 
+-1.500 -1.690 0.330 1.140 2.970 0.470 547*MISS 
+===========================================
+  */
+
+     float asib_roll = 8.14636;
+     float asib_pitch = 1.97205;
+     float asib_heading = 27.9492;
+     float asib_drift_angle = 2.62573;
+     float asib_rotation_angle = 99.6872;
+     float asib_tilt = -19.9924;
+
+/* from cfac.aft file
+azimuth_corr           =   0.000
+elevation_corr         =   0.000
+range_delay_corr       = -16.641
+longitude_corr         =   0.000
+latitude_corr          =   0.000
+pressure_alt_corr      =   4.969
+radar_alt_corr         =   0.000
+ew_gndspd_corr         =   0.000
+ns_gndspd_corr         =   0.000
+vert_vel_corr          =   0.000
+heading_corr           =   0.000
+roll_corr              =   0.000
+pitch_corr             =   0.009
+drift_corr             =   0.119
+rot_angle_corr         =  -0.016
+tilt_corr              =   0.713
+*/
+
+
+     float cfac_pitch_corr =   0.009;
+     float cfac_heading_corr = 0.0;
+     float cfac_drift_corr =   0.119;
+     float cfac_roll_corr = 0.0; 
+     float cfac_elevation_corr = 0.0;
+     float cfac_azimuth_corr = 0.0;
+     float cfac_rot_angle_corr =  -0.016;
+     float cfac_tilt_corr =   0.713;
+     int radar_type = 3;  // from dgi->dds->radd->radar_type  RADAR_AIR_TAIL
+      // # define         AIR_TAIL 3
+     bool use_Wen_Chaus_algorithm = true;
+
+    float dgi_dds_ryib_azimuth = 99.6872;
+    float dgi_dds_ryib_elevation = -19.9924;
+     float ra_x;
+     float ra_y;
+     float ra_z;
+     float ra_rotation_angle;
+     float ra_tilt;
+     float ra_azimuth;
+     float ra_elevation;
+     float ra_psi;
+
+   dd_radar_angles( 
+      asib_roll,
+      asib_pitch,
+      asib_heading,
+      asib_drift_angle,
+      asib_rotation_angle,
+      asib_tilt,
+      cfac_pitch_corr,
+      cfac_heading_corr,
+      cfac_drift_corr,
+      cfac_roll_corr,
+      cfac_elevation_corr,
+      cfac_azimuth_corr,
+      cfac_rot_angle_corr,
+      cfac_tilt_corr,
+      radar_type,  // from dgi->dds->radd->radar_type
+      use_Wen_Chaus_algorithm,
+     dgi_dds_ryib_azimuth,
+     dgi_dds_ryib_elevation,
+      &ra_x,
+      &ra_y,
+      &ra_z,
+      &ra_rotation_angle,
+      &ra_tilt,
+      &ra_azimuth,
+      &ra_elevation,
+      &ra_psi
+     );
+
+
+    Surface_Type which_removal = ONLY_SURFACE;  // internal value based on function call
+       float optimal_beamwidth = 3;      // script parameter; origin seds->optimal_beamwidth
+       int seds_surface_gate_shift = 0;       // script parameter; origin seds->surface_gate_shift
+       float vert_beam_width = 2; // radarBeamWidthDegV:         // from radar angles???; origin dgi->dds->radd->vert_beam_width
+// =============== DoradeData platform ===============
+//  id: ASIB
+//  nbytes: 80
+//  sizeof(platform_t): 80
+//  longitude: -86.3244
+//  latitude: 29.0469
+//  altitude_msl: 1.91292
+//  altitude_agl: 1.95904
+// from https://www.eol.ucar.edu/node/1883   
+//Antenna Altitude above ground level (AGL) in m
+// DORADE has altitude_agl in meters, but cfrad/RadxVol has altitudeKmAgl in Km    
+
+       float asib_altitude_agl = 1.95904;  // agrees // altitudeKmAgl: 1.95904  // altitude angle (gets multiplied by 1000; so in km?)
+       float dds_ra_elevation = ra_elevation; // IN RADIANS!! // -19.9924;   // changed by navigation corrections  
+         // TODO: what is this value???
+         // radar angles!! requires cfac values and calculation
+                                     // origin dds->ra->elevation, ra = radar_angles
+                                     // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+       bool getenv_ALTERNATE_GECHO = false;  // script parameter
+       double d = 0.0; // used for min_grad, if getenv_ALTERNATE_GECHO is true
+       // d = ALTERNATE_GECHO environment variable
+       double dds_asib_rotation_angle = 99.6872;  // agrees // origin dds->asib->rotation_angle;  asib is struct platform_i
+       double dds_asib_roll = 8.14636;    // agrees         // origin dds->asib->roll
+       double dds_cfac_rot_angle_corr =  -0.016;  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+       float radar_latitude = 29.0472; // differs 29.0469;  // radar->latitude 
+       //const float *data;     // internal value
+       float *new_data = newData;       // internal value
+       //size_t nGates;         // internal value
+       float gate_size = 0.075;  // same // gateSpacingKm
+       float distance_to_first_gate = 0.0;  // same // startRangeKm
+       // TODO: should be nGates, but we are using a test number of gates
+
+       //   eff_unamb_range: 48.0437 ???
+       double max_range_in_km = distance_to_first_gate + gate_size * NGATES_MANY;      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+       float bad_data_value = -9999999;  // default value
+       size_t dgi_clip_gate = clip_gate;  // default value
+       bool *boundary_mask = bnd;
+
+    se_ac_surface_tweak(which_removal, optimal_beamwidth, seds_surface_gate_shift,
+       vert_beam_width, asib_altitude_agl, dds_ra_elevation, getenv_ALTERNATE_GECHO, d,
+       dds_asib_rotation_angle, dds_asib_roll, dds_cfac_rot_angle_corr, radar_latitude,
+       data, new_data, nGates, gate_size, distance_to_first_gate, max_range_in_km,
+       bad_data_value, dgi_clip_gate, boundary_mask
+      );
+
+
+    //(vert_velocity, ew_velocity, ns_velocity,
+    //  ew_gndspd_corr, tilt, elevation,
+    //  data, newData, nGates, bad_flag, clip_gate,
+    //  eff_unamb_vel, nyquist_velocity, bnd);
+    for (int i=0; i<NGATES_MANY; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+    
+  }  
 /*
   TEST(SoloRemoveSurface, no_adjust__unfold__no_clipping__no_bad_flags__no_boundary) {
 
