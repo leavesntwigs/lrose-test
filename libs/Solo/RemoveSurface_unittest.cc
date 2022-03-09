@@ -228,8 +228,32 @@ expected output ..
 ===========================================
   */
 
+
+/* 
+see data file: 
+~/data/from_Alex/radarqc_scans/radarqc_scans-main/airborne_qc/RadxConvert_with_cfac/output/20181010/cfrad.20181010_122951.196_to_20181010_122955.166_N42RF-TS_AIR.nc
+works with ra_elevation taken from ray at 
+=============== RadxRay ===============
+  volNum: 3394
+  sweepNum: 0
+  calibIndex: 0
+  sweepMode: elevation_surveillance
+  polarizationMode: horizontal
+  prtMode: fixed
+  followMode: none
+  timeSecs: 2018/10/10 12:29:51.549000
+  az: 137.549
+  elev: -17.4617
+
+which corresponds to the ray at az: 99.286 
+before applying cfac.aft
+*/
+
+  float ra_elevation = -17.4617 * M_PI / 180.0; 
+  printf("ra_elevation (radians) = %f\n", ra_elevation);
+
     Surface_Type which_removal = ONLY_SURFACE;  // internal value based on function call
-       float optimal_beamwidth = 0;      // script parameter; origin seds->optimal_beamwidth
+       float optimal_beamwidth = 3;      // script parameter; origin seds->optimal_beamwidth
        int seds_surface_gate_shift = 0;       // script parameter; origin seds->surface_gate_shift
        float vert_beam_width = 2; // radarBeamWidthDegV:         // from radar angles???; origin dgi->dds->radd->vert_beam_width
 // =============== DoradeData platform ===============
@@ -244,7 +268,7 @@ expected output ..
 //Antenna Altitude above ground level (AGL) in m
 // DORADE has altitude_agl in meters, but cfrad/RadxVol has altitudeKmAgl in Km       
        float asib_altitude_agl = 1.95904;  // altitudeKmAgl: 1.95904  // altitude angle (gets multiplied by 1000; so in km?)
-       float dds_ra_elevation = -19.9924;       // radar angles!! requires cfac values and calculation
+       float dds_ra_elevation = -17.4617 * M_PI / 180.0;       // radar angles!! requires cfac values and calculation
                                      // origin dds->ra->elevation, ra = radar_angles
                                      // get this from RadxRay::_elev if RadxRay::_georefApplied == true
        bool getenv_ALTERNATE_GECHO = false;  // script parameter
@@ -631,6 +655,8 @@ tilt_corr              =   0.713
       &ra_psi
      );
 
+
+    printf("ra_elevation (radians) = %f\n", ra_elevation);
 
     Surface_Type which_removal = ONLY_SURFACE;  // internal value based on function call
        float optimal_beamwidth = 3;      // script parameter; origin seds->optimal_beamwidth
