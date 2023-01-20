@@ -481,24 +481,55 @@ namespace {
 
   }
 
-  /*
-  TEST(SoloRemoveAcMotion, clipping__speckle_at_beginning__skip_speckle_at_end__no_boundary) {
+  
+  TEST(SoloRemoveAcMotion, cfactors) {
 
-    float data[NGATES_7] =             { 5, -3, -3, -3, 5, 5,-3};
-    float newData[NGATES_7] =          { 0,  0,  0,  0, 0, 0, 0};
-    float newData_expected[NGATES_7] = {-3, -3, -3, -3, 5, 5,-3};
+    // fill with real data from 
+    /*
+    Cfac.aft
+    cfrad.20181010_122951.196_to_20181010_122955.166_N42RF-TS_AIR.nc (georefApplied Y; cfactors ?)
+      swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394 (CFAC block is all zero)
+    expected output after running Medium QC script ...
+    ** swp.MQC_1181010122951.N42RF-TS.196.-20.0_AIR_v3394 
 
-    bool  bnd[NGATES_7] = {1,1,1,1,1,1,1};
+
+    */
+    float data[NGATES_10] =             {-3,-3, -3, 5, 6,-4, -3,10,-12, -3};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,   0};
+    //    adjust by -1                              4  5 -5   x  9 -13
+    //   unfold                                     0  1 -1   x  5  -9
+    float newData_expected[NGATES_10] = {-3,-3, -3, 0, 1,-1, -3, 5, -9, -3};
+    bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 1, 1,  1, 1,  1,  1};
+
     float bad_flag = -3;
-    size_t a_speckle = 3;
-    size_t nGates = NGATES_7;
-    size_t clip_gate = 5;
 
-    se_remove_ac_motion(data, newData, nGates, bad_flag, a_speckle, clip_gate, bnd);
-    for (int i=0; i<NGATES_7; i++)
+    float vert_velocity = 31; // goes with sin(elevation)
+    float ew_velocity = 1;   // these three go with sin(tilt)
+    float ns_velocity = 1;
+    float ew_gndspd_corr = 1;
+    float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
+    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
+    // adjust should be -1
+
+    // Nyquist stuff ...    
+    // keep the Nyquist velocity greater than any data value,
+    // to avoid any folding/unfolding 
+    float eff_unamb_vel = 0.0;
+    float nyquist_velocity = 2.0;
+
+    size_t nGates = NGATES_10;
+    size_t clip_gate = nGates;
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, tilt, elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    for (int i=0; i<NGATES_10; i++)
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
+/*
   TEST(SoloRemoveAcMotion, speckle_at_boundary_edges_ignored) {
     //                                   b,  g,  g,  b, b, g, g
     float data[NGATES_7] =             {-3,  5,  5, -3,-3, 5, 5};
