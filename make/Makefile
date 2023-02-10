@@ -159,10 +159,10 @@ Boundary_unittest : Boundary_unittest.o
 
 RemoveAcMotion_unittest.o : $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc \
 	$(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -I$(SRC_DIR)/libs/Radx -c $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc
 
 RemoveAcMotion_unittest : RemoveAcMotion_unittest.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lRadx -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
 # 
 # Soloii - RemoveAcMotion
@@ -173,7 +173,7 @@ RemoveAcMotion_unittest.o : $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${LROSE_INSTALL_DIR}/include -I$(SRC_DIR)/libs/Solo -c $(LIBS_DIR)/Solo/RemoveAcMotion_unittest.cc
 
 RemoveAcMotion_unittest : RemoveAcMotion_unittest.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L${LROSE_INSTALL_DIR}/lib -lSolo -lRadx -lNcxx -lhdf5_cpp  -lgtest_main -lgtest -lpthread $^ -o $@
 
 
 # 

@@ -2,6 +2,9 @@
 #include <math.h>
 #include "gtest/gtest.h"
 #include "Solo/SoloFunctions.hh"
+#include "Radx/RadxRay.hh"
+#include "Radx/RadxGeoref.hh"
+#include "Radx/RadxCfactors.hh"
 
 namespace {
 
@@ -481,8 +484,26 @@ namespace {
 
   }
 
-  
-  TEST(SoloRemoveAcMotion, cfactors) {
+ 
+// I don't have any expected output for Remove_AC_Motion; no data files from Alex
+// Can I make up some data? Yes. 
+// 1. start with a vector of all 1's. Add aircraft motion???
+//    Call remove_ac_motion, verify all 1's as a result.
+// 2. Try to add some correction factors.
+// 3. Use RadxRay::applyGeorefs and compare to radar_angles.  Remove_ac_motion
+//    relies on the calculation of "adjust" to change to field data.  How the
+//    "adjust" is calculated varies:
+//    A. RadxRay::applyGeorefs
+//    B. SoloII:radar_angles
+//    C. A & B
+//
+//    Both A & B use the cfactors to calculate ra_tilt and ra_elevation which
+//    AcVel uses to calculate the "adjust".
+// 
+//    
+//
+
+  TEST(SoloRemoveAcMotion, zero_translation_zero_rotation) {
 
     // fill with real data from 
     /*
@@ -494,22 +515,50 @@ namespace {
 
 
     */
-    float data[NGATES_10] =             {-3,-3, -3, 5, 6,-4, -3,10,-12, -3};
-    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0,   0};
-    //    adjust by -1                              4  5 -5   x  9 -13
-    //   unfold                                     0  1 -1   x  5  -9
-    float newData_expected[NGATES_10] = {-3,-3, -3, 0, 1,-1, -3, 5, -9, -3};
-    bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 1, 1,  1, 1,  1,  1};
+    float data[NGATES_10] =             { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0, 0};
+    float newData_expected[NGATES_10] = { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+    bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+/*
 
+
+    // radar_angles ...  asib means original data
+    dd_radar_angles( 
+  float asib_roll,
+  float asib_pitch,
+  float asib_heading,
+  float asib_drift_angle,
+  float asib_rotation_angle,
+  float asib_tilt,
+
+
+  float cfac_pitch_corr,
+  float cfac_heading_corr,
+  float cfac_drift_corr,
+  float cfac_roll_corr,
+  float cfac_elevation_corr,
+  float cfac_azimuth_corr,
+  float cfac_rot_angle_corr,
+  float cfac_tilt_corr,
+  int radar_type,  // from dgi->dds->radd->radar_type
+  bool use_Wen_Chaus_algorithm,
+    float dgi_dds_ryib_azimuth,
+    float dgi_dds_ryib_elevation,
+  float *ra_x,
+  float *ra_y,
+  float *ra_z,
+  float *ra_rotation_angle,
+  float *ra_tilt,
+  float *ra_azimuth,  // ==> must be unique calculation for each ray???
+  float *ra_elevation,
+  float *ra_psi
+);
+*/
     float bad_flag = -3;
 
-    float vert_velocity = 31; // goes with sin(elevation)
-    float ew_velocity = 1;   // these three go with sin(tilt)
-    float ns_velocity = 1;
-    float ew_gndspd_corr = 1;
-    float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
-    float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
-    // adjust should be -1
+    float ra_elevation;
+    float ra_tilt;
+
 
     // Nyquist stuff ...    
     // keep the Nyquist velocity greater than any data value,
@@ -520,8 +569,107 @@ namespace {
     size_t nGates = NGATES_10;
     size_t clip_gate = nGates;
 
+    RadxRay *ray = new RadxRay();
+
+    // RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */);
+    /* set these data in RadxRay because applyGeoref uses them ...
+     // get georeference values
+
+      double rollRad = _georef->getRoll() * Radx::DegToRad;
+      double pitchRad = _georef->getPitch() * Radx::DegToRad;
+      double headingRad = _georef->getHeading() * Radx::DegToRad;
+      double tiltRad = _georef->getTilt() * Radx::DegToRad;
+      double rotRad = _georef->getRotation() * Radx::DegToRad;
+
+      // apply corrections if appropriate
+
+      if (_cfactors) {
+        rollRad += _cfactors->getRollCorr() * Radx::DegToRad;
+        pitchRad += _cfactors->getPitchCorr() * Radx::DegToRad;
+        headingRad += _cfactors->getHeadingCorr() * Radx::DegToRad;
+        tiltRad += _cfactors->getTiltCorr() * Radx::DegToRad;
+        rotRad += _cfactors->getRotationCorr() * Radx::DegToRad;
+      }
+    */
+
+    RadxGeoref georef; //  = new RadxGeoref();
+    
+    georef.setLongitude();
+    georef.setLatitude();
+    georef.setAltitudeKmMsl(); // or setAltitudeKmAgl
+    georef.setEwVelocity();
+    georef.setNsVelocity();
+    georef.setVertVelocity();
+    georef.setHeading();
+    georef.setTrack();
+    georef.setRoll();
+    georef.setPitch();
+    georef.setDrift();
+    georef.setRotation();
+    georef.setTilt();
+    georef.setEwWind();
+    georef.setNsWind();
+    georef.setVertWind();
+
+    ray->setGeoref(georef);
+
+    RadxCfactors cfac; //  = new RadxCfactors();
+    /*
+    // cfactors ...
+    azimuth_corr           =   0.000;
+    elevation_corr         =   0.000;
+    range_delay_corr       = -16.641;
+    longitude_corr         =   0.000;
+    latitude_corr          =   0.000;
+    pressure_alt_corr      =   4.969;
+    radar_alt_corr         =   0.000;
+    ew_gndspd_corr         =   0.000;
+    ns_gndspd_corr         =   0.000;
+    vert_vel_corr          =   0.000;
+    heading_corr           =   0.000;
+    roll_corr              =   0.000;
+    pitch_corr             =   0.009;
+    drift_corr             =   0.119;
+    rot_angle_corr         =  -0.016;
+    tilt_corr              =   0.713;
+    */
+    ray->setCfactors(cfac);
+
+    /*
+    typedef enum {
+
+      PRIMARY_AXIS_Z = 0, ///< vertical
+      PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+      PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+      PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+      PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+      PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+      
+    } PrimaryAxis_t;
+    */
+
+    Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
+    //bool force = true;
+    ray->applyGeoref(axis); // , force);
+
+    // applyGeorefs calculates phi (elevation angle), 
+    // but it does NOT calculate tau (tilt) = asin (z_t)
+    // we may need to modify RadxRay::applyGeorefs to calculate this, since
+    // tau needs the intermediate, local value zz = z_t
+
+    ra_elevation = ray->getElevationDeg(); // TODO: convert to radians?
+    ra_tilt = 0.0; // ray->getTilt(); ore georef.getTilt()?  TODO: which coordinate systems is this tilt?
+
+    float vert_velocity = georef.getVertVelocity() + cfac.getVertVelCorr(); // goes with sin(elevation)
+    float ew_velocity = georef.getEwVelocity() + cfac.getEwVelCorr();   // these three go with sin(tilt)
+    float ns_velocity = georef.getNsVelocity() + cfac.getNsVelCorr();
+    float ew_gndspd_corr = 0.0; // TODO: where is this??? cfac.get??; or is it calculated?
+    //float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
+    //float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
+    // adjust should be -1
+
     se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
-                        ew_gndspd_corr, tilt, elevation,
+                        ew_gndspd_corr, ra_tilt, ra_elevation,
                         data, newData, nGates, bad_flag, clip_gate,
                         eff_unamb_vel, nyquist_velocity, bnd);
 
