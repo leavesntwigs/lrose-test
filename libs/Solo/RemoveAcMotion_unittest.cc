@@ -593,7 +593,7 @@ namespace {
     */
 
     RadxGeoref georef; //  = new RadxGeoref();
-    
+    /*
     georef.setLongitude();
     georef.setLatitude();
     georef.setAltitudeKmMsl(); // or setAltitudeKmAgl
@@ -610,6 +610,7 @@ namespace {
     georef.setEwWind();
     georef.setNsWind();
     georef.setVertWind();
+    */
 
     ray->setGeoref(georef);
 
@@ -667,6 +668,12 @@ namespace {
     //float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
     //float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
     // adjust should be -1
+
+    // NEED to handle missing values -999 (SoloII) vs -9999 (Radx)
+    if (vert_velocity == Radx::missingMetaFloat) vert_velocity = 0.0;
+    if (ew_velocity == Radx::missingMetaFloat) ew_velocity = 0.0;
+    if (ns_velocity == Radx::missingMetaFloat) ns_velocity = 0.0;
+    if (ew_gndspd_corr == Radx::missingMetaFloat) ew_gndspd_corr = 0.0;
 
     se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
                         ew_gndspd_corr, ra_tilt, ra_elevation,
