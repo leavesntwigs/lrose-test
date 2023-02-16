@@ -874,6 +874,202 @@ namespace {
       EXPECT_EQ(newData[i], newData_expected[i]);
   }
 
+
+  // translation means non-zero Heading, Track, Drift
+  TEST(SoloRemoveAcMotion, zero_translation_nonzero_elev_nonzero_tilt_yprime) {
+
+    float data[NGATES_10] =             { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0, 0};
+    float newData_expected[NGATES_10] = { 5, 5,  5, 5, 5, 5,  5, 5, 5, 5};
+    bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+
+    float bad_flag = -3;
+
+    float ra_elevation;
+    float ra_tilt;
+
+
+    // Nyquist stuff ...    
+    // keep the Nyquist velocity greater than any data value,
+    // to avoid any folding/unfolding 
+    float eff_unamb_vel = 0.0;
+    float nyquist_velocity = 5.0;
+
+    size_t nGates = NGATES_10;
+    size_t clip_gate = nGates;
+
+    RadxRay *ray = new RadxRay();
+
+    RadxGeoref georef; //  = new RadxGeoref();
+
+    // VERY IMPORTANT to set values to zero! otherwise they are
+    // set to missing values and the missing values mess up the
+    // georef calculations!
+    georef.setToZero();
+    
+    //georef.setLongitude();
+    //georef.setLatitude();
+    //georef.setAltitudeKmMsl(); // or setAltitudeKmAgl
+    georef.setEwVelocity(0.0);
+    georef.setNsVelocity(0.0);
+    georef.setVertVelocity(4.0);
+    georef.setHeading(0.0);
+    //georef.setTrack();
+    //georef.setRoll();
+    georef.setPitch(90.0);
+    //georef.setDrift();
+    //georef.setRotation();
+    georef.setTilt(90.0);
+    //georef.setEwWind();
+    //georef.setNsWind();
+    //georef.setVertWind();    
+
+    ray->setGeoref(georef);
+
+    RadxCfactors cfac; 
+
+    ray->setCfactors(cfac);
+    // NOTE!!!! always pull/place the cfactors to the ray, so that
+    // applyGeorefs can add them BEFORE calculating the transformations.
+
+    Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
+    //bool force = true;
+    ray->applyGeoref(axis); // , force);
+
+    // applyGeorefs calculates phi (elevation angle), 
+    // but it does NOT calculate tau (tilt) = asin (z_t)
+    // we may need to modify RadxRay::applyGeorefs to calculate this, since
+    // tau needs the intermediate, local value zz = z_t
+
+    ra_elevation = ray->getElevationDeg() * Radx::DegToRad; // convert to radians? Yes!
+    // elevation should be zero
+    double abs_err = 0.05;
+    EXPECT_NEAR(ray->getElevationDeg(), 90.0, abs_err);
+    ra_tilt = ray->getTiltTDeg() * Radx::DegToRad; // ray->getTilt(); or georef.getTilt()?  TODO: which coordinate systems is this tilt?
+    EXPECT_NEAR(ray->getTiltTDeg(), 0.0, abs_err);
+    float vert_velocity = georef.getVertVelocity() + cfac.getVertVelCorr(); // goes with sin(elevation)
+    float ew_velocity = georef.getEwVelocity() + cfac.getEwVelCorr();   // these three go with sin(tilt)
+    float ns_velocity = georef.getNsVelocity() + cfac.getNsVelCorr();
+    float ew_gndspd_corr = 0.0; // TODO: where is this??? cfac.get??; or is it calculated?
+    //float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
+    //float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
+    // adjust should be -1
+
+    // NEED to handle missing values -999 (SoloII) vs -9999 (Radx)
+    if (vert_velocity == Radx::missingMetaFloat) vert_velocity = 0.0;
+    if (ew_velocity == Radx::missingMetaFloat) ew_velocity = 0.0;
+    if (ns_velocity == Radx::missingMetaFloat) ns_velocity = 0.0;
+    if (ew_gndspd_corr == Radx::missingMetaFloat) ew_gndspd_corr = 0.0;
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, ra_tilt, ra_elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_EQ(newData[i], newData_expected[i]);
+  }
+
+  TEST(SoloRemoveAcMotion, nonzero_translation_sensor_rotated_zero_cfacs_yprime) {
+
+    float data[NGATES_10] =             { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+    float newData[NGATES_10] =          { 0, 0,  0, 0, 0, 0,  0, 0, 0, 0};
+    float newData_expected[NGATES_10] = { 5, 5,  5, 5, 5, 5,  5, 5, 5, 5};
+    bool  bnd[NGATES_10] =              { 1, 1,  1, 1, 1, 1,  1, 1, 1, 1};
+    float sin_cos_pi_over_4 = 0.7071067811865475;
+    float bad_flag = -3;
+
+    float ra_elevation;
+    float ra_tilt;
+
+    // Nyquist stuff ...    
+    // keep the Nyquist velocity greater than any data value,
+    // to avoid any folding/unfolding 
+    float eff_unamb_vel = 0.0;
+    float nyquist_velocity = 5.0;
+
+    size_t nGates = NGATES_10;
+    size_t clip_gate = nGates;
+
+    RadxRay *ray = new RadxRay();
+
+    RadxGeoref georef; //  = new RadxGeoref();
+
+    // VERY IMPORTANT to set values to zero! otherwise they are
+    // set to missing values and the missing values mess up the
+    // georef calculations!
+    georef.setToZero();
+    
+    //georef.setLongitude();
+    //georef.setLatitude();
+    //georef.setAltitudeKmMsl(); // or setAltitudeKmAgl
+    georef.setEwVelocity(0.0);
+    georef.setNsVelocity(0.0);
+    georef.setVertVelocity(4.0);
+    georef.setHeading(0.0);
+    //georef.setTrack();
+    georef.setRoll(-90.0);
+    georef.setPitch(45.0);
+    //georef.setDrift();
+    georef.setRotation(90.0);  // theta_a
+    georef.setTilt(0.0);
+    //georef.setEwWind();
+    //georef.setNsWind();
+    //georef.setVertWind();    
+
+    ray->setGeoref(georef);
+
+    RadxCfactors cfac; 
+
+    ray->setCfactors(cfac);
+    // NOTE!!!! always pull/place the cfactors to the ray, so that
+    // applyGeorefs can add them BEFORE calculating the transformations.
+
+    Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
+    //bool force = true;
+    ray->applyGeoref(axis); // , force);
+
+    // applyGeorefs calculates phi (elevation angle), 
+    // but it does NOT calculate tau (tilt) = asin (z_t)
+    // we may need to modify RadxRay::applyGeorefs to calculate this, since
+    // tau needs the intermediate, local value zz = z_t
+
+    ra_elevation = ray->getElevationDeg() * Radx::DegToRad; // convert to radians? Yes!
+    // elevation should be zero
+    double abs_err = 0.05;
+    EXPECT_NEAR(ray->getElevationDeg(), 45.0, abs_err);
+    ra_tilt = ray->getTiltTDeg() * Radx::DegToRad; // ray->getTilt(); or georef.getTilt()?  TODO: which coordinate systems is this tilt?
+    EXPECT_NEAR(ray->getTiltTDeg(), 315.0, abs_err);
+    float vert_velocity = georef.getVertVelocity() + cfac.getVertVelCorr(); // goes with sin(elevation)
+    float ew_velocity = georef.getEwVelocity() + cfac.getEwVelCorr();   // these three go with sin(tilt)
+    float ns_velocity = georef.getNsVelocity() + cfac.getNsVelCorr();
+    float ew_gndspd_corr = 0.0; // TODO: where is this??? cfac.get??; or is it calculated?
+    //float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
+    //float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
+    // adjust should be -1
+
+    // NEED to handle missing values -999 (SoloII) vs -9999 (Radx)
+    if (vert_velocity == Radx::missingMetaFloat) vert_velocity = 0.0;
+    if (ew_velocity == Radx::missingMetaFloat) ew_velocity = 0.0;
+    if (ns_velocity == Radx::missingMetaFloat) ns_velocity = 0.0;
+    if (ew_gndspd_corr == Radx::missingMetaFloat) ew_gndspd_corr = 0.0;
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, ra_tilt, ra_elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    // the ac_vel gets adjusted by mod 2*nyquist_velocity
+    int adjustment = (int) (vert_velocity * sin_cos_pi_over_4) % (int) (2*nyquist_velocity);
+    for (int i=0; i<NGATES_10; i++)
+      newData_expected[i] = data[i] + adjustment; // sin_cos_pi_over_4;   
+
+
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_NEAR(newData[i], newData_expected[i], abs_err);
+  }
+
+
 /*
   TEST(SoloRemoveAcMotion, speckle_at_boundary_edges_ignored) {
     //                                   b,  g,  g,  b, b, g, g
