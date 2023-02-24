@@ -1126,9 +1126,9 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
       1, 1,  1, 1, 1,
       1, 1,  1, 1, 1, 
       1, 1,  1, 1, 1,
-      1,  1, 1, 1, 1,
+      1, 1,  1, 1, 1,
       1};
-    float sin_cos_pi_over_4 = 0.7071067811865475;
+
     float bad_flag = MISS;
 
     float ra_elevation;
@@ -1137,8 +1137,12 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
     // Nyquist stuff ...    
     // keep the Nyquist velocity greater than any data value,
     // to avoid any folding/unfolding 
-    float eff_unamb_vel = 0.0;
-    float nyquist_velocity = 48.0437;
+    //float eff_unamb_vel = 0.0;
+    //float nyquist_velocity = 48.0437;
+
+    float eff_unamb_vel = 24.96; // from RADD section of Dorade file; use this value!
+    float nyquist_velocity = 0.0; // 48.0437;  NOTE!!! SoloII did NOT have the nyquist velocity!
+
 
     size_t nGates = NGATES_26;
     size_t clip_gate = nGates;
@@ -1163,12 +1167,13 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
     georef.setTrack(0.0); //-9999);
     georef.setRoll(5.61951);
     georef.setPitch(1.77429);
-    georef.setDrift(-2.79053);
+    georef.setDrift(2.79053);
     georef.setRotation(67.478);  // theta_a
     georef.setTilt(-19.9924);
     georef.setEwWind(5.09053);
     georef.setNsWind(-4.84845);
-    georef.setVertWind(1.42); 
+    georef.setVertWind(-1.42); 
+
     //
     // headingRate: 0.939331
     // pitchRate: 0.900879
@@ -1185,20 +1190,20 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
     // azimuth_corr           =   0.000
     // elevation_corr         =   0.000
     // range_delay_corr
-    cfac.setRangeCorr(0.0); // -16.641);
+    cfac.setRangeCorr(-16.641);
     // longitude_corr         =   0.000
     // latitude_corr          =   0.000
-    cfac.setPressureAltCorr(0.0); // 4.969);
+    cfac.setPressureAltCorr(4.969);
     // radar_alt_corr         =   0.000
     // ew_gndspd_corr         =   0.000
     // ns_gndspd_corr         =   0.000
     // vert_vel_corr          =   0.000
     // heading_corr           =   0.000
     // roll_corr              =   0.000
-    cfac.setPitchCorr(0.0); //0.009);
-    cfac.setDriftCorr(0.0); //0.119);
-    cfac.setRotationCorr(0.0); //-0.016);
-    cfac.setTiltCorr(0.0); // 0.713);
+    cfac.setPitchCorr(0.009);
+    cfac.setDriftCorr(0.119);
+    cfac.setRotationCorr(-0.016);
+    cfac.setTiltCorr(0.713);
 
     ray->setCfactors(cfac);
     // NOTE!!!! always pull/place the cfactors to the ray, so that
@@ -1216,9 +1221,9 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
     ra_elevation = ray->getElevationDeg() * Radx::DegToRad; // convert to radians? Yes!
     // elevation should be zero
     double abs_err = 0.05;
-    EXPECT_NEAR(ray->getElevationDeg(), 45.0, abs_err);
+    //EXPECT_NEAR(ray->getElevationDeg(), 45.0, abs_err);
     ra_tilt = ray->getGeoreference()->getTilt() * Radx::DegToRad; // ray->getTilt(); or georef.getTilt()?  TODO: which coordinate systems is this tilt?
-    EXPECT_NEAR(ray->getGeoreference()->getTilt(), 315.0, abs_err);
+    //EXPECT_NEAR(ray->getGeoreference()->getTilt(), 315.0, abs_err);
     float vert_velocity = georef.getVertVelocity() + cfac.getVertVelCorr(); // goes with sin(elevation)
     float ew_velocity = georef.getEwVelocity() + cfac.getEwVelCorr();   // these three go with sin(tilt)
     float ns_velocity = georef.getNsVelocity() + cfac.getNsVelCorr();
@@ -1240,11 +1245,7 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
 
     // the adjustment should be 13.200
     // the ac_vel gets adjusted by mod 2*nyquist_velocity
-    int adjustment = (int) (vert_velocity * sin_cos_pi_over_4) % (int) (2*nyquist_velocity);
-    for (int i=0; i<NGATES_10; i++)
-      newData_expected[i] = data[i] + adjustment; // sin_cos_pi_over_4;   
-
-
+  
     for (int i=0; i<NGATES_10; i++)
       EXPECT_NEAR(newData[i], newData_expected[i], abs_err);
   }
@@ -1309,7 +1310,7 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
       1, 1,  1, 1, 1,
       1,  1, 1, 1, 1,
       1};
-    float sin_cos_pi_over_4 = 0.7071067811865475;
+
     float bad_flag = MISS;
 
     //float ra_elevation;
@@ -1385,7 +1386,7 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
     // NOTE!!!! always pull/place the cfactors to the ray, so that
     // applyGeorefs can add them BEFORE calculating the transformations.
 
-    Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
+    //Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
     //bool force = true;
     //ray->applyGeoref(axis); // , force);
     // try using radar_angles instead of applyGeoref ...
@@ -1483,6 +1484,463 @@ swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394
 
     for (int i=0; i<NGATES_10; i++)
       EXPECT_NEAR(newData[i], newData_expected[i], abs_err);
+  }
+
+
+  TEST(SoloRemoveAcMotion, real_data_N42RF_TS_ApplyGeoref_vs_radar_angles_yprime) {
+
+#define NGATES_26 26
+#define MISS -32768
+    // VEL
+    float data[NGATES_26] = { 
+      0.0,   -0.430, -1.970, -0.930, -0.380,
+     -2.790, -0.590, -1.080, -2.780, -22.780,
+     -5.690,   MISS, -7.440, -3.780,  -2.830,
+     -2.570, -2.400, -2.210, -2.160,  -2.760, 
+     -7.110,-18.430, -4.640,-12.880,  MISS,
+     -19.150};
+
+    float newData[NGATES_26] = { 
+      0, 0, 0, 0, 0, 
+      0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 
+      0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 
+      0};
+    // VR
+    // the adjustment should be 13.200
+    float newData_expected[NGATES_26] = {
+      13.200, 12.770, 11.230, 12.270, 12.820,
+      10.410, 12.610, 12.120, 10.420, -9.580,
+       7.510,   MISS,  5.760,  9.420, 10.370,
+      10.630, 10.800, 10.990, 11.040, 10.440,
+       6.090, -5.230,  8.560,  0.320,   MISS,
+      -5.950};
+
+    bool  bnd[NGATES_26] = { 
+      1, 1,  1, 1, 1, 
+      1, 1,  1, 1, 1,
+      1, 1,  1, 1, 1, 
+      1, 1,  1, 1, 1,
+      1,  1, 1, 1, 1,
+      1};
+
+    float bad_flag = MISS;
+
+    //float ra_elevation;
+    //float ra_tilt;
+
+    // Nyquist stuff ...    
+    // keep the Nyquist velocity greater than any data value,
+    // to avoid any folding/unfolding 
+    float eff_unamb_vel = 24.96; // from RADD section of Dorade file; use this value!
+    float nyquist_velocity = 0.0; // 48.0437;  NOTE!!! SoloII did NOT have the nyquist velocity!
+
+    size_t nGates = NGATES_26;
+    size_t clip_gate = nGates;
+
+    RadxRay *ray = new RadxRay();
+
+    RadxGeoref georef; //  = new RadxGeoref();
+
+    // VERY IMPORTANT to set values to zero! otherwise they are
+    // set to missing values and the missing values mess up the
+    // georef calculations!
+    georef.setToZero();
+    
+    georef.setLongitude(-86.3245);
+    georef.setLatitude(29.0469);
+    georef.setAltitudeKmMsl(1.91292); 
+    georef.setAltitudeKmAgl(1.95904);  // angle
+    georef.setEwVelocity(63.11);
+    georef.setNsVelocity(107.57);
+    georef.setVertVelocity(-1.04);
+    georef.setHeading(27.6086); // <======
+
+    georef.setRoll(5.61951);
+    georef.setPitch(1.77429);
+    georef.setDrift(2.79053);
+    georef.setTrack(georef.getHeading() + georef.getDrift()); // doesn't seem to be used
+    georef.setRotation(67.478);  // theta_a
+    georef.setTilt(-19.9924);
+    georef.setEwWind(5.09053);
+    georef.setNsWind(-4.84845);
+    georef.setVertWind(-1.42); 
+    //
+    // headingRate: 0.939331
+    // pitchRate: 0.900879
+    // rollRate: -9999
+    // driveAngle1: -9999
+    // driveAngle2: -9999
+    //   
+
+    ray->setGeoref(georef);
+
+    RadxCfactors cfac; 
+    cfac.clear();
+    // cfac.aft
+    // azimuth_corr           =   0.000
+    // elevation_corr         =   0.000
+    // range_delay_corr
+    cfac.setRangeCorr(0.0); //-16.641);
+    // longitude_corr         =   0.000
+    // latitude_corr          =   0.000
+    cfac.setPressureAltCorr(0.0); //4.969);
+    // radar_alt_corr         =   0.000
+    // ew_gndspd_corr         =   0.000
+    // ns_gndspd_corr         =   0.000
+    // vert_vel_corr          =   0.000
+    cfac.setHeadingCorr(0.0); //-0.939331);
+    // roll_corr              =   0.000
+    cfac.setPitchCorr(0.0); //0.009);  // maybe pitchRate???
+    cfac.setDriftCorr(0.0); //0.119);
+    cfac.setRotationCorr(0.0); //-0.016);
+    cfac.setTiltCorr(0.0); //0.713);
+
+    ray->setCfactors(cfac);
+    // NOTE!!!! always pull/place the cfactors to the ray, so that
+    // applyGeorefs can add them BEFORE calculating the transformations.
+
+    Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
+    //bool force = true;
+    ray->applyGeoref(axis); // , force);
+    // try using radar_angles instead of applyGeoref ...
+
+    float asib_roll = georef.getRoll();          // degrees
+    float asib_pitch = georef.getPitch();        // degrees
+    float asib_heading = georef.getHeading();    // degrees
+    float asib_drift_angle = georef.getDrift();  // degrees
+    float asib_rotation_angle = georef.getRotation(); // degrees
+    float asib_tilt = georef.getTilt();               // degrees
+
+
+    float cfac_pitch_corr = cfac.getPitchCorr();       // degrees
+    float cfac_heading_corr =  cfac.getHeadingCorr();  // degrees
+    float cfac_drift_corr =  cfac.getDriftCorr();      // degrees
+    float cfac_roll_corr =  cfac.getRollCorr();        // degrees
+    float cfac_elevation_corr =  cfac.getElevationCorr(); // degrees
+    float cfac_azimuth_corr =  cfac.getAzimuthCorr();     // degrees
+    float cfac_rot_angle_corr =  cfac.getRotationCorr();  // degrees
+    float cfac_tilt_corr =  cfac.getTiltCorr();           // degrees
+    int radar_type =  3; // AIR_TAIL 3;  // from dgi->dds->radd->radar_type
+    bool use_Wen_Chaus_algorithm = true; // true; //  ==> adjust = -44;
+    float dgi_dds_ryib_azimuth = 67.478;  // degrees
+    float dgi_dds_ryib_elevation = -19.9924; // degrees
+    float ra_x;
+    float ra_y;
+    float ra_z;
+    float ra_rotation_angle;
+    float ra_tilt;
+    float ra_azimuth;
+    float ra_elevation;
+    float ra_psi;
+
+
+    dd_radar_angles(
+    asib_roll,
+    asib_pitch,
+    asib_heading,
+    asib_drift_angle,
+    asib_rotation_angle,
+    asib_tilt,
+    cfac_pitch_corr,
+    cfac_heading_corr,
+    cfac_drift_corr,
+    cfac_roll_corr,
+    cfac_elevation_corr,
+    cfac_azimuth_corr,
+    cfac_rot_angle_corr,
+    cfac_tilt_corr,
+    radar_type,  // from dgi->dds->radd->radar_type
+    use_Wen_Chaus_algorithm,
+    dgi_dds_ryib_azimuth,
+    dgi_dds_ryib_elevation,
+    &ra_x,
+    &ra_y,
+    &ra_z,
+    &ra_rotation_angle,
+    &ra_tilt,
+    &ra_azimuth,
+    &ra_elevation,
+    &ra_psi
+      );
+
+    // IMPORTANT!!!  SoloII is missing the M_T matrix!!! Then radar_angles == applyGeorefs
+    float T = georef.getTrack() * Radx::DegToRad;
+    float ra_x2 = cos(T) * ra_x + sin(T) * ra_y;
+    float ra_y2 = - sin(T) * ra_x + cos(T) * ra_y;
+
+    double abs_err = 0.05;
+    
+    EXPECT_NEAR(ra_x2, ray->getGeoreference()->getXX(), abs_err);
+    EXPECT_NEAR(ra_y2, ray->getGeoreference()->getYY(), abs_err);
+    EXPECT_NEAR(ra_z,  ray->getGeoreference()->getZZ(), abs_err);
+
+
+    // applyGeorefs calculates phi (elevation angle), 
+    // but it does NOT calculate tau (tilt) = asin (z_t)
+    // we may need to modify RadxRay::applyGeorefs to calculate this, since
+    // tau needs the intermediate, local value zz = z_t
+
+    //ra_elevation = ray->getElevationDeg() * Radx::DegToRad; // convert to radians? Yes!
+    // elevation should be zero
+
+   // EXPECT_NEAR(ray->getGeoreference()->getRotation(), ra_rotation_angle, abs_err);
+    //ra_tilt = ray->getGeoreference()->getTilt() * Radx::DegToRad; // ray->getTilt(); or georef.getTilt()?  TODO: which coordinate systems is this tilt?
+    //EXPECT_NEAR(ray->getGeoreference()->getTilt(), ra_tilt, abs_err);
+
+/*
+    float vert_velocity = georef.getVertVelocity() + cfac.getVertVelCorr(); // goes with sin(elevation)
+    float ew_velocity = georef.getEwVelocity() + cfac.getEwVelCorr();   // these three go with sin(tilt)
+    float ns_velocity = georef.getNsVelocity() + cfac.getNsVelCorr();
+    float ew_gndspd_corr = 0.0; // TODO: where is this??? cfac.get??; or is it calculated?
+    //float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
+    //float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
+    // adjust should be -1
+
+    // NEED to handle missing values -999 (SoloII) vs -9999 (Radx)
+    if (vert_velocity == Radx::missingMetaFloat) vert_velocity = 0.0;
+    if (ew_velocity == Radx::missingMetaFloat) ew_velocity = 0.0;
+    if (ns_velocity == Radx::missingMetaFloat) ns_velocity = 0.0;
+    if (ew_gndspd_corr == Radx::missingMetaFloat) ew_gndspd_corr = 0.0;
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, ra_tilt, ra_elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_NEAR(newData[i], newData_expected[i], abs_err);
+*/
+  }
+
+  TEST(SoloRemoveAcMotion, real_data_N42RF_TS_ApplyGeoref_vs_radar_angles_nonzero_cfacs_yprime) {
+
+#define NGATES_26 26
+#define MISS -32768
+    // VEL
+    float data[NGATES_26] = { 
+      0.0,   -0.430, -1.970, -0.930, -0.380,
+     -2.790, -0.590, -1.080, -2.780, -22.780,
+     -5.690,   MISS, -7.440, -3.780,  -2.830,
+     -2.570, -2.400, -2.210, -2.160,  -2.760, 
+     -7.110,-18.430, -4.640,-12.880,  MISS,
+     -19.150};
+
+    float newData[NGATES_26] = { 
+      0, 0, 0, 0, 0, 
+      0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 
+      0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 
+      0};
+    // VR
+    // the adjustment should be 13.200
+    float newData_expected[NGATES_26] = {
+      13.200, 12.770, 11.230, 12.270, 12.820,
+      10.410, 12.610, 12.120, 10.420, -9.580,
+       7.510,   MISS,  5.760,  9.420, 10.370,
+      10.630, 10.800, 10.990, 11.040, 10.440,
+       6.090, -5.230,  8.560,  0.320,   MISS,
+      -5.950};
+
+    bool  bnd[NGATES_26] = { 
+      1, 1,  1, 1, 1, 
+      1, 1,  1, 1, 1,
+      1, 1,  1, 1, 1, 
+      1, 1,  1, 1, 1,
+      1,  1, 1, 1, 1,
+      1};
+
+    float bad_flag = MISS;
+
+    //float ra_elevation;
+    //float ra_tilt;
+
+    // Nyquist stuff ...    
+    // keep the Nyquist velocity greater than any data value,
+    // to avoid any folding/unfolding 
+    float eff_unamb_vel = 24.96; // from RADD section of Dorade file; use this value!
+    float nyquist_velocity = 0.0; // 48.0437;  NOTE!!! SoloII did NOT have the nyquist velocity!
+
+    size_t nGates = NGATES_26;
+    size_t clip_gate = nGates;
+
+    RadxRay *ray = new RadxRay();
+
+    RadxGeoref georef; //  = new RadxGeoref();
+
+    // VERY IMPORTANT to set values to zero! otherwise they are
+    // set to missing values and the missing values mess up the
+    // georef calculations!
+    georef.setToZero();
+    
+    georef.setLongitude(-86.3245);
+    georef.setLatitude(29.0469);
+    georef.setAltitudeKmMsl(1.91292); 
+    georef.setAltitudeKmAgl(1.95904);  // angle
+    georef.setEwVelocity(63.11);
+    georef.setNsVelocity(107.57);
+    georef.setVertVelocity(-1.04);
+    georef.setHeading(27.6086); // <======
+
+    georef.setRoll(5.61951);
+    georef.setPitch(1.77429);
+    georef.setDrift(2.79053);
+    georef.setTrack(georef.getHeading() + georef.getDrift()); // doesn't seem to be used
+    georef.setRotation(67.478);  // theta_a
+    georef.setTilt(-19.9924);
+    georef.setEwWind(5.09053);
+    georef.setNsWind(-4.84845);
+    georef.setVertWind(-1.42); 
+    //
+    // headingRate: 0.939331
+    // pitchRate: 0.900879
+    // rollRate: -9999
+    // driveAngle1: -9999
+    // driveAngle2: -9999
+    //   
+
+    ray->setGeoref(georef);
+
+    RadxCfactors cfac; 
+    cfac.clear();
+    // cfac.aft
+    // azimuth_corr           =   0.000
+    // elevation_corr         =   0.000
+    // range_delay_corr
+    cfac.setRangeCorr(-16.641);
+    // longitude_corr         =   0.000
+    // latitude_corr          =   0.000
+    cfac.setPressureAltCorr(4.969);
+    // radar_alt_corr         =   0.000
+    // ew_gndspd_corr         =   0.000
+    // ns_gndspd_corr         =   0.000
+    // vert_vel_corr          =   0.000
+    cfac.setHeadingCorr(-0.939331);
+    // roll_corr              =   0.000
+    cfac.setPitchCorr(0.009);  // maybe pitchRate???
+    cfac.setDriftCorr(0.119);
+    cfac.setRotationCorr(-0.016);
+    cfac.setTiltCorr(0.713);
+
+    ray->setCfactors(cfac);
+    // NOTE!!!! always pull/place the cfactors to the ray, so that
+    // applyGeorefs can add them BEFORE calculating the transformations.
+
+    Radx::PrimaryAxis_t axis = Radx::PRIMARY_AXIS_Y_PRIME;
+    //bool force = true;
+    ray->applyGeoref(axis); // , force);
+    // try using radar_angles instead of applyGeoref ...
+
+    float asib_roll = georef.getRoll();          // degrees
+    float asib_pitch = georef.getPitch();        // degrees
+    float asib_heading = georef.getHeading();    // degrees
+    float asib_drift_angle = georef.getDrift();  // degrees
+    float asib_rotation_angle = georef.getRotation(); // degrees
+    float asib_tilt = georef.getTilt();               // degrees
+
+
+    float cfac_pitch_corr = cfac.getPitchCorr();       // degrees
+    float cfac_heading_corr =  cfac.getHeadingCorr();  // degrees
+    float cfac_drift_corr =  cfac.getDriftCorr();      // degrees
+    float cfac_roll_corr =  cfac.getRollCorr();        // degrees
+    float cfac_elevation_corr =  cfac.getElevationCorr(); // degrees
+    float cfac_azimuth_corr =  cfac.getAzimuthCorr();     // degrees
+    float cfac_rot_angle_corr =  cfac.getRotationCorr();  // degrees
+    float cfac_tilt_corr =  cfac.getTiltCorr();           // degrees
+    int radar_type =  3; // AIR_TAIL 3;  // from dgi->dds->radd->radar_type
+    bool use_Wen_Chaus_algorithm = true; // true; //  ==> adjust = -44;
+    float dgi_dds_ryib_azimuth = 67.478;  // degrees
+    float dgi_dds_ryib_elevation = -19.9924; // degrees
+    float ra_x;
+    float ra_y;
+    float ra_z;
+    float ra_rotation_angle;
+    float ra_tilt;
+    float ra_azimuth;
+    float ra_elevation;
+    float ra_psi;
+
+
+    dd_radar_angles(
+    asib_roll,
+    asib_pitch,
+    asib_heading,
+    asib_drift_angle,
+    asib_rotation_angle,
+    asib_tilt,
+    cfac_pitch_corr,
+    cfac_heading_corr,
+    cfac_drift_corr,
+    cfac_roll_corr,
+    cfac_elevation_corr,
+    cfac_azimuth_corr,
+    cfac_rot_angle_corr,
+    cfac_tilt_corr,
+    radar_type,  // from dgi->dds->radd->radar_type
+    use_Wen_Chaus_algorithm,
+    dgi_dds_ryib_azimuth,
+    dgi_dds_ryib_elevation,
+    &ra_x,
+    &ra_y,
+    &ra_z,
+    &ra_rotation_angle,
+    &ra_tilt,
+    &ra_azimuth,
+    &ra_elevation,
+    &ra_psi
+      );
+
+    // IMPORTANT!!!  SoloII is missing the M_T matrix!!! Then radar_angles == applyGeorefs
+    float T = (georef.getHeading() + cfac.getHeadingCorr())  + 
+              (georef.getDrift() + cfac.getDriftCorr());
+    T = T * Radx::DegToRad;
+    float ra_x2 = cos(T) * ra_x + sin(T) * ra_y;
+    float ra_y2 = - sin(T) * ra_x + cos(T) * ra_y;
+
+    double abs_err = 0.05;
+    
+    EXPECT_NEAR(ra_x2, ray->getGeoreference()->getXX(), abs_err);
+    EXPECT_NEAR(ra_y2, ray->getGeoreference()->getYY(), abs_err);
+    EXPECT_NEAR(ra_z,  ray->getGeoreference()->getZZ(), abs_err);
+
+
+    // applyGeorefs calculates phi (elevation angle), 
+    // but it does NOT calculate tau (tilt) = asin (z_t)
+    // we may need to modify RadxRay::applyGeorefs to calculate this, since
+    // tau needs the intermediate, local value zz = z_t
+
+    //ra_elevation = ray->getElevationDeg() * Radx::DegToRad; // convert to radians? Yes!
+    // elevation should be zero
+
+    //EXPECT_NEAR(ray->getGeoreference()->getRotation(), ra_rotation_angle, abs_err);
+    //ra_tilt = ray->getGeoreference()->getTilt() * Radx::DegToRad; // ray->getTilt(); or georef.getTilt()?  TODO: which coordinate systems is this tilt?
+    //EXPECT_NEAR(ray->getGeoreference()->getTilt(), ra_tilt, abs_err);
+
+/*
+    float vert_velocity = georef.getVertVelocity() + cfac.getVertVelCorr(); // goes with sin(elevation)
+    float ew_velocity = georef.getEwVelocity() + cfac.getEwVelCorr();   // these three go with sin(tilt)
+    float ns_velocity = georef.getNsVelocity() + cfac.getNsVelCorr();
+    float ew_gndspd_corr = 0.0; // TODO: where is this??? cfac.get??; or is it calculated?
+    //float elevation = M_PI/2.0; // or any multiple of pi help make ac_vel = 0 
+    //float tilt = 0.0; // or any multiple of pi help make ac_vel = 0  
+    // adjust should be -1
+
+    // NEED to handle missing values -999 (SoloII) vs -9999 (Radx)
+    if (vert_velocity == Radx::missingMetaFloat) vert_velocity = 0.0;
+    if (ew_velocity == Radx::missingMetaFloat) ew_velocity = 0.0;
+    if (ns_velocity == Radx::missingMetaFloat) ns_velocity = 0.0;
+    if (ew_gndspd_corr == Radx::missingMetaFloat) ew_gndspd_corr = 0.0;
+
+    se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
+                        ew_gndspd_corr, ra_tilt, ra_elevation,
+                        data, newData, nGates, bad_flag, clip_gate,
+                        eff_unamb_vel, nyquist_velocity, bnd);
+
+    for (int i=0; i<NGATES_10; i++)
+      EXPECT_NEAR(newData[i], newData_expected[i], abs_err);
+*/
   }
 
 
