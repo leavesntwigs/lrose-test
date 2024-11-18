@@ -1,0 +1,52 @@
+
+eol-amalfi:~ brenda$ docker run -it -v /Users/brenda/git/lrose-test/apps/radar/src/CreateCfac:/tmp  leavesntwigs/mmbell-cai-et-al:20230720
+
+Need to install make in the Docker container for running cfac code.
+need root permission.
+Just use gfortran!
+
+   30  gfortran -c chol_inv.f 
+   31  ls
+   32  gfortran -c hello.f90 
+   33  ls
+   34  gfortran -o hello hello.o chol_inv.o
+
+
+These agree:
+python
+>>> aF = np.array([[1., 2.], [3., 5.]], order='F')
+>>> aF
+array([[1., 2.],
+       [3., 5.]])
+>>> ierr, xF = chol_inv.chol_inv(aF, b, 2)
+>>> xF
+array([1., 0.], dtype=float32)
+
+and hello.f
+
+      program hello
+      ! This is a comment line; it is ignored by the compiler
+
+      real*4   a(2,2)
+      real*4   b(2)
+      real*4   x(2)
+      INTEGER n
+      INTEGER ierr
+
+      a(1,1) = 1.0
+      a(1,2) = 2.0
+      a(2,1) = 3.0
+      a(2,2) = 5.0
+      b(1) = 1.0
+      b(2) = 2.0 
+      n = 2
+      call chol_inv(a,x,b,n,ierr)
+      print *,'x: ',x(1),x(2)
+      stop
+      end  
+
+
+(base) eol-amalfi:~ brenda$ docker run -it -v /Users/brenda/git/lrose-test/apps/radar/src/CreateCfac:/tmp  leavesntwigs/mmbell-cai-et-al:20230720
+
+lrose@c767e2a85201:/tmp$ ./hello
+ x:    1.00000000       0.00000000
