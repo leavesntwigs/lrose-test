@@ -50,3 +50,18 @@ and hello.f
 
 lrose@c767e2a85201:/tmp$ ./hello
  x:    1.00000000       0.00000000
+
+----
+
+splin tests:
+
+to compile cns_eldo_cai.f in container 
+to avoid error: Error: Rank mismatch in argument 'xinv' at (1) (scalar and rank-2)
+use this compile flag: -fallow-argument-mismatch
+
+lrose@49d490856ee8:~$ cd /tmp
+lrose@49d490856ee8:/tmp$ gfortran -fallow-argument-mismatch -c test_splin.f
+lrose@49d490856ee8:/tmp$ gfortran -fallow-argument-mismatch -o test_splin  test_splin.o splin.o
+$ ./test_splin
+
+
