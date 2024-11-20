@@ -65,3 +65,14 @@ lrose@49d490856ee8:/tmp$ gfortran -fallow-argument-mismatch -o test_splin  test_
 $ ./test_splin
 
 
+--------
+ spline
+-------
+
+--------
+ inter
+-------
+
+--------
+ azel
+-------
