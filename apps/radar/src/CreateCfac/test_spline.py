@@ -42,40 +42,61 @@ qn = 0
       # dimension x(1000),u(1000),s(1000),del(1000)
       #    v, q1, qn, n are all single values
 
-x = np.array([3., 12., 22., 42.])
-u = np.array([9., 8., 7., 6.])
+x = np.array([3., 12., 22., 42., 40.])
+u = np.array([9., 8., 7., 6., 5])
 
 # TODO: how to handle these out parameters?  
-# 1. create them inside spline as arrays of length n
-# 2. pass them in, preallocated.
-dely = np.array([1., 1., 1., 1.])
-s = np.array([1., 1., 1., 1.])
+# **1. create them inside spline as arrays of length n
+#   2. pass them in, preallocated.
+# dely = np.array([1., 1., 1., 1.])
+# s = np.array([1., 1., 1., 1.])
 
 q1 = 0
 qn = 0
 
-n = 0
-# test: n = 0 
-print('')
-print('test n=0')
-s, dely = spline.spline(x,u,s,dely,q1,qn,n)
-expected = 0
+# NOT A VALID TEST
+# n = 0
+# # test: n = 0 
+# print('')
+# print('test n=0')
+# s, dely = spline.spline(x,u,q1,qn,n)
+# print('dely: ', dely[:10])
+# print('s: ', s[:10])
+
 
 # test: n = 1 
 print('')
 print('test n=1')
-s, dely = spline.spline(x,u,s,dely,q1,qn,n)
+n = 1
+s, dely = spline.spline(x,u,q1,qn,n)
+print('dely: ', dely[:10])
+print('s: ', s[:10])
 expected = 9
 
 # test: n = 2
 print('')
 print('test n=2')
-s, dely = spline.spline(x,u,s,dely,q1,qn,n)
+n = 2
+s, dely = spline.spline(x,u,q1,qn,n)
+print('dely: ', dely[:10])
+print('s: ', s[:10])
 expected = 0
 
 # test: n = 3
 print('')
 print('test n=3')
-s, dely = spline.spline(x,u,s,dely,q1,qn,n)
+n = 3
+s, dely = spline.spline(x,u,q1,qn,n)
+print('dely: ', dely[:10])
+print('s: ', s[:10])
+expected = 79 
+
+# test: n = 4
+print('')
+print('test n=4')
+n = 4
+s, dely = spline.spline(x,u,q1,qn,n)
+print('dely: ', dely[:10])
+print('s: ', s[:10])
 expected = 79 
 
