@@ -55,13 +55,13 @@ q1 = 0
 qn = 0
 
 # NOT A VALID TEST
-# n = 0
-# # test: n = 0 
-# print('')
-# print('test n=0')
-# s, dely = spline.spline(x,u,q1,qn,n)
-# print('dely: ', dely[:10])
-# print('s: ', s[:10])
+n = 0
+# test: n = 0 
+print('')
+print('test n=0')
+s, dely = spline.spline(x,u,q1,qn,n)
+print('dely: ', dely[:10])
+print('s: ', s[:10])
 
 
 # test: n = 1 

@@ -83,7 +83,12 @@
       print *,'s: ', s(1), s(2), s(3), s(4)
 
       n = 4
-      
+      print *,''
+      print *,'test n=4'
+      result = spline(x,u,s,del,q1,qn,n)
+      print *,'del: ', del(1), del(2), del(3), del(4)
+      print *,'s: ', s(1), s(2), s(3), s(4)
+
       n = 1001
 
       stop
