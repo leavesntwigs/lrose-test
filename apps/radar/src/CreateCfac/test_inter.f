@@ -41,14 +41,22 @@
       ! ?? nx_wrisurf
       ! ?? ny_wrisurf
 
-      x(1) = 3
-      x(2) = 12
-      x(3) = 22
-      x(4) = 42
-      u(1) = 9
-      u(2) = 8
-      u(3) = 7
-      u(4) = 6
+      swdzsurf_wri(1,1) = 3
+      swdzsurf_wri(1,2) = 12
+      swdzsurf_wri(1,3) = 22
+      swdzsurf_wri(1,4) = 42
+      swdzsurf_wri(2,1) = 3
+      swdzsurf_wri(2,2) = 12
+      swdzsurf_wri(2,3) = 22
+      swdzsurf_wri(2,4) = 42
+      swdzsurf_wri(3,1) = 3
+      swdzsurf_wri(3,2) = 12
+      swdzsurf_wri(3,3) = 22
+      swdzsurf_wri(3,4) = 42
+      swdzsurf_wri(4,1) = 3
+      swdzsurf_wri(4,2) = 12
+      swdzsurf_wri(4,3) = 22
+      swdzsurf_wri(4,4) = 42
 
 !
 ! test these values for n: 0, 1, 2, 3, 4, n>1000
@@ -57,42 +65,69 @@
 ! Hmmm, not sure how to test this, ...
 ! vary nx and ny ? the size of the submatrix to interpolate over?
 
-      n = 0
+      ! square matrix
+      nx_wrisurf = 0
+      ny_wrisurf = 0
       print *,''
       print *,'test n=0'
-      result = inter(swdzsurf_wri,sw_or_altsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-      print *,'del: ', del(1), del(2), del(3), del(4)
-      print *,'s: ', s(1), s(2), s(3), s(4)
+      call inter(swdzsurf_wri,sw_or_altsurf_wri
+     &                 ,nx_wrisurf,ny_wrisurf,nxysurfmax)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(1,1), sw_or_altsurf_wri(1,2), sw_or_altsurf_wri(1,3), sw_or_altsurf_wri(1,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(2,1), sw_or_altsurf_wri(2,2), sw_or_altsurf_wri(2,3), sw_or_altsurf_wri(2,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(3,1), sw_or_altsurf_wri(3,2), sw_or_altsurf_wri(3,3), sw_or_altsurf_wri(3,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(4,1), sw_or_altsurf_wri(4,2), sw_or_altsurf_wri(4,3), sw_or_altsurf_wri(4,4)
 
-      n = 1
+      nx_wrisurf = 1
+      ny_wrisurf = 1
       print *,''
       print *,'test n=1'
-      result = inter(swdzsurf_wri,sw_or_altsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-      print *,'del: ', del(1), del(2), del(3), del(4)
-      print *,'s: ', s(1), s(2), s(3), s(4)
+      call inter(swdzsurf_wri,sw_or_altsurf_wri
+     &                 ,nx_wrisurf,ny_wrisurf,nxysurfmax)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(1,1), sw_or_altsurf_wri(1,2), sw_or_altsurf_wri(1,3), sw_or_altsurf_wri(1,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(2,1), sw_or_altsurf_wri(2,2), sw_or_altsurf_wri(2,3), sw_or_altsurf_wri(2,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(3,1), sw_or_altsurf_wri(3,2), sw_or_altsurf_wri(3,3), sw_or_altsurf_wri(3,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(4,1), sw_or_altsurf_wri(4,2), sw_or_altsurf_wri(4,3), sw_or_altsurf_wri(4,4)
 
-      n = 2
+
+      nx_wrisurf = 2
+      ny_wrisurf = 2
       print *,''
       print *,'test n=2'
-      result = inter(swdzsurf_wri,sw_or_altsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-      print *,'del: ', del(1), del(2), del(3), del(4)
-      print *,'s: ', s(1), s(2), s(3), s(4)
+      call inter(swdzsurf_wri,sw_or_altsurf_wri
+     &                 ,nx_wrisurf,ny_wrisurf,nxysurfmax)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(1,1), sw_or_altsurf_wri(1,2), sw_or_altsurf_wri(1,3), sw_or_altsurf_wri(1,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(2,1), sw_or_altsurf_wri(2,2), sw_or_altsurf_wri(2,3), sw_or_altsurf_wri(2,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(3,1), sw_or_altsurf_wri(3,2), sw_or_altsurf_wri(3,3), sw_or_altsurf_wri(3,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(4,1), sw_or_altsurf_wri(4,2), sw_or_altsurf_wri(4,3), sw_or_altsurf_wri(4,4)
 
-      n = 3
+
+      nx_wrisurf = 3
+      ny_wrisurf = 3
       print *,''
       print *,'test n=3'
-      result = inter(swdzsurf_wri,sw_or_altsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-      print *,'del: ', del(1), del(2), del(3), del(4)
-      print *,'s: ', s(1), s(2), s(3), s(4)
+      call inter(swdzsurf_wri,sw_or_altsurf_wri
+     &                 ,nx_wrisurf,ny_wrisurf,nxysurfmax)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(1,1), sw_or_altsurf_wri(1,2), sw_or_altsurf_wri(1,3), sw_or_altsurf_wri(1,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(2,1), sw_or_altsurf_wri(2,2), sw_or_altsurf_wri(2,3), sw_or_altsurf_wri(2,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(3,1), sw_or_altsurf_wri(3,2), sw_or_altsurf_wri(3,3), sw_or_altsurf_wri(3,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(4,1), sw_or_altsurf_wri(4,2), sw_or_altsurf_wri(4,3), sw_or_altsurf_wri(4,4)
 
-      n = 4
+
+      nx_wrisurf = 4
+      ny_wrisurf = 4
       print *,''
       print *,'test n=4'
-      result = inter(swdzsurf_wri,sw_or_altsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-      print *,'del: ', del(1), del(2), del(3), del(4)
-      print *,'s: ', s(1), s(2), s(3), s(4)
+      call inter(swdzsurf_wri,sw_or_altsurf_wri
+     &                 ,nx_wrisurf,ny_wrisurf,nxysurfmax)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(1,1), sw_or_altsurf_wri(1,2), sw_or_altsurf_wri(1,3), sw_or_altsurf_wri(1,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(2,1), sw_or_altsurf_wri(2,2), sw_or_altsurf_wri(2,3), sw_or_altsurf_wri(2,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(3,1), sw_or_altsurf_wri(3,2), sw_or_altsurf_wri(3,3), sw_or_altsurf_wri(3,4)
+      print *,'sw_or_altsurf_wri: ', sw_or_altsurf_wri(4,1), sw_or_altsurf_wri(4,2), sw_or_altsurf_wri(4,3), sw_or_altsurf_wri(4,4)
 
-      n = 1001
+
+      ny_wrisurf = 1001
+
+      ! rectangular  matrix
 
       stop
       end  
