@@ -1,7 +1,7 @@
       
 # 
 import numpy as np
-import spline
+import inter
 
 
 def compare_results(result, expected):
@@ -15,7 +15,7 @@ def compare_results(result, expected):
 # real x(1000),u(1000),s(1000),del(1000)
 
 q1 = 0
-qn = 0
+qnx_wrisurf = 0
 
       # INTEGER v, q1, qn, n 
 
@@ -42,61 +42,72 @@ qn = 0
       # dimension x(1000),u(1000),s(1000),del(1000)
       #    v, q1, qn, n are all single values
 
-x = np.array([3., 12., 22., 42., 40.])
-u = np.array([9., 8., 7., 6., 5])
+nxysurfmax = 10
+swdzsurf_wri = np.ndarray((10,10), dtype=float)
 
-# TODO: how to handle these out parameters?  
-# **1. create them inside spline as arrays of length n
-#   2. pass them in, preallocated.
-# dely = np.array([1., 1., 1., 1.])
-# s = np.array([1., 1., 1., 1.])
+swdzsurf_wri[1,1] = 3
+swdzsurf_wri[1,2] = 12
+swdzsurf_wri[1,3] = 22
+swdzsurf_wri[1,4] = 42
+swdzsurf_wri[2,1] = 3
+swdzsurf_wri[2,2] = 12
+swdzsurf_wri[2,3] = 22
+swdzsurf_wri[2,4] = 42
+swdzsurf_wri[3,1] = 3
+swdzsurf_wri[3,2] = 12
+swdzsurf_wri[3,3] = 22
+swdzsurf_wri[3,4] = 42
+swdzsurf_wri[4,1] = 3
+swdzsurf_wri[4,2] = 12
+swdzsurf_wri[4,3] = 22
+swdzsurf_wri[4,4] = 42
 
 q1 = 0
-qn = 0
+qnx_wrisurf = 0
 
 # NOT A VALID TEST
-n = 0
-# test: n = 0 
+nx_wrisurf = 0
+ny_wrisurf = 0
+# test: nx_wrisurf = 0 
 print('')
 print('test n=0')
-s, dely = spline.spline(x,u,q1,qn,n)
-print('dely: ', dely[:10])
-print('s: ', s[:10])
+sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
+print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
 
 
-# test: n = 1 
+# test: nx_wrisurf = 1 
 print('')
 print('test n=1')
-n = 1
-s, dely = spline.spline(x,u,q1,qn,n)
-print('dely: ', dely[:10])
-print('s: ', s[:10])
+nx_wrisurf = 1
+ny_wrisurf = 1
+sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
+print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
 expected = 9
 
-# test: n = 2
+# test: nx_wrisurf = 2
 print('')
 print('test n=2')
-n = 2
-s, dely = spline.spline(x,u,q1,qn,n)
-print('dely: ', dely[:10])
-print('s: ', s[:10])
+nx_wrisurf = 2
+ny_wrisurf = 2
+sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
+print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
 expected = 0
 
-# test: n = 3
+# test: nx_wrisurf = 3
 print('')
 print('test n=3')
-n = 3
-s, dely = spline.spline(x,u,q1,qn,n)
-print('dely: ', dely[:10])
-print('s: ', s[:10])
+nx_wrisurf = 3
+ny_wrisurf = 3
+sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
+print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
 expected = 79 
 
-# test: n = 4
+# test: nx_wrisurf = 4
 print('')
 print('test n=4')
-n = 4
-s, dely = spline.spline(x,u,q1,qn,n)
-print('dely: ', dely[:10])
-print('s: ', s[:10])
+nx_wrisurf = 4
+ny_wrisurf = 4
+sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
+print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
 expected = 79 
 

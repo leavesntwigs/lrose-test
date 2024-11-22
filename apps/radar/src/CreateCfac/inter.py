@@ -1,6 +1,7 @@
 import numpy as np
 
-def inter(sp, sz, nx, ny, nxysurfmax):
+# def inter(sp, sz, nx, ny, nxysurfmax):  ! fortran autoconversion
+def inter(sp, nx, ny, nxysurfmax):  # BEJ conversion
     nsaut = 5
     nmin = 5
     spmin = 1.0
@@ -8,6 +9,7 @@ def inter(sp, sz, nx, ny, nxysurfmax):
     nintx = 0
     ninty = 0
     nout = 0
+    sz = np.ndarray((nxysurfmax,nxysurfmax), dtype='float')
 
     for j in range(ny):
         for i in range(nx):
@@ -38,7 +40,8 @@ def inter(sp, sz, nx, ny, nxysurfmax):
             qn = (y[n - 1] - y[n - 2]) / (x[n - 1] - x[n - 2])
             s = np.zeros(1000)  # Placeholder for spline coefficients
             d = np.zeros(1000)  # Placeholder for spline derivatives
-            spline(x[:n], y[:n], s, d, q1, qn, n)
+            # spline(x[:n], y[:n], s, d, q1, qn, n) ! fortran autoconversion
+            s, d = spline(x[:n], y[:n], q1, qn, n)  # conversion BEJ
             for i in range(imin, imax + 1):
                 if sz[i, j] < -900.0:
                     xi = float(i)
@@ -71,7 +74,8 @@ def inter(sp, sz, nx, ny, nxysurfmax):
             qn = (y[n - 1] - y[n - 2]) / (x[n - 1] - x[n - 2])
             s = np.zeros(1000)  # Placeholder for spline coefficients
             d = np.zeros(1000)  # Placeholder for spline derivatives
-            spline(x[:n], y[:n], s, d, q1, qn, n)
+            # spline(x[:n], y[:n], s, d, q1, qn, n) ! fortran autoconversion
+            s, d = spline(x[:n], y[:n], q1, qn, n) # conversion BEJ
             for j in range(jmin, jmax + 1):
                 if sz[i, j] < -900.0:
                     yj = float(j)
@@ -88,6 +92,6 @@ def inter(sp, sz, nx, ny, nxysurfmax):
 
     print('     -> N_in,int_X,int_Y,out :', nin, nintx, ninty, nout)
 
-    return
+    return sz
 
 
