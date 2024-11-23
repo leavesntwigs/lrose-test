@@ -10,6 +10,10 @@ def inter(sp, nx, ny, nxysurfmax):  # BEJ conversion
     ninty = 0
     nout = 0
     sz = np.ndarray((nxysurfmax,nxysurfmax), dtype='float')
+    x = np.zeros(1000)
+    y = np.zeros(1000)
+    s = np.zeros(1000)
+    d = np.zeros(1000)
 
     for j in range(ny):
         for i in range(nx):

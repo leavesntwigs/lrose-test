@@ -72,7 +72,8 @@ ny_wrisurf = 0
 print('')
 print('test n=0')
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
+print('sw_or_altsurf_wri: ')
+print(sw_or_altsurf_wri[:10,:10])
 
 
 # test: nx_wrisurf = 1 
@@ -81,7 +82,8 @@ print('test n=1')
 nx_wrisurf = 1
 ny_wrisurf = 1
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
+print('sw_or_altsurf_wri: ')
+print(sw_or_altsurf_wri[:10,:10])
 expected = 9
 
 # test: nx_wrisurf = 2
@@ -90,7 +92,8 @@ print('test n=2')
 nx_wrisurf = 2
 ny_wrisurf = 2
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
+print('sw_or_altsurf_wri: ')
+print(sw_or_altsurf_wri[:10,:10])
 expected = 0
 
 # test: nx_wrisurf = 3
@@ -99,7 +102,8 @@ print('test n=3')
 nx_wrisurf = 3
 ny_wrisurf = 3
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
+print('sw_or_altsurf_wri: ')
+print(sw_or_altsurf_wri[:10,:10])
 expected = 79 
 
 # test: nx_wrisurf = 4
@@ -108,6 +112,7 @@ print('test n=4')
 nx_wrisurf = 4
 ny_wrisurf = 4
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
-print('sw_or_altsurf_wri: ', sw_or_altsurf_wri[:10,:10])
+print('sw_or_altsurf_wri: ')
+print(sw_or_altsurf_wri[:10,:10])
 expected = 79 
 
