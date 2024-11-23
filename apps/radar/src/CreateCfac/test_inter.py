@@ -43,24 +43,27 @@ qnx_wrisurf = 0
       #    v, q1, qn, n are all single values
 
 nxysurfmax = 10
-swdzsurf_wri = np.ndarray((10,10), dtype=float)
+swdzsurf_wri = np.ndarray((10,10), dtype=float, order='F')
 
-swdzsurf_wri[1,1] = 3
-swdzsurf_wri[1,2] = 12
-swdzsurf_wri[1,3] = 22
-swdzsurf_wri[1,4] = 42
-swdzsurf_wri[2,1] = 3
-swdzsurf_wri[2,2] = 12
-swdzsurf_wri[2,3] = 22
-swdzsurf_wri[2,4] = 42
-swdzsurf_wri[3,1] = 3
-swdzsurf_wri[3,2] = 12
-swdzsurf_wri[3,3] = 22
-swdzsurf_wri[3,4] = 42
-swdzsurf_wri[4,1] = 3
-swdzsurf_wri[4,2] = 12
-swdzsurf_wri[4,3] = 22
-swdzsurf_wri[4,4] = 42
+swdzsurf_wri[0,0] = 3
+swdzsurf_wri[0,1] = 12
+swdzsurf_wri[0,2] = 22
+swdzsurf_wri[0,3] = 42
+swdzsurf_wri[1,0] = 3
+swdzsurf_wri[1,1] = 12
+swdzsurf_wri[1,2] = 22
+swdzsurf_wri[1,3] = 42
+swdzsurf_wri[2,0] = 3
+swdzsurf_wri[2,1] = 12
+swdzsurf_wri[2,2] = 22
+swdzsurf_wri[2,3] = 42
+swdzsurf_wri[3,0] = 3
+swdzsurf_wri[3,1] = 12
+swdzsurf_wri[3,2] = 22
+swdzsurf_wri[3,3] = 42
+
+print('before tests, swdzsurf_wri = ')
+print(swdzsurf_wri[:10,:10])
 
 q1 = 0
 qnx_wrisurf = 0
@@ -70,7 +73,7 @@ nx_wrisurf = 0
 ny_wrisurf = 0
 # test: nx_wrisurf = 0 
 print('')
-print('test n=0')
+print('test n=0; corresponds to n=?')
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
 print('sw_or_altsurf_wri: ')
 print(sw_or_altsurf_wri[:10,:10])
@@ -78,7 +81,7 @@ print(sw_or_altsurf_wri[:10,:10])
 
 # test: nx_wrisurf = 1 
 print('')
-print('test n=1')
+print('test n=1; corresponds to n=0')
 nx_wrisurf = 1
 ny_wrisurf = 1
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
@@ -88,7 +91,7 @@ expected = 9
 
 # test: nx_wrisurf = 2
 print('')
-print('test n=2')
+print('test n=2; corresponds to n=1')
 nx_wrisurf = 2
 ny_wrisurf = 2
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
@@ -98,7 +101,7 @@ expected = 0
 
 # test: nx_wrisurf = 3
 print('')
-print('test n=3')
+print('test n=3; corresponds to n=2')
 nx_wrisurf = 3
 ny_wrisurf = 3
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)
@@ -108,7 +111,7 @@ expected = 79
 
 # test: nx_wrisurf = 4
 print('')
-print('test n=4')
+print('test n=4; corresponds to n=3')
 nx_wrisurf = 4
 ny_wrisurf = 4
 sw_or_altsurf_wri = inter.inter(swdzsurf_wri,nx_wrisurf,ny_wrisurf,nxysurfmax)

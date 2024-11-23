@@ -9,7 +9,7 @@ def inter(sp, nx, ny, nxysurfmax):  # BEJ conversion
     nintx = 0
     ninty = 0
     nout = 0
-    sz = np.ndarray((nxysurfmax,nxysurfmax), dtype='float')
+    sz = np.ndarray((nxysurfmax,nxysurfmax), dtype='float', order='F')
     x = np.zeros(1000)
     y = np.zeros(1000)
     s = np.zeros(1000)
@@ -21,6 +21,7 @@ def inter(sp, nx, ny, nxysurfmax):  # BEJ conversion
                 sz[i, j] = sz[i, j] / sp[i, j]
                 nin += 1
             else:
+                print('sp[i,j]=', sp[i,j], ' setting sz[', i, ',', j, ']=-999')
                 sz[i, j] = -999.0
 
     print('     -> ALONG X')
