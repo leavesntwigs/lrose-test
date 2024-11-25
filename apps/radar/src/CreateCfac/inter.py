@@ -9,7 +9,7 @@ def inter(sp, nx, ny, nxysurfmax):  # BEJ conversion
     nintx = 0
     ninty = 0
     nout = 0
-    sz = np.ndarray((nxysurfmax,nxysurfmax), dtype='float', order='F')
+    sz = np.zeros((nxysurfmax,nxysurfmax), dtype='float', order='F')
     x = np.zeros(1000)
     y = np.zeros(1000)
     s = np.zeros(1000)
