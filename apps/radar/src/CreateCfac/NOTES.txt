@@ -1,78 +1,79 @@
-
-eol-amalfi:~ brenda$ docker run -it -v /Users/brenda/git/lrose-test/apps/radar/src/CreateCfac:/tmp  leavesntwigs/mmbell-cai-et-al:20230720
-
-Need to install make in the Docker container for running cfac code.
-need root permission.
-Just use gfortran!
-
-   30  gfortran -c chol_inv.f 
-   31  ls
-   32  gfortran -c hello.f90 
-   33  ls
-   34  gfortran -o hello hello.o chol_inv.o
+I think we need examples of these files:
+1. DATA_cns_Cai (or the file 99 parameters)
+   see https://github.com/mmbell/Airborne-Radar-QC/blob/master/navigation/DATA_cns_run
+2. surf_dtm_* files  (or the file 20)
+   This does not seem to be used; it is turned off in the DATA_cns_run file:
+   Otherwise, the file name would be something like ... 'IHOP_DTM_1km'
 
 
-These agree:
-python
->>> aF = np.array([[1., 2.], [3., 5.]], order='F')
->>> aF
-array([[1., 2.],
-       [3., 5.]])
->>> ierr, xF = chol_inv.chol_inv(aF, b, 2)
->>> xF
-array([1., 0.], dtype=float32)
 
-and hello.f
+Input parameter and file name file:
 
-      program hello
-      ! This is a comment line; it is ignored by the compiler
+99: file name from command line args
+c     open(99,file='DATA_cns_Cai',status='unknown')
+      open(99,file=argu,status='unknown')
 
-      real*4   a(2,2)
-      real*4   b(2)
-      real*4   x(2)
-      INTEGER n
-      INTEGER ierr
+Not used
+20: surf_dtm_*  
+       open(20
 
-      a(1,1) = 1.0
-      a(1,2) = 2.0
-      a(2,1) = 3.0
-      a(2,2) = 5.0
-      b(1) = 1.0
-      b(2) = 2.0 
-      n = 2
-      call chol_inv(a,x,b,n,ierr)
-      print *,'x: ',x(1),x(2)
-      stop
-      end  
+output file base directory:
 
+30: wrisurfile<N> 
+        open(30
 
-(base) eol-amalfi:~ brenda$ docker run -it -v /Users/brenda/git/lrose-test/apps/radar/src/CreateCfac:/tmp  leavesntwigs/mmbell-cai-et-al:20230720
+Output files:
 
-lrose@c767e2a85201:/tmp$ ./hello
- x:    1.00000000       0.00000000
+10: fich_cornav
 
-----
+      open(10,file=directory(1:ndir)//'/'//fich_cornav
 
-splin tests:
+50: fich_sis
 
-to compile cns_eldo_cai.f in container 
-to avoid error: Error: Rank mismatch in argument 'xinv' at (1) (scalar and rank-2)
-use this compile flag: -fallow-argument-mismatch
+      open(50,file=directory(1:ndir)//'/'//fich_sis
 
-lrose@49d490856ee8:~$ cd /tmp
-lrose@49d490856ee8:/tmp$ gfortran -fallow-argument-mismatch -c test_splin.f
-lrose@49d490856ee8:/tmp$ gfortran -fallow-argument-mismatch -o test_splin  test_splin.o splin.o
-$ ./test_splin
+55: (read the ELDORA data from text files) 
+        open(55,file=infilename, status='old')
+
+11: cfac.aft
+         open(11,file=directory(1:ndir)//'/'//'cfac.aft'
+12: cfac.fore
+          open(12,file=directory(1:ndir)//'/'//'cfac.fore'
 
 
---------
- spline
--------
+How do we want this to work?
+I think the main function as a service.
+Send parameters as arguments to the service (How many? about 44 individual values; can they be strung into an array? or a list? or a dictionary?))
+Then, return what? files? output parameters? (How many?) cfac.aft has 16 values; cfac.fore has 16 values
+Service is a library?  A C or Fortran library? with Python bindings? like the PySolo code? Follow Ammar's approach?
+* remove the file read and write stuff from the Fortran code.
+* send parameters/arguments to the Fortran code
+* try to wrap the Fortran code as a library, wrapped with C/C++ and Python bindings.
+ This will help understand how to do this with the AOS code.
 
---------
- inter
--------
+Phase I
+   just convert the code and get it running
 
---------
- azel
--------
+Phase II
+   work on user interfaces as needed
+
+11/12/2024
+Trying the numpy.f2py
+There are three approaches:
+1. meson: new build system. Doesn't seem to work, repeated error
+        meson not found
+2. cmake: documentation claims cmake is not so well supported.
+3. scipy: uses cmake, but also scipy, so yet another package to install.
+4. distutil, but this is deprecated.
+
+I cannot make progress with any of the options for f2py.
+I am trying Scipy.
+Performant
+
+mamba create environment scipy ...
+
+brew install gfortran,
+also updated Xcode.
+
+gfortran --help
+
