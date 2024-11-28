@@ -30,6 +30,7 @@
 #******************************************************************
 
 import numpy as np
+import read_input_parameters
 
 def cns_eldo():
     nvar=12
@@ -274,276 +275,15 @@ def cns_eldo():
 #******************************************************************
 #
 # CAI-START ---- read in command line arguments
-       CALL GETARG(1, argu)
+      CALL GETARG(1, argu)
 
-#     open(99,file='DATA_cns_Cai',status='unknown')
+      read_input_parameters.read_input_parameters('DATA_cns.txt')
 
-      open(99,file=argu,status='unknown')
-# CAI STOP
-
-      print(' '
-      read(99,*)directory
-      ndir=1
-      do while(directory(ndir:ndir).ne.' ')
-         ndir=ndir+1
-      enddo
-      ndir=ndir-1
-      print(' DIRECTORY FOR THE OUTPUT FILES :',directory(1:ndir)
-#
-# CAI-START: No tape driver, change to number of text files
-      print(' '
-      read(99,*)dir_read
-      ndirr=1
-      do while(dir_read(ndirr:ndirr).ne.' ')
-         ndirr=ndirr+1
-      enddo
-      ndirr=ndirr-1
-      print(' DIRECTORY FOR READ FILES :',dir_read(1:ndirr)
-
-      print(' '
-      read(99,*)nfile
-      print(' Total Number of Sweep Files :',nfile
-
-# CAI-STOP
-
-      read(99,*)iyymmdd
-      write(yymmdd,"(i12)")10000*iyymmdd(3)+100*iyymmdd(2)+iyymmdd(1)
-      print(' YYYYMMDD :',yymmdd
-#
-      read(99,*)ihms_min,ihms_max
-      print(' HHMMSS (min,max) :',ihms_min,ihms_max
-      ih_min=ihms_min/10000
-      im_min=(ihms_min-10000*ih_min)/100
-      is_min=ihms_min-10000*ih_min-100*im_min
-      ih_max=ihms_max/10000
-      im_max=(ihms_max-10000*ih_max)/100
-      is_max=ihms_max-10000*ih_max-100*im_max
-#
-      read(99,*)orig_lat,orig_lon
-      print(' ORIGIN_LATITUDE,_LONGITUDE :',orig_lat,orig_lon
-#
-      print(' '
-      read(99,*)ig_dismiss
-      print(' 15 GATES TO DISMISS (0 if not) :',ig_dismiss
-#
-      print(' '
-      read(99,*)dmin,dmax0
-      print(' DMIN,DMAX FROM RADAR [km]:',dmin,dmax0
-#
-      print(' '
-      read(99,*)ipr_alt
-      print(' ALTITUDE (1:pressure,2:radar) :',ipr_alt
-#
-      print(' '
-      read(99,*)ref_min0,ref_max
-      print(' REF_min(at 10km),REF_max [dBZ]:',ref_min0,ref_max
-#
-      print(' '
-      read(99,*)ichoice_vdop
-      print(' WHICH VDOP (1:VR,2:VG,3:VU) :'
-             ,ichoice_vdop
-      if(ichoice_vdop == 1.or.ichoice_vdop == 2):
-        ictrl_contray=0
-        print(' -> WILL NOT CONTROL CONTINUITY ALONG THE RAY !!!!'
-      else
-        ictrl_contray=0
-      endif
-#
-      print(' '
-      print(' CORRECTION OF NAVIGATIONAL ERRORS'
-      print(' '
-      print(' FIELDS TAKEN INTO ACCOUNT:'
-      kdzsurf=1
-      kvsurf=1
-      kdvinsitu=1
-      read(99,*)
-      read(99,*)rw_dzsurf,rw_vsurf,rw_dvinsitu
-      print('   -> REL.WGHT_dZsurf,Vsurf,dVinsitu (1/0) :'
-             ,rw_dzsurf,rw_vsurf,rw_dvinsitu
-#
-      print(' '
-      print(' CORRECTIONS TO CALCULATE:'
-      read(99,*)
-      read(99,*)idtiltaft,idtiltfore
-      print('   -> D_TILT_AFT,D_TILT_FORE (1/0) :'
-             ,idtiltaft,idtiltfore
-      read(99,*)idrotaaft,idrotafore
-      print('   -> D_ROTA_AFT,D_ROTA_FORE (1/0) :'
-             ,idrotaaft,idrotafore
-      read(99,*)idpitch,idhdg
-      print('   -> D_PITCH,D_HEADING (1/0) :'
-             ,idpitch,idhdg
-      read(99,*)irdaft,irdfore
-      print('   -> RANGE_DELAY_AFT,RANGE_DELAY_FORE (1/0) :'
-             ,irdaft,irdfore
-      read(99,*)idxwe,idysn,idzacft
-      print('   -> D_XWE,D_YSN,D_ZACFT (1/0) :'
-             ,idxwe,idysn,idzacft
-      read(99,*)idvh
-      print('   -> D_VHACFT (1/0) :',idvh
-#
-      print(' '
-      read(99,*)
-      read(99,*)isim
-      print(' SIMULATION AVEC +dXXX_GUESS INITIAUX (1/0) :',isim
-#
-      print(' '
-      read(99,*)
-      read(99,*)dtiltaft_guess,dtiltfore_guess
-      print(' D_TILT_AFT,D_TILT_FORE (deg) guess :'
-             ,dtiltaft_guess,dtiltfore_guess
-      read(99,*)drotaaft_guess,drotafore_guess
-      print(' D_ROTA_AFT,D_ROTA_FORE (deg) guess :'
-             ,drotaaft_guess,drotafore_guess
-      read(99,*)dpitch_guess,dhdg_guess
-      print(' D_PITCH,D_HEADING (deg) guess :'
-             ,droll_guess,dpitch_guess,dhdg_guess
-      read(99,*)rdaft_guess,rdfore_guess
-      print(' RANGE_DELAY_AFT,RANGE_DELAY_FORE (km) guess :'
-             ,rdaft_guess,rdfore_guess
-      read(99,*)dxwe_guess,dysn_guess,dzacft_guess
-      print(' D_XWE,D_YSN,D_ZACFT (km) guess :'
-             ,dxwe_guess,dysn_guess,dzacft_guess
-      read(99,*)dvh_guess
-      print(' D_VHACFT (m/s) guess :',dvh_guess
-      read(99,*)
-#
-      print('  '
-      read(99,*)idtmfile,dtm_file,zsurf_cst
-      ndtmfile=0
-      if(idtmfile.ne.0):
-        do while(dtm_file(ndtmfile+1:ndtmfile+1).ne.' ')
-           ndtmfile=ndtmfile+1
-        enddo
-      endif
-      if(idtmfile == 0)print(' NO "SURF_DTM_*" FILE WILL BE READ '
-                               ,'-> ZSURF_CST (km) =',zsurf_cst
-      if(idtmfile == 1)print(' WILL READ "SURF_DTM_*" FILE :'
-                               ,dtm_file(1:ndtmfile)
-#
-      read(99,*)iwrisurfile,wrisurfile
-      nsf=0
-      if(iwrisurfile == 1):
-        do while(wrisurfile(nsf+1:nsf+1).ne.' ')
-           nsf=nsf+1
-        enddo
-        print(' WILL WRITE "SURF_EL_*" FILE : '
-               ,wrisurfile(1:nsf)
-        read(99,*)xywidth_wrisurf,hxy_wrisurf
-        xmin_wrisurf=-xywidth_wrisurf/2.
-        xmax_wrisurf=+xywidth_wrisurf/2.
-        ymin_wrisurf=-xywidth_wrisurf/2.
-        ymax_wrisurf=+xywidth_wrisurf/2.
-        print(' -> Xmin,max_wrisurf:',xmin_wrisurf,xmax_wrisurf
-        print('    Ymin,max_wrisurf:',ymin_wrisurf,ymax_wrisurf
-        print('    Hx,y_wrisurf:',hxy_wrisurf
-        nx_wrisurf=((xmax_wrisurf-xmin_wrisurf)/hxy_wrisurf+1.)
-        ny_wrisurf=((ymax_wrisurf-ymin_wrisurf)/hxy_wrisurf+1.)
-        print('    Nx,Ny_wrisurf:',nx_wrisurf,ny_wrisurf
-        if(nx_wrisurf > nxysurfmax.or.ny_wrisurf > nxysurfmax):
-	  print(' !!!! Nx,Ny_wrisurf :',nx_wrisurf,ny_wrisurf
-                 ,' > NxySURFmax !!!!'
-	  print(' !!!! MODIFY l.30 AND RECOMPILE THE PROGRAM !!!!'
-          go to 3
-        endif
-#
-#**** OPEN "SURF_EL_*" FILE #30 FOR WRITING (if IWRISURFILE=1)
-#
-        print(' OPEN "SURF_EL_*" FILE #30 FOR WRITING :'
-         ,directory(1:ndir)//'/'//wrisurfile(1:nsf)
-        open(30
-         ,file=directory(1:ndir)//'/'//wrisurfile(1:nsf)
-         ,form='formatted',status='unknown')
-        iolat_wrisurf=(1000.*orig_lat)
-        iolon_wrisurf=(1000.*orig_lon)
-        ixmin_wrisurf=(1000.*xmin_wrisurf)
-        iymin_wrisurf=(1000.*ymin_wrisurf)
-        ihxy_wrisurf=(1000.*hxy_wrisurf)
-        write(30,111)yymmdd,'ELDO'
-                     ,iolat_wrisurf,iolon_wrisurf
-                     ,0,0,0,0,0
-                     ,ih_min,im_min,is_min
-                     ,ih_max,im_max,is_max
-                     ,ixmin_wrisurf,iymin_wrisurf,0
-                     ,nx_wrisurf,ny_wrisurf,1
-                     ,ihxy_wrisurf,ihxy_wrisurf,0
-#
-      else
-        print(' NO "SURF_EL_*" FILE WILL BE WRITTEN'
-      endif
-#
-      close(99)
       if(no_lect > 900)go to 3
-#
-#******************************************************************
-#**** GENERATE THE SURFACE ARRAYS
-#******************************************************************
-#
-      print(' '
-      print(' GENERATE THE SURFACE ARRAYS'
-      print(' '
-#
-      if(idtmfile == 1):
-#
-#------------------------------------------------------------------
-#---- FROM THE INPUT "SURF_DTM_*" FILE
-#------------------------------------------------------------------
-#
-       print(' IFIDTM=1 -> READ THE "SURF_DTM_*" FILE #20 :'
-               ,directory(1:ndir)//'/'//dtm_file(1:ndtmfile)
-       open(20
-           ,file=directory(1:ndir)//'/'//dtm_file(1:ndtmfile)
-           ,form='formatted',status='unknown')
-        read(20,111)yymmdd_dtm,suff_dtm
-                    ,iolat_dtm,iolon_dtm
-                    ,iha_dtm,ima_dtm,isa_dtm
-                    ,iua_dtm,iva_dtm
-                    ,ihms_dtm,ixmin_dtm,iymin_dtm,nul1
-                    ,nx_dtm,ny_dtm,nul2,ihx_dtm,ihy_dtm,nul3
-  111   format(a12,a4,22i7)
 
-# CAI START
-        write(*,*)'nx_dtm,ny_dtm,ixmin_dtm',nx_dtm,ny_dtm,ixmin_dtm
-# CAI STOP
-	olat_dtm=float(iolat_dtm)/1000.
-	olon_dtm=float(iolon_dtm)/1000.
-	xlatm_surf=(olat_dtm+orig_lat)/2.
-	deg_lon=deg_lon0*cos(conv*xlatm_surf)
-	dx_dtm=(olon_dtm-orig_lon)*deg_lon
-	dy_dtm=(olat_dtm-orig_lat)*deg_lat
-	xmin_dtm=float(ixmin_dtm)/1000.+dx_dtm
-	ymin_dtm=float(iymin_dtm)/1000.+dy_dtm
-	hx_dtm=float(ihx_dtm)/1000.
-	hy_dtm=float(ihy_dtm)/1000.
-	xmax_dtm=xmin_dtm+float(nx_dtm-1)*hx_dtm
-	ymax_dtm=ymin_dtm+float(ny_dtm-1)*hy_dtm
-	print('    X_DTM_min,max :',xmin_dtm,xmax_dtm
-	print('    Y_DTM_min,max :',ymin_dtm,ymax_dtm
-	print('    Hx,y_DTM :',hx_dtm,hy_dtm
-	print('    Nx,y_DTM:',nx_dtm,ny_dtm
-        saltdtm=0.
-        altdtm_mean=0.
-	altdtm_min=+999.
-	altdtm_max=-999.
-        do jdtm=1,ny_dtm
-	   read(20,333)(itab(idtm),idtm=1,nx_dtm)
-  333      format(500i6)
-	   do idtm=1,nx_dtm
-	      if(itab(idtm) > -1000):
-		h_dtm=float(itab(idtm))/1000.
-		alt_dtm(idtm,jdtm)=h_dtm
-	        saltdtm=saltdtm+1.
-	        altdtm_mean=altdtm_mean+h_dtm
-	        altdtm_min=amin1(altdtm_min,h_dtm)
-	        altdtm_max=amax1(altdtm_max,h_dtm)
-	      else
-		alt_dtm(idtm,jdtm)=-999.
-	      endif
-	   enddo
-	enddo
-	altdtm_mean=altdtm_mean/amax1(1.,saltdtm)
-        close(20)
-#
+      if (idtmfile == 1):
+         generate_surface_arrays.generate_surface_arrays(directory,
+            idtmfile, dtm_file)
       elif(idtmfile == 0):
 #
 #------------------------------------------------------------------
@@ -551,7 +291,7 @@ def cns_eldo():
 #------------------------------------------------------------------
 #
         print(' IFIDTM=0 -> ALT_SURF(i,j)=cst'
-               ,' (',zsurf_cst,' )'
+               ,' (',zsurf_cst,' )')
         xmin_dtm=xmin_wrisurf
         ymin_dtm=ymin_wrisurf
         hx_dtm=hxy_wrisurf
@@ -569,15 +309,15 @@ def cns_eldo():
 	altdtm_min=zsurf_cst
 	altdtm_max=zsurf_cst
 #
-      endif
+#      endif
       print('     -> NPTS:',int(saltdtm)
              ,' ALTSURF_mean,min,max:',altdtm_mean
-             ,altdtm_min,altdtm_max
+             ,altdtm_min,altdtm_max)
       zsurfrad_min=altdtm_min-1.
       zsurfrad_max=altdtm_max+1.
-      print(' '
+      print(' ')
       print(' -> AUTHORIZED ZSURF_RAD_min,max :'
-             ,zsurfrad_min,zsurfrad_max
+             ,zsurfrad_min,zsurfrad_max)
 #
 #******************************************************************
 #**** MIN AND MAX TIMES
@@ -647,7 +387,7 @@ def cns_eldo():
              ,directory(1:ndir)//'/'//fich_sis
       open(50,file=directory(1:ndir)//'/'//fich_sis
              ,form='unformatted',status='unknown')
-      write(50)iyymmdd,orig_lon,orig_lat,ihms_min,ihms_max
+      f50.write(iyymmdd,orig_lon,orig_lat,ihms_min,ihms_max
 #
 #******************************************************************
 #**** INITIALIZATIONS
@@ -1173,30 +913,30 @@ while ifile < nfile:
 #**** CONTROL PRINTS FOR THE PAST SWEEP
 #******************************************************************
 #
- 	  print(' '
-	  print(' '
-	  print(' *******************************************'
- 	  print(' **** CONTROL PRINTS FOR THE PAST SWEEP ****'
-	  print(' *******************************************'
- 	  print(' '
-	  print(' HHMMSS :',ihms
-          print(' RADAR(aft=1,fore=2) :',iradar_ray
+ 	  print(' ')
+	  print(' ')
+	  print(' *******************************************')
+ 	  print(' **** CONTROL PRINTS FOR THE PAST SWEEP ****')
+	  print(' *******************************************')
+ 	  print(' ')
+	  print(' HHMMSS :',ihms)
+          print(' RADAR(aft=1,fore=2) :',iradar_ray)
           print(' SWEEP(aft=-1,fore=+1) :',iaftfore
                  ,' NO_SWEEP(this program) :',nb_sweep(iradar_ray)
-                 ,'      [ on tape :',swp(iradar_ray),' ]'
+                 ,'      [ on tape :',swp(iradar_ray),' ]')
           print(' X_we/OLON,Y_sn/OLAT,Z_acft :'
-                 ,xacft_mean,yacft_mean,zacft_mean
-          print(' HEADING :',hdg_mean
-	  print(' U,V,W_acft :',uacft_mean,vacft_mean,wacft_mean
-	  print(' U,V,W_insitu :',uwind_mean,vwind_mean,wwind_mean
-          print(' -> NB_RAYS_THIS_SWEEP :',nb_ray(iradar_ray)
-          print(' -> TILT_mean,rms :',tilt_mean,tilt_rms
-	  print(' -> ROTA_start,end :',rota_start(iradar_ray)
-           	                        ,rota_end(iradar_ray)
-          print(' '
-          print(' -> NREF_OK:',nref_ok(iradar_ray)
-                 ,'    NDOP_OK:',ndop_ok(iradar_ray)
-          print(' '
+                 ,xacft_mean,yacft_mean,zacft_mean)
+          print(' HEADING :',hdg_mean)
+	  print(' U,V,W_acft :',uacft_mean,vacft_mean,wacft_mean)
+	  print(' U,V,W_insitu :',uwind_mean,vwind_mean,wwind_mean)
+          print(' -> NB_RAYS_THIS_SWEEP :',nb_ray(iradar_ray))
+          print(' -> TILT_mean,rms :',tilt_mean,tilt_rms)
+	  print(' -> ROTA_start,end :',rota_start(iradar_ray))
+           	                        ,rota_end(iradar_ray))
+          print(' ')
+          print(' -> NREF_OK:',nref_ok(iradar_ray))
+                 ,'    NDOP_OK:',ndop_ok(iradar_ray))
+          print(' ')
 #
 	  if(kdzsurf == 1):
 	    if(swdzsurf_sweep(iradar_ray) > 0.):
@@ -1209,12 +949,12 @@ while ifile < nfile:
                           /swdzsurf_sweep(iradar_ray)
 	      print(' -> dZHSURF_npts,swghts,mean,stdv :'
                      ,n_dzsurf(iradar_ray),swdzsurf_sweep(iradar_ray)
-                     ,bias_dzsurf,stdv_dzsurf
+                     ,bias_dzsurf,stdv_dzsurf)
               if(iwrisurfile == 1)
                 print('     [ NPTS_SURF FOR SURF_EL_*:'
-                       ,nsurf_wri(iradar_ray),' ]'
+                       ,nsurf_wri(iradar_ray),' ]')
             else
-	      print(' !!!! NPTS_dZHSURF :',n_dzsurf(iradar_ray),' !!!!'
+	      print(' !!!! NPTS_dZHSURF :',n_dzsurf(iradar_ray),' !!!!')
             endif
           endif
 #
@@ -1229,13 +969,13 @@ while ifile < nfile:
                           /swvsurf_sweep(iradar_ray)
 	      print(' -> VSURF_npts,swghts,mean,stdv :'
                      ,n_vsurf(iradar_ray),swvsurf_sweep(iradar_ray)
-                     ,bias_vsurf,stdv_vsurf
+                     ,bias_vsurf,stdv_vsurf)
             else
-	      print(' !!!! NPTS_VSURF :',n_vsurf(iradar_ray),' !!!!'
+	      print(' !!!! NPTS_VSURF :',n_vsurf(iradar_ray),' !!!!')
 	      print(' !!!! Ndismissed_VACFT,VDOPCORR,VDOPSURF:'
                      ,ndismiss_vhacft(iradar_ray)
                      ,ndismiss_vdopcorr(iradar_ray)
-                     ,ndismiss_vdopsurf(iradar_ray),' !!!!'
+                     ,ndismiss_vdopsurf(iradar_ray),' !!!!')
             endif
           endif
 #
@@ -1250,30 +990,30 @@ while ifile < nfile:
                           /swinsitu_sweep(iradar_ray)
 	      print(' -> dVINSITU_npts,swghts,mean,stdv :'
                      ,n_dvinsitu(iradar_ray),swinsitu_sweep(iradar_ray)
-                     ,bias_dvinsitu,stdv_dvinsitu
+                     ,bias_dvinsitu,stdv_dvinsitu)
               print('     -> LEFT_swghts,mean,stdv:'
                      ,s_vpv(iradar_ray,1)
                      ,sv_vpv(iradar_ray,1)
                       /amax1(0.001,s_vpv(iradar_ray,1))
                      ,sqrt( s_vpv(iradar_ray,1)*svv_vpv(iradar_ray,1)
                            -sv_vpv(iradar_ray,1)*sv_vpv(iradar_ray,1))
-                      /amax1(0.001,s_vpv(iradar_ray,1))
+                      /amax1(0.001,s_vpv(iradar_ray,1)))
               print('     -> RIGHT_swghts,mean,stdv:'
                      ,s_vpv(iradar_ray,2)
                      ,sv_vpv(iradar_ray,2)
                       /amax1(0.001,s_vpv(iradar_ray,2))
                      ,sqrt( s_vpv(iradar_ray,2)*svv_vpv(iradar_ray,2)
                            -sv_vpv(iradar_ray,2)*sv_vpv(iradar_ray,2))
-                      /amax1(0.001,s_vpv(iradar_ray,2))
+                      /amax1(0.001,s_vpv(iradar_ray,2)))
             else
 	      print(' !!!! NPTS_VINSITU :'
-                     ,n_dvinsitu(iradar_ray),' !!!!'
+                     ,n_dvinsitu(iradar_ray),' !!!!')
             endif
           endif
-          print(' '
-	  print(' *******************************************'
- 	  print(' '
- 	  print(' '
+          print(' ')
+	  print(' *******************************************')
+ 	  print(' ')
+ 	  print(' ')
 #
 #******************************************************************
 #**** WRITE THE RESULTS FOR THE PAST SWEEP
@@ -1282,34 +1022,34 @@ while ifile < nfile:
 #
 #**** SWEEP HEADER
 #
-          write(50)iaftfore,nb_sweep(iradar_ray)
+          f50.write(iaftfore,nb_sweep(iradar_ray)
                    ,xacft_mean,yacft_mean,zacft_mean
                    ,time_ks_mean,hdg_mean
-                   ,u_mean,v_mean,w_mean
+                   ,u_mean,v_mean,w_mean)
 #
 #******************************************************************
 #**** SWEEP DATA: DZ_surf
 #******************************************************************
 #
-          print(' '
+          print(' ')
           if(kdzsurf == 1 and n_dzsurf(iradar_ray) > 0):
-            write(50)n_dzsurf(iradar_ray)
-            write(50)( zs_rot(iradar_ray,n)
+            f50.write(n_dzsurf(iradar_ray))
+            f50.write(( zs_rot(iradar_ray,n)
                       ,zs_el(iradar_ray,n),zs_az(iradar_ray,n)
                       ,zs_dsurf(iradar_ray,n),zs_dhor(iradar_ray,n)
                       ,zs_zsurf(iradar_ray,n),zs_hsurf(iradar_ray,n)
                       ,n=1,n_dzsurf(iradar_ray))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#!!!!      print(' '
-#!!!!      print(' SIS_* -> NPTS_Zsurf:',n_dzsurf(iradar_ray)
-#!!!!      print(' [ ROT - DH - Z_surf - H_surf ]'
+#!!!!      print(' ')
+#!!!!      print(' SIS_* -> NPTS_Zsurf:',n_dzsurf(iradar_ray))
+#!!!!      print(' [ ROT - DH - Z_surf - H_surf ]')
 #!!!!      do n=1,n_dzsurf(iradar_ray)
 #!!!!         print(zs_rot(iradar_ray,n),zs_dhor(iradar_ray,n)
-#!!!!                ,zs_zsurf(iradar_ray,n),zs_hsurf(iradar_ray,n)
+#!!!!                ,zs_zsurf(iradar_ray,n),zs_hsurf(iradar_ray,n))
 #!!!!      enddo
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           else
-            write(50)0
+            f50.write(0)
           endif
 #
 #******************************************************************
@@ -1317,9 +1057,9 @@ while ifile < nfile:
 #******************************************************************
 #
           if(kvsurf == 1 and n_vsurf(iradar_ray) > 0):
-            write(50)n_vsurf(iradar_ray)
-            write(50)(vs_dhor(iradar_ray,n),vs_vdopsurf(iradar_ray,n)
-                      ,n=1,n_vsurf(iradar_ray))
+            f50.write(n_vsurf(iradar_ray))
+            f50.write((vs_dhor(iradar_ray,n),vs_vdopsurf(iradar_ray,n)
+                      ,n=1,n_vsurf(iradar_ray)))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!      print(' '
 #!!!!      print(' SIS_* -> NPTS_VDOP_surf:',n_vsurf(iradar_ray)
@@ -1329,7 +1069,7 @@ while ifile < nfile:
 #!!!!      enddo
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           else
-            write(50)0
+            f50.write(0)
           endif
 #
 #******************************************************************
@@ -1337,10 +1077,10 @@ while ifile < nfile:
 #******************************************************************
 #
           if(kdvinsitu == 1 and n_dvinsitu(iradar_ray) > 0):
-            write(50)n_dvinsitu(iradar_ray)
-            write(50)( vi_dhor(iradar_ray,n)
+            f50.write(n_dvinsitu(iradar_ray))
+            f50.write(( vi_dhor(iradar_ray,n)
                       ,vi_vdop(iradar_ray,n),vi_vinsitu(iradar_ray,n)
-                      ,n=1,n_dvinsitu(iradar_ray))
+                      ,n=1,n_dvinsitu(iradar_ray)))
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!      print(' '
 #!!!!      print(' NPTS_Vinsitu:',n_dvinsitu(iradar_ray)
@@ -1351,7 +1091,7 @@ while ifile < nfile:
 #!!!!      enddo
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           else
-            write(50)0
+            f50.write(0)
           endif
 #
         endif    !!  of  !! if(nb_ray(iradar_ray) > 1):  !!
@@ -1361,15 +1101,15 @@ while ifile < nfile:
 #******************************************************************
 #
         if(iend == 2):
-	  print(' '
-	  print(' ****************************************************'
+	  print(' ')
+	  print(' ****************************************************')
 	  print('   HHMMSS :',ih_ray,im_ray,is_ray
-                 ,'   -> END OF CONSIDERED PERIOD'
+                 ,'   -> END OF CONSIDERED PERIOD')
 	  print('   NB_SWEEPS_READ FOR AFT AND FORE RADARS :'
-                 ,nb_sweep
-	  print(' ****************************************************'
-	  print(' '
-	  print(' '
+                 ,nb_sweep)
+	  print(' ****************************************************')
+	  print(' ')
+	  print(' ')
           write(10,"(' NB_SWEEPS FOR THE AFT AND FORE RADARS: '
                      ,2i5,/)")
                     ,int(xsweeps(1)),int(xsweeps(2))
@@ -1381,83 +1121,12 @@ while ifile < nfile:
 #****    - DIFFERENCE OF DOPPLER VELOCITY (RADAR-FLIGHT_LEVEL);
 #******************************************************************
 #
-	  print(' '
-	  print(' **********************************************'
-	  print(' ************ MEAN AND RMS ERRORS *************'
-	  print(' **********************************************'
-	  print(' '
-#
-#	  if(kdzsurf == 1):
-#	    bias_dzsurf=swdzmsurf_tot/amax1(1.,swdzsurf_tot)
-#	    stdv_dzsurf=sqrt( swdzsurf_tot*swdz2surf_tot
-#                             -swdzmsurf_tot*swdzmsurf_tot)
-#                        /amax1(1.,swdzsurf_tot)
-#            print(' '
-#            print(' dZ_surf (km) sum_wghts,mean,stdv :'
-#                   ,swdzsurf_tot,bias_dzsurf,stdv_dzsurf
-#            write(10,"(//,' dZ_surf (km) sum_wghts,mean,stdv :'
-#                       ,f10.1,2f8.3,/)")
-#                  swdzsurf_tot,bias_dzsurf,stdv_dzsurf
-#          endif
-##
-#	  if(kvsurf == 1):
-#	    bias_vsurf=swvmsurf_tot/amax1(1.,swvsurf_tot)
-#	    stdv_vsurf=sqrt( swvsurf_tot*swv2surf_tot
-#                            -swvmsurf_tot*swvmsurf_tot)
-#                       /amax1(1.,swvsurf_tot)
-#            print(' '
-#            print(' VDOP_surf (m/s) sum_wghts,mean,stdv :'
-#                   ,swvsurf_tot,bias_vsurf,stdv_vsurf
-#            write(10,"(' VDOP_surf (m/s) sum_wghts,mean,stdv :'
-#                       ,f10.1,2f8.3,/)")
-#                  swvsurf_tot,bias_vsurf,stdv_vsurf
-#          endif
-##
-#	  if(kdvinsitu == 1):
-#	    bias_dvinsitu=swdvminsitu_tot/amax1(1.,swdvinsitu_tot)
-#	    stdv_dvinsitu=sqrt( swdvinsitu_tot*swdv2insitu_tot
-#                               -swdvminsitu_tot*swdvminsitu_tot)
-#                          /amax1(1.,swdvinsitu_tot)
-#            print(' '
-#            print(' dVDOP_insitu (m/s) sum_wghts,mean,stdv :'
-#                   ,swdvinsitu_tot,bias_dvinsitu,stdv_dvinsitu
-#            write(10,"(' dVDOP_insitu (m/s) sum_wghts,mean,stdv :'
-#                       ,f10.1,2f8.3)")
-#                  swdvinsitu_tot,bias_dvinsitu,stdv_dvinsitu
-#	    do iradar=1,2
-#	       print('   IRADAR (AR=1,AV=2) :',iradar
-#               bias_dvinsitu_ir_g
-#                =xv_vpv(iradar,1)/amax1(1.,x_vpv(iradar,1))
-#               stdv_dvinsitu_ir_g
-#                =sqrt( x_vpv(iradar,1)*xvv_vpv(iradar,1)
-#                      -xv_vpv(iradar,1)*xv_vpv(iradar,1))
-#                 /amax1(1.,x_vpv(iradar,1))
-#               print('     -> VDOP-PROJWIND_LEFT_npts,mean,stdv:'
-#                      ,x_vpv(iradar,1)
-#                      ,bias_dvinsitu_ir_g,stdv_dvinsitu_ir_g
-#               write(10,"('   IRADAR (AR=1,AV=2) :',i1,/
-#                          ,'    -> VDOP-PROJWIND_LEFT_npts,mean,stdv:'
-#                          ,f10.1,2f8.3)")
-#                     iradar,x_vpv(iradar,1)
-#                    ,bias_dvinsitu_ir_g,stdv_dvinsitu_ir_g
-#               bias_dvinsitu_ir_d
-#                =xv_vpv(iradar,2)/amax1(1.,x_vpv(iradar,2))
-#               stdv_dvinsitu_ir_d
-#                =sqrt( x_vpv(iradar,2)*xvv_vpv(iradar,2)
-#                      -xv_vpv(iradar,2)*xv_vpv(iradar,2))
-#                 /amax1(1.,x_vpv(iradar,2))
-#               print('     -> VDOP-PROJWIND_RIGHT_npts,mean,stdv:'
-#                      ,x_vpv(iradar,2)
-#                     ,bias_dvinsitu_ir_d,stdv_dvinsitu_ir_d
-#               write(10,"('    -> VDOP-PROJWIND_RIGHT_npts,mean,stdv:'
-#                          ,f10.1,2f8.3)")
-#                     x_vpv(iradar,2)
-#                    ,bias_dvinsitu_ir_d,stdv_dvinsitu_ir_d
-#	    enddo
-#	    print(' '
-#            write(10,"(//)")
-#          endif
-#
+	  print(' ')
+	  print(' **********************************************')
+	  print(' ************ MEAN AND RMS ERRORS *************')
+	  print(' **********************************************')
+	  print(' ')
+
 # autoconverted begin
 
 import numpy as np
@@ -1502,11 +1171,11 @@ if kdvinsitu == 1:
 
 # autoconverted end
 
-	  print(' '
-	  print(' **********************************************'
-	  print(' '
-	  print(' '
-	  print(' '
+	  print(' ')
+	  print(' **********************************************')
+	  print(' ')
+	  print(' ')
+	  print(' ')
 #
 #******************************************************************
 #****  (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
@@ -1519,82 +1188,82 @@ if kdvinsitu == 1:
 #**** RMS VALUES OF THE NORMALIZED VARIABLES
 #******************************************************************
 #
-	    print(' '
-	    print(' **********************************************'
-	    print(' *** RMS VALUES OF THE NORMALIZED VARIABLES ***'
-	    print(' **********************************************'
-	    print(' '
+	    print(' ')
+	    print(' **********************************************')
+	    print(' *** RMS VALUES OF THE NORMALIZED VARIABLES ***')
+	    print(' **********************************************')
+	    print(' ')
 #
             if(swdzsurf_tot > 1.):
               print(' DZ_surf -> sWGHTs:',swdzsurf_tot
-              print('          rms_VAR(dTaft,dTfore):'
-                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=1,2)
+              print('          rms_VAR(dTaft,dTfore):')
+                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=1,2))
               print('          -------(dRaft,dRfore):'
-                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=3,4)
+                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=3,4))
               print('          -------(dPitch,dHdg):'
-                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=5,6)
+                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=5,6))
               print('          -------(RDaft,RDfore):'
-                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=7,8)
+                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=7,8))
               print('          -------(dXwe,dYsn,dZacft):'
-                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=9,11)
+                     ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=9,11))
               print('          -------(dVHacft):'
-                     ,sqrt(rms_var_zsurf(12)/swadzsurf_tot)
+                     ,sqrt(rms_var_zsurf(12)/swadzsurf_tot))
             else
-              print(' !!!! DZ_surf -> sWGHTs:',swdzsurf_tot,' !!!!'
+              print(' !!!! DZ_surf -> sWGHTs:',swdzsurf_tot,' !!!!')
             endif
 #
             if(swvsurf_tot > 1.):
-              print(' VDOP_surf -> sWGHTs:',swvsurf_tot
+              print(' VDOP_surf -> sWGHTs:',swvsurf_tot)
               print('          rms_VAR(dTaft,dTfore):'
-                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=1,2)
+                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=1,2))
               print('          -------(dRaft,dRfore):'
-                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=3,4)
+                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=3,4))
               print('          -------(dPitch,dHdg):'
-                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=5,6)
+                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=5,6))
               print('          -------(RDaft,RDfore):'
-                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=7,8)
+                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=7,8))
               print('          -------(dXwe,dYsn,dZacft):'
-                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=9,11)
+                     ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=9,11))
               print('          -------(dVHacft):'
-                     ,sqrt(rms_var_vsurf(12)/swavsurf_tot)
+                     ,sqrt(rms_var_vsurf(12)/swavsurf_tot))
             else
-              print(' !!!! VDOP_surf -> sWGHTs:',swvsurf_tot,' !!!!'
+              print(' !!!! VDOP_surf -> sWGHTs:',swvsurf_tot,' !!!!')
             endif
 #
             if(swdvinsitu_tot > 1.):
-              print(' DVDOP_insitu -> sWGHTs:',swdvinsitu_tot
+              print(' DVDOP_insitu -> sWGHTs:',swdvinsitu_tot)
               print('          rms_VAR(dTaft,dTfore):'
-                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=1,2)
+                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=1,2))
               print('          -------(dRaft,dRfore):'
-                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=3,4)
+                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=3,4))
               print('          -------(dPitch,dHdg):'
-                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=5,6)
+                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=5,6))
               print('          -------(RDaft,RDfore):'
-                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=7,8)
+                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=7,8))
               print('          -------(dXwe,dYsn,dZacft):'
-                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=9,11)
+                     ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=9,11))
               print('          -------(dVHacft):'
-                     ,sqrt(rms_var_vinsitu(12)/swadvinsitu_tot)
+                     ,sqrt(rms_var_vinsitu(12)/swadvinsitu_tot))
             else
               print(' !!!! DVDOP_insitu -> sWGHTs:'
-                     ,swdvinsitu_tot,' !!!!'
+                     ,swdvinsitu_tot,' !!!!')
             endif
 #
 #******************************************************************
 #**** NORMALIZED CORRELATION MATRIX BETWEEN THE NVAR VARIABLES
 #******************************************************************
 #
-            print(' '
+            print(' ')
             sp_zsvszi=swdzsurf_tot+swvsurf_tot+swdvinsitu_tot
             if(sp_zsvszi > 1.):
-	    print(' **********************************************'
-	    print(' ******* NORMALIZED CORRELATION MATRIX ********'
-	    print(' *******            (*1000)            ********'
-	    print(' *******   BETWEEN THE NVAR VARIABLES  ********'
-	    print(' **********************************************'
-	    print(' '
+	    print(' **********************************************')
+	    print(' ******* NORMALIZED CORRELATION MATRIX ********')
+	    print(' *******            (*1000)            ********')
+	    print(' *******   BETWEEN THE NVAR VARIABLES  ********')
+	    print(' **********************************************')
+	    print(' ')
               print('        dTa-dTf-dRa-dRf-dP-dH-RDa-RDf'
-                     ,'-dX-dY-dZ-dV '
+                     ,'-dX-dY-dZ-dV ')
               do i=1,nvar
 #
                  if(i == 1):
@@ -1603,7 +1272,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 2):
                    print(' dTf  - '
@@ -1611,7 +1280,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 3):
                    print(' dRa  - '
@@ -1619,7 +1288,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 4):
                    print(' dRf  - '
@@ -1627,7 +1296,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 5):
                    print(' dP   - '
@@ -1635,7 +1304,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 6):
                    print(' dH   - '
@@ -1643,7 +1312,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 7):
                    print(' RDa - '
@@ -1651,7 +1320,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 8):
                    print(' RDf - '
@@ -1659,7 +1328,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 9):
                    print(' dX   - '
@@ -1667,7 +1336,7 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 10):
                    print(' dY   - '
@@ -1675,14 +1344,14 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
                  elif(i == 11):
                    print(' dZ   - '
                           ,(int(1000.*corr_var(i,j)
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  elif(i == 12):
                    print(' dV   - '
@@ -1690,14 +1359,14 @@ if kdvinsitu == 1:
                                 /amax1( 0.01
                                        ,sqrt( corr_var(i,i)
                                              *corr_var(j,j))))
-                            ,j=1,nvar)
+                            ,j=1,nvar))
 #
                  endif
               enddo
             else
-              print(' !!!! sw_Zsurf+Vsurf+Vinsitu:',sp_zsvsvi,' !!!!'
+              print(' !!!! sw_Zsurf+Vsurf+Vinsitu:',sp_zsvsvi,' !!!!')
             endif
-            print(' '
+            print(' ')
 #
 #******************************************************************
 #**** NORMALIZATION OF THE MATRICES AND VECTORS
@@ -1706,10 +1375,10 @@ if kdvinsitu == 1:
 #**** THEN BUILD A UNIQUE MATRICE AND VECTOR BY SUMMING
 #******************************************************************
 #
-            print(' '
-            print(' NORMALIZATION OF THE MATRICES AND VECTORS'
+            print(' ')
+            print(' NORMALIZATION OF THE MATRICES AND VECTORS')
             print(' SumPosVal_DZsurf,VDOPsurf,DVDOPinsitu:'
-                   ,swadzsurf_tot,swavsurf_tot,swadvinsitu_tot
+                   ,swadzsurf_tot,swavsurf_tot,swadvinsitu_tot)
       
 #            itest_xmat=0
 #            do i=1,nvar
@@ -2193,13 +1862,13 @@ for i in range(1, nvar + 1):
           print(' '
           print(' END OF "SIS_EL_*" FILE #50 :'
                 ,directory(1:ndir)//'/'//fich_sis
-          write(50)999,999
+          f50.write(999,999
                     ,-999.,-999.,-999.,-999.
                     ,-999.,-999.,-999.
                     ,-999.,-999.,-999.
-          write(50)-999
-          write(50)-999
-          write(50)-999
+          f50.write(-999
+          f50.write(-999
+          f50.write(-999
           close(50)
 #
 #******************************************************************
@@ -2729,42 +2398,6 @@ for i in range(1, nvar + 1):
 	dhor_prevgate=0.	! Mod Oliv
 	z_prevgate=0.		! Mod Oliv
 
-#	do ig=igstart_surf,ngates_max
-#	   if(dgate_corr(ig) <= distmax):
-#	     d_ig=dgate_corr(ig)
-#	     dver_ig=d_ig*selh
-#	     dhor_ig=d_ig*celh
-#	     frac1=2.*(z_acft+dver_ig)/rayter
-#	     frac2=(z_acft*z_acft+d_ig*d_ig
-#                    +2.*z_acft*dver_ig)/(rayter*rayter)
-#             z_ig=rayter*(sqrt(1.+frac1+frac2)-1.)
-#             theta=atan(dhor_ig/(rayter+z_acft+dver_ig))
-#             dhor_ig=rayter*theta
-#	     if(ze(ig) > -900.):
-#               if(ze(ig) > refmax_ray):
-#                 refmax_ray=ze(ig)
-#                 ig_refmax=ig
-#                 d_refmax=d_ig
-#                 dhor_refmax=dhor_ig
-#                 z_refmax=z_ig
-#               endif
-#               if(ig > 1 and ze(ig-1) > -900.):
-#                 gradref=(ze(ig)-ze(ig-1))
-#                         /(d_ig-dgate_corr(ig-1))
-#                 if(gradref > gradrefmax_ray):
-#                   gradrefmax_ray=gradref
-#                   ig_gradrefmax=ig
-#                   d_gradrefmax=(d_ig+dgate_corr(ig-1))/2.
-#                   dhor_gradrefmax=(dhor_prevgate+dhor_ig)/2.
-#                   z_gradrefmax=(z_prevgate+z_ig)/2.
-#                 endif
-#               endif
-#
-#             endif
-#             z_prevgate=z_ig
-#             dhor_prevgate=dhor_ig
-#           endif
-#        enddo
 # autoconverted begin
 import numpy as np
 

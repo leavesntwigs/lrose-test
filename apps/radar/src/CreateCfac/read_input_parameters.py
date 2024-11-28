@@ -289,7 +289,5 @@ def read_input_parameters(file_name):
       else:
          print(' NO "SURF_EL_*" FILE WILL BE WRITTEN')
     
-      # if(no_lect > 900)go to 3 # move to calling function?
-
    return
 
