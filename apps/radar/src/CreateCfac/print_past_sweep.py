@@ -1,3 +1,25 @@
+
+def print_past_sweep(
+          ihms,
+          iradar_ray,
+          iaftfore,
+          nb_sweep,
+          xacft_mean,
+          yacft_mean,zacft_mean,
+          hdg_mean,
+uacft_mean,vacft_mean,wacft_mean,
+uwind_mean,vwind_mean,wwind_mean,
+nb_ray,
+tilt_mean,tilt_rms,
+rota_start,
+rota_end,
+nref_ok,
+ndop_ok,
+kdzsurf,
+swdzsurf_sweep,
+...  # think about how to pass this info.
+          
+          ):
 #
 #******************************************************************
 #**** CONTROL PRINTS FOR THE PAST SWEEP

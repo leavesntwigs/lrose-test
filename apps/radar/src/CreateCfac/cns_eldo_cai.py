@@ -29,6 +29,7 @@
 #   Converted to Python by Brenda Javornik at NCAR, November, 2024
 #******************************************************************
 
+import getopt
 import numpy as np
 import read_input_parameters
 
@@ -54,120 +55,120 @@ def cns_eldo():
 
 # Variable for reading text files
 
-        int ntimes    # Number of times rays were collected --- Number of rays
-        int nranges   # Number of range gates per time  --- Number of gates for each ray
-        int nsweep    # Sweep number in each netcdf file; Used to identify different sweep
+    int ntimes    # Number of times rays were collected --- Number of rays
+    int nranges   # Number of range gates per time  --- Number of gates for each ray
+    int nsweep    # Sweep number in each netcdf file; Used to identify different sweep
 
-        int*4 counter  # Ray number
+    int*4 counter  # Ray number
 
 
-        int start_year,start_mon,start_day
-        int start_hour,start_min,start_sec
+    int start_year,start_mon,start_day
+    int start_hour,start_min,start_sec
 
 
 !  Scaler variable for coccrection factors
 
-        float azimuth_correction
-        float elevation_correction
-        float range_correction
-        float longitude_correction
-        float latitude_correction
-        float pressure_altitude_correction
-        float radar_altitude_correction
-        float ew_gound_speed_correction
-        float ns_ground_speed_correction
-        float vertical_velocity_correction
-        float heading_correction
-        float roll_correction
-        float pitch_correction
-        float drift_correction
-        float rotation_correction
-        float tilt_correction
+    float azimuth_correction
+    float elevation_correction
+    float range_correction
+    float longitude_correction
+    float latitude_correction
+    float pressure_altitude_correction
+    float radar_altitude_correction
+    float ew_gound_speed_correction
+    float ns_ground_speed_correction
+    float vertical_velocity_correction
+    float heading_correction
+    float roll_correction
+    float pitch_correction
+    float drift_correction
+    float rotation_correction
+    float tilt_correction
 
 ! Variable for cfac files
-        float tilt_corr_aft
-        float tilt_corr_fore
-        float rot_angle_corr_aft
-        float rot_angle_corr_fore
-        float pitch_corr_cfac
-        float drift_corr_cfac
-        float range_delay_corr_aft
-        float range_delay_corr_fore
-        float pressure_alt_corr
-        float ew_gndspd_corr
+    float tilt_corr_aft
+    float tilt_corr_fore
+    float rot_angle_corr_aft
+    float rot_angle_corr_fore
+    float pitch_corr_cfac
+    float drift_corr_cfac
+    float range_delay_corr_aft
+    float range_delay_corr_fore
+    float pressure_alt_corr
+    float ew_gndspd_corr
 
 ! Scaler variable for each ray
 
-        int sweep_number
+    int sweep_number
 
-        float*8  time
-        float azimuth
-        float elevation
-        float*8 latitude
-        float*8 longitude
-        float*8 altitude
-        float altitude_agl
-        float heading
-        float roll
-        float pitch
-        float drift
-        float rotation
-        float tilt
-        float ew_velocity
-        float ns_velocity
-        float vertical_velocity
-        float ew_wind
-        float ns_wind
-        float vertical_wind
+    float  time
+    float azimuth
+    float elevation
+    float latitude
+    float longitude
+    float altitude
+    float altitude_agl
+    float heading
+    float roll
+    float pitch
+    float drift
+    float rotation
+    float tilt
+    float ew_velocity
+    float ns_velocity
+    float vertical_velocity
+    float ew_wind
+    float ns_wind
+    float vertical_wind
 
 ! One dimensional array of DBZ, VR, SW, NCP, etc
 
-        float range(MAXPORT)
-        float ZE(MAXPORT),NCP(MAXPORT),VR(MAXPORT),SW(MAXPORT)
-        float VS(MAXPORT),VL(MAXPORT),VG(MAXPORT),VU(MAXPORT)
+    float range(MAXPORT)
+    float ZE(MAXPORT),NCP(MAXPORT),VR(MAXPORT),SW(MAXPORT)
+    float VS(MAXPORT),VL(MAXPORT),VG(MAXPORT),VU(MAXPORT)
 
 ! Variables for input file list
-        CHARACTER(len=80) infilename
-        int  nfile,ifile # total number of netcdf text file, current file number
-        islastfile = False
-        int iopen
+    CHARACTER(len=80) infilename
+    int  nfile,ifile # total number of netcdf text file, current file number
+    islastfile = False
+    int iopen
 
 # Variables declarations previous in Franks' common block, which has been deleted
 
 # From COMMON /CSPD_OU_CELV/
-      integer*4 nb_portes
-d_porte = np.zeros(MAXPORAD, dtype=np.float16)
+    np.int32 nb_portes
+    d_porte = np.zeros(MAXPORAD, dtype=np.float16)
 
 # From COMMON /CFAC/
 #
-      # float corr_azest(MAXRAD),corr_elhor(MAXRAD),corr_dist(MAXRAD)
-corr_azest = np.zeros(MAXRAD, dtype=np.float16)
-corr_elhor = np.zeros(MAXRAD, dtype=np.float16)
-corr_dist = np.zeros(MAXRAD, dtype=np.float16)
-corr_lon = np.zeros(MAXRAD, dtype=np.float16)
-corr_lat = np.zeros(MAXRAD, dtype=np.float16)
-corr_p_alt = np.zeros(MAXRAD, dtype=np.float16)
-corr_r_alt = np.zeros(MAXRAD, dtype=np.float16)
-corr_vwe_av = np.zeros(MAXRAD, dtype=np.float16)
-corr_vsn_av = np.zeros(MAXRAD, dtype=np.float16)
-corr_vnz_av = np.zeros(MAXRAD, dtype=np.float16)
-corr_cap = np.zeros(MAXRAD, dtype=np.float16)
-corr_roul = np.zeros(MAXRAD, dtype=np.float16)
-corr_tang = np.zeros(MAXRAD, dtype=np.float16)
-corr_derv = np.zeros(MAXRAD, dtype=np.float16)
-corr_rota = np.zeros(MAXRAD, dtype=np.float16)
-corr_incl = np.zeros(MAXRAD, dtype=np.float16)
+    # float corr_azest(MAXRAD),corr_elhor(MAXRAD),corr_dist(MAXRAD)
+    corr_azest = np.zeros(MAXRAD, dtype=np.float16)
+    corr_elhor = np.zeros(MAXRAD, dtype=np.float16)
+    corr_dist = np.zeros(MAXRAD, dtype=np.float16)
+    corr_lon = np.zeros(MAXRAD, dtype=np.float16)
+    corr_lat = np.zeros(MAXRAD, dtype=np.float16)
+    corr_p_alt = np.zeros(MAXRAD, dtype=np.float16)
+    corr_r_alt = np.zeros(MAXRAD, dtype=np.float16)
+    corr_vwe_av = np.zeros(MAXRAD, dtype=np.float16)
+    corr_vsn_av = np.zeros(MAXRAD, dtype=np.float16)
+    corr_vnz_av = np.zeros(MAXRAD, dtype=np.float16)
+    corr_cap = np.zeros(MAXRAD, dtype=np.float16)
+    corr_roul = np.zeros(MAXRAD, dtype=np.float16)
+    corr_tang = np.zeros(MAXRAD, dtype=np.float16)
+    corr_derv = np.zeros(MAXRAD, dtype=np.float16)
+    corr_rota = np.zeros(MAXRAD, dtype=np.float16)
+    corr_incl = np.zeros(MAXRAD, dtype=np.float16)
 
 # From COMMON /RYIB/
 #
-      integer*2 ih_rdl,im_rdl,is_rdl,ims_rdl
-      integer*4 num_swp,j_julien,etat_rdl,no_rdl
-      float azest_rdl,elhor_rdl,puiscre_em,vit_bal_rdl
+    np.int16 ih_rdl,im_rdl,is_rdl,ims_rdl
+    np.int32 num_swp,j_julien,etat_rdl,no_rdl
+    float azest_rdl,elhor_rdl,puiscre_em,vit_bal_rdl
 
 # From COMMON /ASIB/ ************************************************
 #
-      float*8  lon_av,lat_av,p_alt_av,r_alt_av
-      float    vwe_av,vsn_av,vnz_av
+     float  lon_av,lat_av,p_alt_av,r_alt_av
+     float    vwe_av,vsn_av,vnz_av
           ,cap_av,roul_av,tang_av,derv_av
           ,rota_rdl,incl_rdl
           ,vent_we,vent_sn,vent_nz
@@ -177,105 +178,119 @@ corr_incl = np.zeros(MAXRAD, dtype=np.float16)
 #
 # float*4 is dtype=np.float32 in python
       # float*4  dgate_corr = np.zeros(MAXPORT, dtype=np.float32)
-dgate_corr = np.zeros(MAXPORT, dtype=np.float32)
-dgate_true = np.zeros(MAXPORT, dtype=np.float32)
-vdop_corr = np.full(MAXPORT, -999, dtype=np.float32)
-xms = np.zeros(9, dtype=np.float32)
-xml = np.zeros(9, dtype=np.float32)
-rota_start = np.full(2, -999, dtype=np.float32)
-rota_end = np.full(2, -999, dtype=np.float32)
-xp = np.zeros(2, dtype=np.float32)
-ssc = np.zeros(2, dtype=np.float32)
-scc = np.zeros(2, dtype=np.float32)
-sxa = np.zeros(2, dtype=np.float32)
-sya = np.zeros(2, dtype=np.float32)
-sza = np.zeros(2, dtype=np.float32)
-sacfthspd = np.zeros(2, dtype=np.float32)
-stime = np.zeros(2, dtype=np.float32)
-xp_acft = np.zeros(2, dtype=np.float32)
-su_acft = np.zeros(2, dtype=np.float32)
-sv_acft = np.zeros(2, dtype=np.float32)
-sw_acft = np.zeros(2, dtype=np.float32)
-su_wind = np.zeros(2, dtype=np.float32)
-sv_wind = np.zeros(2, dtype=np.float32)
-sw_wind = np.zeros(2, dtype=np.float32)
-xp_wind = np.zeros(2, dtype=np.float32)
-stilt = np.zeros(2, dtype=np.float32)
-stilt2 = np.zeros(2, dtype=np.float32)
-xsweeps = np.zeros(2, dtype=np.float32)
-# rota_prev(iradar)=-999
-rota_prev = np.full(2, -999, dtype=np.float32)
-swdzsurf_sweep = np.zeros(2, dtype=np.float32)
-dzsurfsweep_mean = np.zeros(2, dtype=np.float32)
-dzsurfsweep_rms = np.zeros(2, dtype=np.float32)
-swvsurf_sweep = np.zeros(2, dtype=np.float32)
-vsurfsweep_mean = np.zeros(2, dtype=np.float32)
-vsurfsweep_rms = np.zeros(2, dtype=np.float32)
-swinsitu_sweep = np.zeros(2, dtype=np.float32)
-dvinsitusweep_mean = np.zeros(2, dtype=np.float32)
-dvinsitusweep_rms = np.zeros(2, dtype=np.float32)
-var = np.zeros(nvar, dtype=np.float32)
-xmat = np.zeros((nvar,nvar), dtype=np.float32)
-vect = np.zeros(nvar, dtype=np.float32)
-xinv = np.zeros((nvar,nvar), dtype=np.float32)
-res = np.zeros(nvar, dtype=np.float32)
-vect_dzsurf = np.zeros(nvar, dtype=np.float32)
+    dgate_corr = np.zeros(MAXPORT, dtype=np.float32)
+    dgate_true = np.zeros(MAXPORT, dtype=np.float32)
+    vdop_corr = np.full(MAXPORT, -999, dtype=np.float32)
+    xms = np.zeros(9, dtype=np.float32)
+    xml = np.zeros(9, dtype=np.float32)
+    rota_start = np.full(2, -999, dtype=np.float32)
+    rota_end = np.full(2, -999, dtype=np.float32)
+    xp = np.zeros(2, dtype=np.float32)
+    ssc = np.zeros(2, dtype=np.float32)
+    scc = np.zeros(2, dtype=np.float32)
+    sxa = np.zeros(2, dtype=np.float32)
+    sya = np.zeros(2, dtype=np.float32)
+    sza = np.zeros(2, dtype=np.float32)
+    sacfthspd = np.zeros(2, dtype=np.float32)
+    stime = np.zeros(2, dtype=np.float32)
+    xp_acft = np.zeros(2, dtype=np.float32)
+    su_acft = np.zeros(2, dtype=np.float32)
+    sv_acft = np.zeros(2, dtype=np.float32)
+    sw_acft = np.zeros(2, dtype=np.float32)
+    su_wind = np.zeros(2, dtype=np.float32)
+    sv_wind = np.zeros(2, dtype=np.float32)
+    sw_wind = np.zeros(2, dtype=np.float32)
+    xp_wind = np.zeros(2, dtype=np.float32)
+    stilt = np.zeros(2, dtype=np.float32)
+    stilt2 = np.zeros(2, dtype=np.float32)
+    xsweeps = np.zeros(2, dtype=np.float32)
+    # rota_prev(iradar)=-999
+    rota_prev = np.full(2, -999, dtype=np.float32)
+    swdzsurf_sweep = np.zeros(2, dtype=np.float32)
+    dzsurfsweep_mean = np.zeros(2, dtype=np.float32)
+    dzsurfsweep_rms = np.zeros(2, dtype=np.float32)
+    swvsurf_sweep = np.zeros(2, dtype=np.float32)
+    vsurfsweep_mean = np.zeros(2, dtype=np.float32)
+    vsurfsweep_rms = np.zeros(2, dtype=np.float32)
+    swinsitu_sweep = np.zeros(2, dtype=np.float32)
+    dvinsitusweep_mean = np.zeros(2, dtype=np.float32)
+    dvinsitusweep_rms = np.zeros(2, dtype=np.float32)
+    var = np.zeros(nvar, dtype=np.float32)
+    xmat = np.zeros((nvar,nvar), dtype=np.float32)
+    vect = np.zeros(nvar, dtype=np.float32)
+    xinv = np.zeros((nvar,nvar), dtype=np.float32)
+    res = np.zeros(nvar, dtype=np.float32)
+    vect_dzsurf = np.zeros(nvar, dtype=np.float32)
 
-xmat_dzsurf = np.zeros((nvar,nvar), dtype)=np.float32)
-vect_vsurf = np.zeros((nvar), dtype)=np.float32)
-xmat_vsurf = np.zeros((nvar,nvar), dtype)=np.float32)
-vect_dvinsitu = np.zeros((nvar), dtype)=np.float32)
-xmat_dvinsitu = np.zeros((nvar,nvar), dtype)=np.float32)
-alt_dtm = np.zeros((nxysurfmax,nxysurfmax), dtype)=np.float32)
-swdzsurf_wri = np.zeros((nxysurfmax,nxysurfmax), dtype)=np.float32)
-sw_or_altsurf_wri = np.zeros((nxysurfmax,nxysurfmax), dtype)=np.float32)
-zs_rot = np.zeros((2,500), dtype)=np.float32)
-zs_el = np.zeros((2,500), dtype)=np.float32)
-zs_az = np.zeros((2,500), dtype)=np.float32)
-zs_dsurf = np.zeros((2,500), dtype)=np.float32)
-zs_dhor = np.zeros((2,500), dtype)=np.float32)
-zs_zsurf = np.zeros((2,500), dtype)=np.float32)
-zs_hsurf = np.zeros((2,500), dtype)=np.float32)
-vs_dhor = np.zeros((2,500), dtype)=np.float32)
-vs_vdopsurf = np.zeros((2,500), dtype)=np.float32)
-vi_dhor = np.zeros((2,500), dtype)=np.float32)
-vi_vdop = np.zeros((2,500), dtype)=np.float32)
-vi_vinsitu = np.zeros((2,500), dtype)=np.float32)
-
-rms_var_zsurf = np.zeros(nvar, dtype=np.float32)
-rms_var_vsurf = np.zeros(nvar, dtype=np.float32)
-rms_var_vinsitu = np.zeros(nvar, dtype=np.float32)
-corr_var = np.zeros((nvar,nvar), dtype=np.float32)
-s_vpv = np.zeros((2,2), dtype=np.float32)
-sv_vpv = np.zeros((2,2), dtype=np.float32)
-svv_vpv = np.zeros((2,2), dtype=np.float32)
-x_vpv = np.zeros((2,2), dtype=np.float32)
-xv_vpv = np.zeros((2,2), dtype=np.float32)
-xvv_vpv = np.zeros((2,2), dtype=np.float32)
+    xmat_dzsurf = np.zeros((nvar,nvar), dtype)=np.float32)
+    vect_vsurf = np.zeros((nvar), dtype)=np.float32)
+    xmat_vsurf = np.zeros((nvar,nvar), dtype)=np.float32)
+    vect_dvinsitu = np.zeros((nvar), dtype)=np.float32)
+    xmat_dvinsitu = np.zeros((nvar,nvar), dtype)=np.float32)
+    alt_dtm = np.zeros((nxysurfmax,nxysurfmax), dtype)=np.float32)
+    swdzsurf_wri = np.zeros((nxysurfmax,nxysurfmax), dtype)=np.float32)
+    sw_or_altsurf_wri = np.zeros((nxysurfmax,nxysurfmax), dtype)=np.float32)
+    zs_rot = np.zeros((2,500), dtype)=np.float32)
+    zs_el = np.zeros((2,500), dtype)=np.float32)
+    zs_az = np.zeros((2,500), dtype)=np.float32)
+    zs_dsurf = np.zeros((2,500), dtype)=np.float32)
+    zs_dhor = np.zeros((2,500), dtype)=np.float32)
+    zs_zsurf = np.zeros((2,500), dtype)=np.float32)
+    zs_hsurf = np.zeros((2,500), dtype)=np.float32)
+    vs_dhor = np.zeros((2,500), dtype)=np.float32)
+    vs_vdopsurf = np.zeros((2,500), dtype)=np.float32)
+    vi_dhor = np.zeros((2,500), dtype)=np.float32)
+    vi_vdop = np.zeros((2,500), dtype)=np.float32)
+    vi_vinsitu = np.zeros((2,500), dtype)=np.float32)
+    
+    rms_var_zsurf = np.zeros(nvar, dtype=np.float32)
+    rms_var_vsurf = np.zeros(nvar, dtype=np.float32)
+    rms_var_vinsitu = np.zeros(nvar, dtype=np.float32)
+    corr_var = np.zeros((nvar,nvar), dtype=np.float32)
+    s_vpv = np.zeros((2,2), dtype=np.float32)
+    sv_vpv = np.zeros((2,2), dtype=np.float32)
+    svv_vpv = np.zeros((2,2), dtype=np.float32)
+    x_vpv = np.zeros((2,2), dtype=np.float32)
+    xv_vpv = np.zeros((2,2), dtype=np.float32)
+    xvv_vpv = np.zeros((2,2), dtype=np.float32)
 #
-#       integer*2 iyymmdd(3),ig_dismiss(15)
+#       np.int16 iyymmdd(3),ig_dismiss(15)
     iyymmdd = np.zeros(3, dtype=np.int16)
     ig_dismiss = np.zeros(15, dtype=np.int16)
 #
-      integer*4 nb_ray(2),nb_sweep(2)
-               ,n_dzsurf(2),n_vsurf(2),n_dvinsitu(2)
-               ,nsurf_wri(2)
-               ,ndismiss_vhacft(2),ndismiss_vdopcorr(2)
-               ,ndismiss_vdopsurf(2)
-               ,swp(2),swp_prev(2)
-               ,ndop_ok(2),nref_ok(2)
-               ,istart_sweep(2)
-               ,itab(nxysurfmax),ihms_dtm(6),ialtsurf_wri(nxysurfmax)
+    nb_ray = np.zeros(2, dtype=np.int32)
+    nb_sweep = np.zeros(2, dtype=np.int32)
+    n_dzsurf = np.zeros(2, dtype=np.int32)
+    n_vsurf = np.zeros(2, dtype=np.int32)
+    n_dvinsitu = np.zeros(2, dtype=np.int32)
+    nsurf_wri = np.zeros(2, dtype=np.int32)
+    ndismiss_vhacft = np.zeros(2, dtype=np.int32)
+    ndismiss_vdopcorr = np.zeros(2, dtype=np.int32)
+    ndismiss_vdopsurf = np.zeros(2, dtype=np.int32)
+    swp = np.zeros(2, dtype=np.int32)
+    swp_prev = np.zeros(2, dtype=np.int32)
+    ndop_ok = np.zeros(2, dtype=np.int32)
+    nref_ok = np.zeros(2, dtype=np.int32)
+    istart_sweep = np.zeros(2, dtype=np.int32)
+    itab = np.zeros(nxysurfmax, dtype=np.int32)
+    ihms_dtm = np.zeros(6, dtype=np.int32)
+    ialtsurf_wri = np.zeros(nxysurfmax, dtype=np.int32)
+
 #
-      character path_abs*18,directory*60,dir_read*60
-               ,fich_sis*30
-               ,dtm_file*50,fich_cornav*30
-               ,wrisurfile*50
-               ,yymmdd_dtm*12,suff_dtm*20
-               ,yymmdd*12,c_hms_min*7,c_hms_max*7
-# CAI START   command line arguments
-               ,argu*30
-# CAI STOP
+
+    path_abs = ""  # 18 characters
+    directory = ""  # 60 characters
+    dir_read = ""  # 60 characters
+    fich_sis = ""  # 30 characters
+    dtm_file = ""  # 50 characters
+    fich_cornav = ""  # 30 characters
+    wrisurfile = ""  # 50 characters
+    yymmdd_dtm = ""  # 12 characters
+    suff_dtm = ""  # 20 characters
+    yymmdd = ""  # 12 characters
+    c_hms_min = ""  # 7 characters
+    c_hms_max = ""  # 7 characters
+    argu = "" # 30 characters
 
 #
 #     include '/home/users/rouf/SOURCES/ELDO/mes_commons'
@@ -285,9 +300,10 @@ xvv_vpv = np.zeros((2,2), dtype=np.float32)
 #      so that this common block is no longer used
 #     include '/home/caihq/navigation/roux_nav/SOURCES-ELDO/mes_commons'
 # CAI-STOP
-      common/cosinang/crr,srr,cti,sti
-                     ,chdg,shdg,cdri,sdri,cpit,spit
-                     ,caze,saze,celh,selh
+# TODO deal with this common block
+#      common/cosinang/crr,srr,cti,sti
+#                     ,chdg,shdg,cdri,sdri,cpit,spit
+#                     ,caze,saze,celh,selh
 #
 # CAI-START
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -325,43 +341,51 @@ xvv_vpv = np.zeros((2,2), dtype=np.float32)
       ssurfins_min=1.
 #
 #******************************************************************
-#**** READ THE INPUT PARAMETERS ON FILE "DATA_cns"
+#**** READ THE INPUT PARAMETERS IN FILE "DATA_cns"
 #******************************************************************
 #
 # CAI-START ---- read in command line arguments
-      CALL GETARG(1, argu)
+      # CALL GETARG(1, argu)  # command line arg is just the name of the input param file. 
+      param_file = 'DATA_cns.txt'
+      optlist, args = getopt.getopt(args, '')
+      if len(args) > 0:
+          param_file = args[0] 
+      print('reading paramaters from: ', param_file)
 
-      read_input_parameters.read_input_parameters('DATA_cns.txt')
+      read_input_parameters.read_input_parameters(param_file)
+      #  no_lect is never set; is it not used?
+      # if(no_lect > 900)go to 3 # stop
 
-      if(no_lect > 900)go to 3 # stop
-
-      if (idtmfile == 1):
-         generate_surface_arrays.generate_surface_arrays(directory,
+      if idtmfile == 1:
+          generate_surface_arrays.generate_surface_arrays(directory,
             idtmfile, dtm_file)
-      elif(idtmfile == 0):
+      elif idtmfile == 0:
 #
 #------------------------------------------------------------------
 #---- FROM ZSURF_CST (read in DATA_cns)
 #------------------------------------------------------------------
 #
-        print(' IFIDTM=0 -> ALT_SURF(i,j)=cst'
-               ,' (',zsurf_cst,' )')
-        xmin_dtm=xmin_wrisurf
-        ymin_dtm=ymin_wrisurf
-        hx_dtm=hxy_wrisurf
-        hy_dtm=hxy_wrisurf
-        nx_dtm=nx_wrisurf
-        ny_dtm=ny_wrisurf
-	xmax_dtm=xmin_dtm+float(nx_dtm-1)*hx_dtm
-	ymax_dtm=ymin_dtm+float(ny_dtm-1)*hy_dtm
-        do jdtm=1,ny_dtm
-	   do idtm=1,nx_dtm
-	      alt_dtm(idtm,jdtm)=zsurf_cst
-	   enddo
-	enddo
-        altdtm_mean=zsurf_cst
-	altdtm_min=zsurf_cst
-	altdtm_max=zsurf_cst
+          print(' IFIDTM=0 -> ALT_SURF(i,j)=cst'
+                 ,' (',zsurf_cst,' )')
+          xmin_dtm=xmin_wrisurf
+          ymin_dtm=ymin_wrisurf
+          hx_dtm=hxy_wrisurf
+          hy_dtm=hxy_wrisurf
+          nx_dtm=nx_wrisurf
+          ny_dtm=ny_wrisurf
+          xmax_dtm=xmin_dtm+float(nx_dtm-1)*hx_dtm
+          ymax_dtm=ymin_dtm+float(ny_dtm-1)*hy_dtm
+          #do jdtm=1,ny_dtm
+  	  # do idtm=1,nx_dtm
+  	  #    alt_dtm(idtm,jdtm)=zsurf_cst
+  	  # enddo
+  	  #enddo
+          for jdtm in range(ny_dtm):
+              for idtm in range(nx_dtm):
+  	          alt_dtm[idtm][jdtm]=zsurf_cst
+          altdtm_mean=zsurf_cst
+  	  altdtm_min=zsurf_cst
+          altdtm_max=zsurf_cst
 #
 #      endif
       print('     -> NPTS:',int(saltdtm)
@@ -417,20 +441,20 @@ xvv_vpv = np.zeros((2,2), dtype=np.float32)
           ,irdaft,irdfore
           ,idxwe,idysn,idzacft
           ,idvh
-      if(idtmfile == 1):
+      if idtmfile == 1:
         write(10,"(' READS THE SURF_DTM_* FILE :',a50)")
              directory(1:ndir)//'/'//dtm_file(1:ndtmfile)
-      else
+      else:
         write(10,"( ' NO SURF_DTM_* FILE TO READ '
                    ,'-> ALT_SURF(x,y)=CST (',f6.3,')')")
              zsurf_cst
-      endif
-      if(iwrisurfile == 1):
+      # endif
+      if iwrisurfile == 1:
         write(10,"(' WRITES THE SURF_EL_* FILE :',a50,//)")
              directory(1:ndir)//'/'//wrisurfile(1:nsf)
-      else
+      else:
         write(10,"(' NO SURF_EL_* FILE TO WRITE ',//)")
-      endif
+      # endif
 #
 #******************************************************************
 #**** OPEN THE OUTPUT "SIS_EL_*" FILE #50
@@ -449,7 +473,7 @@ xvv_vpv = np.zeros((2,2), dtype=np.float32)
 #
 # done at np.zeros, and np.full
 #
-      if(no_lect == 999)go to 3 # stop
+#      if(no_lect == 999)go to 3 # stop
 #
 #******************************************************************
 #*** READ THE ELDORA DATA FROM TEXT FILES CREATED BY ANOTHER PROGRAM
@@ -470,7 +494,7 @@ xvv_vpv = np.zeros((2,2), dtype=np.float32)
 #      ifile = 1
 #      islastfile = False 
 #   #  while (ifile < nfile):
-#  1   if(iopen  ==  0) : 
+#  1   if(iopen  ==  0) :   # WHILE iopen == 0 ???
 #
 #        write(infilename,'(i10)') ifile
 #        infilename = dir_read(1:ndirr) // '/'
@@ -518,43 +542,43 @@ xvv_vpv = np.zeros((2,2), dtype=np.float32)
 #  6     continue
 
 # autoconverted begin 
-import numpy as np
 
-iopen = 0
-ifile = 1
-islastfile = False 
-
-while ifile < nfile:
-    if iopen == 0:
-        infilename = f"{dir_read[0:ndirr]}/{infile:10d}.txt"
-        with open(infilename, 'r') as f:
-            iopen = 1
-
-    try:
-        data = f.readline().strip().split()
-        counter, nsweep, NTIMES, NRANGES, start_year, start_mon, start_day, start_hour, start_min, start_sec, time, azimuth, elevation, latitude, longitude, altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction = map(float, data)
-
-        ranges = np.zeros(nranges)
-        ZE = np.zeros(nranges)
-        NCP = np.zeros(nranges)
-        VR = np.zeros(nranges)
-        SW = np.zeros(nranges)
-
-        for J in range(nranges):
+    iopen = 0
+    ifile = 1
+    islastfile = False 
+    done = False
+    
+    while ifile < nfile and not done:
+        if iopen == 0:
+            infilename = f"{dir_read[0:ndirr]}/{infile:10d}.txt"
+            with open(infilename, 'r') as f:
+                iopen = 1
+    
+        try:
             data = f.readline().strip().split()
-            ranges[J], ZE[J], NCP[J], VR[J], SW[J] = map(float, data)
+            counter, nsweep, NTIMES, NRANGES, start_year, start_mon, start_day, start_hour, start_min, start_sec, time, azimuth, elevation, latitude, longitude, altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction = map(float, data)
+    
+            ranges = np.zeros(nranges)
+            ZE = np.zeros(nranges)
+            NCP = np.zeros(nranges)
+            VR = np.zeros(nranges)
+            SW = np.zeros(nranges)
+    
+            for J in range(nranges):
+                data = f.readline().strip().split()
+                ranges[J], ZE[J], NCP[J], VR[J], SW[J] = map(float, data)
+    
+        except EOFError:
+            iopen = 0  # jump here on EOF
+            if ifile == nfile:
+                islastfile = True 
+                break
+            else:
+                ifile += 1
+    
+    # end autoconverted
 
-    except EOFError:
-        iopen = 0  # jump here on EOF
-        if ifile == nfile:
-            islastfile = True 
-            break
-        else:
-            ifile += 1
-
-# end autoconverted
-
-process ray ...
+    # process ray ...
 
 # ************ Get the ray time *************
         ih_rdl1 = start_hour
@@ -595,57 +619,62 @@ process ray ...
 # Assign  the total number of gates and range of each gates,
 #  The aft/fore radar are different
         nb_portes = nranges
-        if (tilt  <  0) : !AFT,iradar_ray=1,iaftfore= -1
-           do ig = 1, nranges
-              d_porte(ig) = range(ig)
-           enddo
-        elif(tilt  >  0) : #FORE,iradar_ray=2,iaftfore= +1
-           do ig = 1, nranges
-              d_porte(MAXPORT+ig) = range(ig)  # This change fixed icorrupted infilename
-           enddo
-        endif
+        if (tilt  <  0): # AFT,iradar_ray=1,iaftfore= -1
+           # do ig = 1, nranges
+           #    d_porte(ig) = range(ig)
+           # enddo 
+           # ig is a loop variable!  
+           for ig in range(0, nranges):
+               d_porte[ig] = range[ig]
+        elif tilt  >  0: # FORE,iradar_ray=2,iaftfore= +1
+           # do ig = 1, nranges
+           #    d_porte(MAXPORT+ig) = range(ig)  # This change fixed icorrupted infilename
+           # enddo
+           for ig in range(0, nranges):
+               d_porte[MAXPORT+ig] = range[ig]
+        # endif
 # Assign the swp number read from text file to num_swp
-       num_swp = nsweep
+        num_swp = nsweep
 
 # Assign the correction factors to Frank's variable
 # NOTE: Here the correction factors are arrays with two elements
 # This is different from any other variables
 
-        if (tilt  <  0) :   # AFT, iradar_ray=1,iaftfore= -1
-           corr_azest(1) = azimuth_correction
-           corr_elhor(1) = elevation_correction
-           corr_dist(1) = range_correction
-           corr_lon(1) = longitude_correction
-           corr_lat(1) = latitude_correction
-           corr_p_alt(1) = pressure_altitude_correction
-           corr_r_alt(1) = radar_altitude_correction
-           corr_vwe_av(1) = ew_gound_speed_correction
-           corr_vsn_av(1) = ns_ground_speed_correction
-           corr_vnz_av(1) = vertical_velocity_correction
-           corr_cap(1) = heading_correction
-           corr_roul(1) = roll_correction
-           corr_tang(1) = pitch_correction
-           corr_derv(1) = drift_correction
-           corr_rota(1) = rotation_correction
-           corr_incl(1) = tilt_correction
-        elif(tilt  >  0) :   ! FORE, iradar_ray=2,iaftfore= +1
-           corr_azest(2) = azimuth_correction
-           corr_elhor(2) = elevation_correction
-           corr_dist(2) = range_correction
-           corr_lon(2) = longitude_correction
-           corr_lat(2) = latitude_correction
-           corr_p_alt(2) = pressure_altitude_correction
-           corr_r_alt(2) = radar_altitude_correction
-           corr_vwe_av(2) = ew_gound_speed_correction
-           corr_vsn_av(2) = ns_ground_speed_correction
-           corr_vnz_av(2) = vertical_velocity_correction
-           corr_cap(2) = heading_correction
-           corr_roul(2) = roll_correction
-           corr_tang(2) = pitch_correction
-           corr_derv(2) = drift_correction
-           corr_rota(2) = rotation_correction
-           corr_incl(2) = tilt_correction
-        endif
+        if tilt  <  0:   # AFT, iradar_ray=1,iaftfore= -1
+           corr_azest[0] = azimuth_correction
+           corr_elhor[0] = elevation_correction
+           corr_dist[0] = range_correction
+           corr_lon[0] = longitude_correction
+           corr_lat[0] = latitude_correction
+           corr_p_alt[0] = pressure_altitude_correction
+           corr_r_alt[0] = radar_altitude_correction
+           corr_vwe_av[0] = ew_gound_speed_correction
+           corr_vsn_av[0] = ns_ground_speed_correction
+           corr_vnz_av[0] = vertical_velocity_correction
+           corr_cap[0] = heading_correction
+           corr_roul[0] = roll_correction
+           corr_tang[0] = pitch_correction
+           corr_derv[0] = drift_correction
+           corr_rota[0] = rotation_correction
+           corr_incl[0] = tilt_correction
+        elif tilt  >  0:   ! FORE, iradar_ray=2,iaftfore= +1
+           corr_azest[1] = azimuth_correction
+           corr_elhor[1] = elevation_correction
+           corr_dist[1] = range_correction
+           corr_lon[1] = longitude_correction
+           corr_lat[1] = latitude_correction
+           corr_p_alt[1] = pressure_altitude_correction
+           corr_r_alt[1] = radar_altitude_correction
+           corr_vwe_av[1] = ew_gound_speed_correction
+           corr_vsn_av[1] = ns_ground_speed_correction
+           corr_vnz_av[1] = vertical_velocity_correction
+           corr_cap[1] = heading_correction
+           corr_roul[1] = roll_correction
+           corr_tang[1] = pitch_correction
+           corr_derv[1] = drift_correction
+           corr_rota[1] = rotation_correction
+           corr_incl[1] = tilt_correction
+        # endif
 #
 
 
@@ -654,25 +683,28 @@ process ray ...
 #           ,' HHMMSS:',ih_rdl,im_rdl,is_rdl,' EL:',elhor_rdl
 # TEST-END
 
-    ifile += 1
-    if ifile == nfile:
-        islastfile = True 
-
-    except EOFError:
-        iopen = 0  # jump here on EOF
+        ifile += 1
+        if ifile == nfile:
+            islastfile = True 
+    
+        except EOFError:
+            iopen = 0  # jump here on EOF
 
 #******************************************************************
 #**** CONTROL FOR THE END OF THE READING ALL TEXT FILES
 #******************************************************************
 #
   # end while ifile < nfile
-  7   iend=0  # What is the use of iend? boolean? or state? State: iend = 1 for end of sweep
+  7   iend=0  # What is the use of iend? boolean? or state? State: 
+              # iend = 0 ???
+              # iend = 1 for end of sweep
               # iend = 2 for end of considered period.
-if(ifile == nfile  and  islastfile  == True):
-     iend=2 # end_of_considered_period = True
-     print(' '
-     print('**** END OF READING ALL TEXT FILES ****'
-#endif
+    if ifile == nfile and islastfile:
+         iend=2 # end_of_considered_period = True
+         done = True
+         print(' ')
+         print('**** END OF READING ALL TEXT FILES ****')
+    #endif
 
 # CAI-STOP
 
@@ -686,7 +718,7 @@ if(ifile == nfile  and  islastfile  == True):
       is_ray=is_rdl
       ims_ray=ims_rdl
       ihhmmss=10000*ih_ray+100*im_ray+is_ray
-      if(ihhmmss <= 0)go to 1 # read next file
+      if(ihhmmss <= 0)go to 1 # read next file   # END WHILE ihhmmss >= 0
 #
       time_ks=3.6*float(ih_ray)+0.06*float(im_ray)
               +0.001*float(is_ray)+1.e-6*float(ims_ray)
@@ -696,29 +728,29 @@ if(ifile == nfile  and  islastfile  == True):
 	ihhmmss=ihhmmss+240000
       endif
       time_prev=time_ks
-      if(time_ks < tmin):
-        if(ihhmmss/10 > ihms_prev):
+      if time_ks < tmin):
+        if ihhmmss/10 > ihms_prev):
 	  print(' HHMMSS:',ihhmmss,' < HHMMSS_min:',ihms_min
 	  ihms_prev=ihhmmss/10
         endif
 # CAI-START
-        if(iend .ne. 2) go to 1   # read next file ! only when end of text file not reached
+        if iend .ne. 2) go to 1   # read next file ! only when end of text file not reached
 # CAI-STOP
       endif
-      if(time_ks > tmax):
+      if time_ks > tmax):
 	iend=2
 	print(' '
 	print(' HHMMSSms:',100*ihhmmss+ims_rdl
                ,' > HHMMSSms_max:',100*ihms_max
       endif
-      if(iend == 2)go to 2
+      if iend == 2)go to 2
       # if end_of_considered_period
 #
 #******************************************************************
 #**** CONTROL OF LAT, LON, P_ALT AND R_ALT
 #******************************************************************
 #
-      if(    abs(lat_av) < 0.001
+      if     abs(lat_av) < 0.001
          .or.abs(lon_av) < 0.001
          .or.(     abs(p_alt_av) < 0.001
                and abs(r_alt_av) < 0.001))go to 1 # read next file
@@ -808,7 +840,7 @@ if(ifile == nfile  and  islastfile  == True):
 #******************************************************************
 #
   2   continue
-      iend_ge_1()
+      done = iend_ge_1()
 #
 #************************************************************************
 #**** NEW RAY
@@ -1117,39 +1149,39 @@ if(ifile == nfile  and  islastfile  == True):
 #******************************************************************
 #
       ngates_insitu_max=-999
-      if(abs(selh) < selhinsitu_max):
+      if abs(selh) < selhinsitu_max:
         ig=1
-        do while (     ig < MAXPORT
+        while (     ig < MAXPORT
                    and dgate_corr(ig) < dmax_insitu)
            ngates_insitu_max=ig
            ig=ig+1
-        enddo
-      endif
+        #enddo
+      # endif
 #
 #******************************************************************
 #**** CHECK THE NCP, SW AND REFLECTIVITY VALUES
 #******************************************************************
 #
       ngates_max=1
-      do ig=1,ngates
+      for ig in range(ngates):
          ref_min=ref_min0+20.*(alog10(dgate_corr(ig))-1.)
-         if(    dgate_corr(ig) < dmin
-            .or.dgate_corr(ig) > dmax
-            .or.ncp(ig) < xncp_min
-            .or.sw(ig) > sw_max
-            .or.ze(ig) < ref_min
-            .or.ze(ig) > ref_max):
-           ze(ig)=-999.
-           vr(ig)=-999.
-	   vs(ig)=-999.	!Olivier
-	   vl(ig)=-999.	!Olivier
-           vg(ig)=-999.
-           vu(ig)=-999.
-         else
-	   ngates_max=ig
-           nref_ok(iradar_ray)=nref_ok(iradar_ray)+1
-         endif
-      enddo
+         if dgate_corr(ig) < dmin
+            or dgate_corr(ig) > dmax
+            or ncp(ig) < xncp_min
+            or sw(ig) > sw_max
+            or ze(ig) < ref_min
+            or ze(ig) > ref_max:
+             ze(ig)=-999.
+             vr(ig)=-999.
+	     vs(ig)=-999.	!Olivier
+	     vl(ig)=-999.	!Olivier
+             vg(ig)=-999.
+             vu(ig)=-999.
+         else:
+	     ngates_max=ig
+             nref_ok(iradar_ray)=nref_ok(iradar_ray)+1
+         # endif
+      # end for
   10  continue
 #
 #******************************************************************
@@ -1157,34 +1189,34 @@ if(ifile == nfile  and  islastfile  == True):
 #****   -> 1:RAW(VR), 2:CORRECTED FOR VACFT(VG), 3:UNFOLDED(VU)
 #******************************************************************
 
-      do ig=1,ngates_max
+      for ig in range(ngates_max):
 
 	 vdop_read=-999.
 	 vdop_corr(ig)=-999.
-	 if(ze(ig) > -900.):
+	 if ze(ig) > -900.:
 
-            if(     ichoice_vdop == 1
+            if      ichoice_vdop == 1
                and abs(vr(ig)) > 0. and abs(vr(ig)) < vdop_max
-               and proj_acftspd > -900.)
+               and proj_acftspd > -900.:
                vdop_read=vr(ig)+proj_acftspd
 # CAI-STOP
 
 
-           if(     ichoice_vdop == 2
-               and abs(vr(ig)) > 0. and abs(vr(ig)) < vdop_max)
+           if      ichoice_vdop == 2
+               and abs(vr(ig)) > 0. and abs(vr(ig)) < vdop_max:
              vdop_read=vr(ig)
 
-           if(     ichoice_vdop == 3
-               and abs(vu(ig)) > 0. and abs(vu(ig)) < vdop_max)
+           if      ichoice_vdop == 3
+               and abs(vu(ig)) > 0. and abs(vu(ig)) < vdop_max:
              vdop_read=vu(ig)
 
-           if(vdop_read > -900.):
+           if vdop_read > -900.:
              ndop_ok(iradar_ray)=ndop_ok(iradar_ray)+1
              vdop_corr(ig)=vdop_read
-           endif
+           #endif
 
-         endif
-      enddo
+         #endif
+      #enddo
 
       kdzsurf_kvsurf_ge_1()
 #
@@ -1207,6 +1239,8 @@ if(ifile == nfile  and  islastfile  == True):
 #
       go to 1 # read next file
 #
-  3   stop
-      end
+    # end while not done 3stop
+    #   end
+if iend==2:
+    iend_equals_2()
 

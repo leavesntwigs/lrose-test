@@ -1,3 +1,5 @@
+def iend_ge_1(): # end of sweep
+
       if(iend >= 1):
 	rota_end(iradar_ray)=rota_prev(iradar_ray)
 #
@@ -124,10 +126,11 @@
 #**** END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
 #******************************************************************
 #
-        if(iend == 2):
-          iend_equals_2()
+        if iend == 2:
+          done = True
+          # iend_equals_2()
           # calculate and write cfac then exit?
-        endif    !!  of  !! if(iend == 2):  !!
+        #endif    !!  of  !! if(iend == 2):  !!
 
 
 
