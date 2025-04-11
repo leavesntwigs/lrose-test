@@ -59,14 +59,14 @@ def cns_eldo():
     int nranges   # Number of range gates per time  --- Number of gates for each ray
     int nsweep    # Sweep number in each netcdf file; Used to identify different sweep
 
-    int*4 counter  # Ray number
+    np.int32 counter  # Ray number
 
 
     int start_year,start_mon,start_day
     int start_hour,start_min,start_sec
 
 
-!  Scaler variable for coccrection factors
+!  Scalar variable for correction factors
 
     float azimuth_correction
     float elevation_correction
@@ -121,14 +121,14 @@ def cns_eldo():
     float ns_wind
     float vertical_wind
 
-! One dimensional array of DBZ, VR, SW, NCP, etc
+# ! One dimensional array of DBZ, VR, SW, NCP, etc
 
     float range(MAXPORT)
     float ZE(MAXPORT),NCP(MAXPORT),VR(MAXPORT),SW(MAXPORT)
     float VS(MAXPORT),VL(MAXPORT),VG(MAXPORT),VU(MAXPORT)
 
-! Variables for input file list
-    CHARACTER(len=80) infilename
+# ! Variables for input file list
+#     CHARACTER(len=80) infilename
     int  nfile,ifile # total number of netcdf text file, current file number
     islastfile = False
     int iopen
@@ -352,14 +352,80 @@ def cns_eldo():
           param_file = args[0] 
       print('reading paramaters from: ', param_file)
 
-      read_input_parameters.read_input_parameters(param_file)
+      # return a dictionary of input paramters
+      # idtmfile
+      # 
+      input_paramters = read_input_parameters.read_input_parameters(param_file)
+
+      ndtmfile=len(dtm_file)
+      idtmfile = input_parameters['idtmfile']
+
+      if(idtmfile == 0):
+         print(' NO "SURF_DTM_*" FILE WILL BE READ '
+             ,'-> ZSURF_CST (km) =',zsurf_cst)
+      if(idtmfile == 1):
+         print(' WILL READ "SURF_DTM_*" FILE :'
+             ,dtm_file)
+
+      nsf=0
+      if(input_parameters['iwrisurfile'] == 1):
+         # while(wrisurfile(nsf+1:nsf+1).ne.' '):
+         #     nsf=nsf+1
+         nsf = len(wrisurfile)
+         print(' WILL WRITE "SURF_EL_*" FILE : '
+             ,wrisurfile)
+         # tokens = f99.readline().split()
+         xywidth_wrisurf = input_parameters['xywidth_wrisurf']
+         hxy_wrisurf = input_parameters['hxy_wrisurf']
+         xmin_wrisurf=-xywidth_wrisurf/2.
+         xmax_wrisurf=+xywidth_wrisurf/2.
+         ymin_wrisurf=-xywidth_wrisurf/2.
+         ymax_wrisurf=+xywidth_wrisurf/2.
+         print(' -> Xmin,max_wrisurf:',xmin_wrisurf,xmax_wrisurf)
+         print('    Ymin,max_wrisurf:',ymin_wrisurf,ymax_wrisurf)
+         print('    Hx,y_wrisurf:',hxy_wrisurf)
+         nx_wrisurf=((xmax_wrisurf-xmin_wrisurf)/hxy_wrisurf+1.)
+         ny_wrisurf=((ymax_wrisurf-ymin_wrisurf)/hxy_wrisurf+1.)
+         print('    Nx,Ny_wrisurf:',nx_wrisurf,ny_wrisurf)
+         if(nx_wrisurf > nxysurfmax or ny_wrisurf > nxysurfmax):
+            print(' !!!! Nx,Ny_wrisurf :',nx_wrisurf,ny_wrisurf
+               ,' > NxySURFmax !!!!')
+            print(' !!!! MODIFY l.30 AND RECOMPILE THE PROGRAM !!!!')
+   #   go to 3 # stop end
+            return
+  # endif
+#  
+#**** OPEN "SURF_EL_*" FILE #30 FOR WRITING (if IWRISURFILE=1)
+#
+         print(' OPEN "SURF_EL_*" FILE #30 FOR WRITING :'
+            ,directory//'/'//wrisurfile)
+         with open(directory//'/'//wrisurfile, 'w') as f30:
+              # ,form='formatted',status='unknown')
+            iolat_wrisurf=(1000.*orig_lat)
+            iolon_wrisurf=(1000.*orig_lon)
+            ixmin_wrisurf=(1000.*xmin_wrisurf)
+            iymin_wrisurf=(1000.*ymin_wrisurf)
+            ihxy_wrisurf=(1000.*hxy_wrisurf)
+            f30.write(yymmdd,'ELDO'
+               ,iolat_wrisurf,iolon_wrisurf
+               ,0,0,0,0,0
+               ,ih_min,im_min,is_min
+               ,ih_max,im_max,is_max
+               ,ixmin_wrisurf,iymin_wrisurf,0
+               ,nx_wrisurf,ny_wrisurf,1
+               ,ihxy_wrisurf,ihxy_wrisurf,0)
+#
+      else:
+         print(' NO "SURF_EL_*" FILE WILL BE WRITTEN')
+
+
       #  no_lect is never set; is it not used?
       # if(no_lect > 900)go to 3 # stop
 
       if idtmfile == 1:
           generate_surface_arrays.generate_surface_arrays(directory,
             idtmfile, dtm_file)
-      elif idtmfile == 0:
+      elif idtmfile == 0:   # sample param file has idtmfile = 0
 #
 #------------------------------------------------------------------
 #---- FROM ZSURF_CST (read in DATA_cns)

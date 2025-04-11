@@ -33,6 +33,7 @@
 import numpy as np
 import datetime
 
+# return a dictionary of the input parameters
 def read_input_parameters(file_name):
    nvar=12
    nxysurfmax=200
@@ -61,24 +62,28 @@ def read_input_parameters(file_name):
 #**** READ THE INPUT PARAMETERS ON FILE "DATA_cns"
 #******************************************************************
 #
+   input_parameters = {}
+
    with open(file_name, 'r') as f99:
       print(' ')
       aline = f99.readline()
-      tokens = aline.split()
+      tokens = aline.split('!') # comments are !
       #print('tokens: ', aline)
-      directory = tokens[0]
+      input_paramters['directory'] = tokens[0]
       ndir=len(directory) # ndir-1
       print(' DIRECTORY FOR THE OUTPUT FILES :',directory)
 
       print(' ')
       #aline = f99.readline()
       #tokens = aline.split()
-      dir_read = f99.readline().split()[0]
+      dir_read = f99.readline().split('!')[0]
+      input_paramters['dir_read'] = dir_read 
       #ndirr=len(dir_read) # ndirr-1
       print(' DIRECTORY FOR READ FILES :',dir_read)
 
       print(' ')
-      nfile = f99.readline()
+      nfile = f99.readline().strip()
+      input_paramters['nfile'] = nfile 
       print(' Total Number of Sweep Files :',nfile)
 
       tokens = f99.readline().split()
@@ -225,69 +230,68 @@ def read_input_parameters(file_name):
       idtmfile = int(tokens[0])
       dtm_file = tokens[1]
       zsurf_cst = tokens[2]
-      # ndtmfile=idtmfile
-      # if(idtmfile != 0):
-      #    while(dtm_file(ndtmfile+1:ndtmfile+1) != ' '):
-      #       ndtmfile=ndtmfile+1
-      if(idtmfile == 0):
-         print(' NO "SURF_DTM_*" FILE WILL BE READ '
-             ,'-> ZSURF_CST (km) =',zsurf_cst)
-      if(idtmfile == 1):
-         print(' WILL READ "SURF_DTM_*" FILE :'
-             ,dtm_file)
+
+      ndtmfile=len(dtm_file)
+
+#      if(idtmfile == 0):
+#         print(' NO "SURF_DTM_*" FILE WILL BE READ '
+#             ,'-> ZSURF_CST (km) =',zsurf_cst)
+#      if(idtmfile == 1):
+#         print(' WILL READ "SURF_DTM_*" FILE :'
+#             ,dtm_file)
 #
       tokens = f99.readline().split()
       iwrisurfile = tokens[0]
       wrisurfile = tokens[1]
-      nsf=0
+#      nsf=0
       if(iwrisurfile == 1):
-         # while(wrisurfile(nsf+1:nsf+1).ne.' '):
-         #     nsf=nsf+1
-         print(' WILL WRITE "SURF_EL_*" FILE : '
-             ,wrisurfile)
+#         # while(wrisurfile(nsf+1:nsf+1).ne.' '):
+#         #     nsf=nsf+1
+#         print(' WILL WRITE "SURF_EL_*" FILE : '
+#             ,wrisurfile)
          tokens = f99.readline().split()
          xywidth_wrisurf = tokens[0]
          hxy_wrisurf = tokens[1]
-         xmin_wrisurf=-xywidth_wrisurf/2.
-         xmax_wrisurf=+xywidth_wrisurf/2.
-         ymin_wrisurf=-xywidth_wrisurf/2.
-         ymax_wrisurf=+xywidth_wrisurf/2.
-         print(' -> Xmin,max_wrisurf:',xmin_wrisurf,xmax_wrisurf)
-         print('    Ymin,max_wrisurf:',ymin_wrisurf,ymax_wrisurf)
-         print('    Hx,y_wrisurf:',hxy_wrisurf)
-         nx_wrisurf=((xmax_wrisurf-xmin_wrisurf)/hxy_wrisurf+1.)
-         ny_wrisurf=((ymax_wrisurf-ymin_wrisurf)/hxy_wrisurf+1.)
-         print('    Nx,Ny_wrisurf:',nx_wrisurf,ny_wrisurf)
-         if(nx_wrisurf > nxysurfmax or ny_wrisurf > nxysurfmax):
-            print(' !!!! Nx,Ny_wrisurf :',nx_wrisurf,ny_wrisurf
-               ,' > NxySURFmax !!!!')
-            print(' !!!! MODIFY l.30 AND RECOMPILE THE PROGRAM !!!!')
-   #   go to 3 # stop end 
-            return
-  # endif
-#
-#**** OPEN "SURF_EL_*" FILE #30 FOR WRITING (if IWRISURFILE=1)
-#
-         print(' OPEN "SURF_EL_*" FILE #30 FOR WRITING :'
-            ,directory//'/'//wrisurfile)
-         with open(directory//'/'//wrisurfile, 'w') as f30:
-              # ,form='formatted',status='unknown')
-            iolat_wrisurf=(1000.*orig_lat)
-            iolon_wrisurf=(1000.*orig_lon)
-            ixmin_wrisurf=(1000.*xmin_wrisurf)
-            iymin_wrisurf=(1000.*ymin_wrisurf)
-            ihxy_wrisurf=(1000.*hxy_wrisurf)
-            f30.write(yymmdd,'ELDO'
-               ,iolat_wrisurf,iolon_wrisurf
-               ,0,0,0,0,0
-               ,ih_min,im_min,is_min
-               ,ih_max,im_max,is_max
-               ,ixmin_wrisurf,iymin_wrisurf,0
-               ,nx_wrisurf,ny_wrisurf,1
-               ,ihxy_wrisurf,ihxy_wrisurf,0)
-#
-      else:
-         print(' NO "SURF_EL_*" FILE WILL BE WRITTEN')
+#         xmin_wrisurf=-xywidth_wrisurf/2.
+#         xmax_wrisurf=+xywidth_wrisurf/2.
+#         ymin_wrisurf=-xywidth_wrisurf/2.
+#         ymax_wrisurf=+xywidth_wrisurf/2.
+#         print(' -> Xmin,max_wrisurf:',xmin_wrisurf,xmax_wrisurf)
+#         print('    Ymin,max_wrisurf:',ymin_wrisurf,ymax_wrisurf)
+#         print('    Hx,y_wrisurf:',hxy_wrisurf)
+#         nx_wrisurf=((xmax_wrisurf-xmin_wrisurf)/hxy_wrisurf+1.)
+#         ny_wrisurf=((ymax_wrisurf-ymin_wrisurf)/hxy_wrisurf+1.)
+#         print('    Nx,Ny_wrisurf:',nx_wrisurf,ny_wrisurf)
+#         if(nx_wrisurf > nxysurfmax or ny_wrisurf > nxysurfmax):
+#            print(' !!!! Nx,Ny_wrisurf :',nx_wrisurf,ny_wrisurf
+#               ,' > NxySURFmax !!!!')
+#            print(' !!!! MODIFY l.30 AND RECOMPILE THE PROGRAM !!!!')
+#   #   go to 3 # stop end 
+#            return
+#  # endif
+##
+##**** OPEN "SURF_EL_*" FILE #30 FOR WRITING (if IWRISURFILE=1)
+##
+#         print(' OPEN "SURF_EL_*" FILE #30 FOR WRITING :'
+#            ,directory//'/'//wrisurfile)
+#         with open(directory//'/'//wrisurfile, 'w') as f30:
+#              # ,form='formatted',status='unknown')
+#            iolat_wrisurf=(1000.*orig_lat)
+#            iolon_wrisurf=(1000.*orig_lon)
+#            ixmin_wrisurf=(1000.*xmin_wrisurf)
+#            iymin_wrisurf=(1000.*ymin_wrisurf)
+#            ihxy_wrisurf=(1000.*hxy_wrisurf)
+#            f30.write(yymmdd,'ELDO'
+#               ,iolat_wrisurf,iolon_wrisurf
+#               ,0,0,0,0,0
+#               ,ih_min,im_min,is_min
+#               ,ih_max,im_max,is_max
+#               ,ixmin_wrisurf,iymin_wrisurf,0
+#               ,nx_wrisurf,ny_wrisurf,1
+#               ,ihxy_wrisurf,ihxy_wrisurf,0)
+##
+#      else:
+#         print(' NO "SURF_EL_*" FILE WILL BE WRITTEN')
     
-   return
+   return input_parameters
 
