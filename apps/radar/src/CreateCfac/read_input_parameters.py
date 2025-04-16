@@ -69,22 +69,24 @@ def read_input_parameters(file_name):
       aline = f99.readline()
       tokens = aline.split('!') # comments are !
       #print('tokens: ', aline)
-      input_paramters['directory'] = tokens[0]
+      directory = tokens[0]
       ndir=len(directory) # ndir-1
       print(' DIRECTORY FOR THE OUTPUT FILES :',directory)
+      input_parameters['directory'] = directory
 
       print(' ')
       #aline = f99.readline()
       #tokens = aline.split()
       dir_read = f99.readline().split('!')[0]
-      input_paramters['dir_read'] = dir_read 
+      input_parameters['dir_read'] = dir_read 
       #ndirr=len(dir_read) # ndirr-1
       print(' DIRECTORY FOR READ FILES :',dir_read)
+      input_parameters['dir_read'] = dir_read
 
       print(' ')
       nfile = f99.readline().strip()
-      input_paramters['nfile'] = nfile 
       print(' Total Number of Sweep Files :',nfile)
+      input_parameters['nfile'] = nfile 
 
       tokens = f99.readline().split()
       yymmdd = datetime.date(int(tokens[2]), int(tokens[0]), int(tokens[1]))
@@ -93,6 +95,7 @@ def read_input_parameters(file_name):
 # convert date format to string
 #      write(yymmdd,"(i12)")10000*iyymmdd(3)+100*iyymmdd(2)+iyymmdd(1)
       print(' YYYYMMDD :',yymmdd.isoformat())
+      input_parameters['yymmdd'] = yymmdd
 #
       tokens = f99.readline().split()
       ihms_min = tokens[0]
@@ -104,31 +107,39 @@ def read_input_parameters(file_name):
       #ih_max=ihms_max/10000
       #im_max=(ihms_max-10000*ih_max)/100
       #is_max=ihms_max-10000*ih_max-100*im_max
+      input_parameters['ihms_min'] = ihms_min
+      input_parameters['ihms_max'] = ihms_max
 #
       tokens = f99.readline().split()
       orig_lat = tokens[0]
       orig_lon = tokens[1]
       print(' ORIGIN_LATITUDE,_LONGITUDE :',orig_lat,orig_lon)
+      input_parameters['orig_lat'] = orig_lat
+      input_parameters['orig_lon'] = orig_lon
 #
       print(' ')
       ig_dismiss = f99.readline()
       print(' 15 GATES TO DISMISS (0 if not) :',ig_dismiss)
+      input_parameters['ig_dismiss'] = ig_dismiss
 #
       print(' ')
       tokens = f99.readline().split()
       dmin0 = tokens[0]
       dmax0 = tokens[1]
       print(' DMIN,DMAX FROM RADAR [km]:',dmin0,dmax0)
+      input_parameters['ig_dismiss'] = ig_dismiss
 #
       print(' ')
       ipr_alt = f99.readline().split()[0]
       print(' ALTITUDE (1:pressure,2:radar) :',ipr_alt)
+      input_parameters['ig_dismiss'] = ig_dismiss
 #
       print(' ')
       tokens = f99.readline().split()
       ref_min0 = tokens[0]
       ref_max = tokens[1]
       print(' REF_min(at 10km),REF_max [dBZ]:',ref_min0,ref_max)
+      input_parameters['ig_dismiss'] = ig_dismiss
 #
       print(' ')
       ichoice_vdop = f99.readline().split()[0]
@@ -154,6 +165,12 @@ def read_input_parameters(file_name):
       rw_dvinsitu = tokens[2] 
       print('   -> REL.WGHT_dZsurf,Vsurf,dVinsitu (1/0) :'
              ,rw_dzsurf,rw_vsurf,rw_dvinsitu)
+      input_parameters['kdzsurf'] = kdzsurf
+      input_parameters['kvsurf'] = kvsurf
+      input_parameters['kdvinsitu'] = kdvinsitu
+      input_parameters['rw_dzsurf'] = rw_dzsurf
+      input_parameters['rw_vsurf'] = rw_vsurf
+      input_parameters['rw_dvinsitu'] = rw_dvinsitu
 #
       print(' ')
       print(' CORRECTIONS TO CALCULATE:')
@@ -230,6 +247,9 @@ def read_input_parameters(file_name):
       idtmfile = int(tokens[0])
       dtm_file = tokens[1]
       zsurf_cst = tokens[2]
+      input_parameters['idtmfile'] = idtmfile
+      input_parameters['dtm_file'] = dtm_file
+      input_parameters['zsurf_cst'] = zsurf_cst
 
       ndtmfile=len(dtm_file)
 
@@ -243,15 +263,20 @@ def read_input_parameters(file_name):
       tokens = f99.readline().split()
       iwrisurfile = tokens[0]
       wrisurfile = tokens[1]
+      input_parameters['iwrisurfile'] = iwrisurfile
+      input_parameters['wrisurfile'] = wrisurfile
 #      nsf=0
       if(iwrisurfile == 1):
 #         # while(wrisurfile(nsf+1:nsf+1).ne.' '):
 #         #     nsf=nsf+1
 #         print(' WILL WRITE "SURF_EL_*" FILE : '
 #             ,wrisurfile)
-         tokens = f99.readline().split()
-         xywidth_wrisurf = tokens[0]
-         hxy_wrisurf = tokens[1]
+          tokens = f99.readline().split()
+          xywidth_wrisurf = tokens[0]
+          hxy_wrisurf = tokens[1]
+          input_parameters['xywidth_wrisurf'] = xywidth_wrisurf
+          input_parameters['hxy_wrisurf'] = hxy_wrisurf
+
 #         xmin_wrisurf=-xywidth_wrisurf/2.
 #         xmax_wrisurf=+xywidth_wrisurf/2.
 #         ymin_wrisurf=-xywidth_wrisurf/2.
