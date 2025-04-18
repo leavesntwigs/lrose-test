@@ -66,18 +66,18 @@ def read_input_parameters(file_name):
 
    with open(file_name, 'r') as f99:
       print(' ')
-      aline = f99.readline()
-      tokens = aline.split('!') # comments are !
+      aline = f99.readline().replace('\'', ' ')
+      tokens = aline.split() # comments are !
       #print('tokens: ', aline)
-      directory = tokens[0]
+      directory = tokens[0].strip()
       ndir=len(directory) # ndir-1
       print(' DIRECTORY FOR THE OUTPUT FILES :',directory)
       input_parameters['directory'] = directory
 
       print(' ')
-      #aline = f99.readline()
+      #aline = f99.readline().replace('\'', ' ')
       #tokens = aline.split()
-      dir_read = f99.readline().split('!')[0]
+      dir_read = f99.readline().split()[0].strip()
       input_parameters['dir_read'] = dir_read 
       #ndirr=len(dir_read) # ndirr-1
       print(' DIRECTORY FOR READ FILES :',dir_read)
@@ -243,12 +243,12 @@ def read_input_parameters(file_name):
       f99.readline()
 #
       print('  ')
-      tokens = f99.readline().split()
+      tokens = f99.readline().replace('\'', ' ').split()
       idtmfile = int(tokens[0])
       dtm_file = tokens[1]
       zsurf_cst = tokens[2]
       input_parameters['idtmfile'] = idtmfile
-      input_parameters['dtm_file'] = dtm_file
+      input_parameters['dtm_file'] = dtm_file.strip()
       input_parameters['zsurf_cst'] = zsurf_cst
 
       ndtmfile=len(dtm_file)
@@ -260,13 +260,15 @@ def read_input_parameters(file_name):
 #         print(' WILL READ "SURF_DTM_*" FILE :'
 #             ,dtm_file)
 #
-      tokens = f99.readline().split()
-      iwrisurfile = tokens[0]
+      tokens = f99.readline().replace('\'', ' ').split()
+      iwrisurfile = int(tokens[0])
       wrisurfile = tokens[1]
       input_parameters['iwrisurfile'] = iwrisurfile
-      input_parameters['wrisurfile'] = wrisurfile
+      print(type(iwrisurfile), iwrisurfile)
+      input_parameters['wrisurfile'] = wrisurfile.strip()
 #      nsf=0
       if(iwrisurfile == 1):
+          print("*************")
 #         # while(wrisurfile(nsf+1:nsf+1).ne.' '):
 #         #     nsf=nsf+1
 #         print(' WILL WRITE "SURF_EL_*" FILE : '
@@ -276,6 +278,7 @@ def read_input_parameters(file_name):
           hxy_wrisurf = tokens[1]
           input_parameters['xywidth_wrisurf'] = xywidth_wrisurf
           input_parameters['hxy_wrisurf'] = hxy_wrisurf
+          print("just inserted xywidth_wrisurf and hxy_wrisurf")
 
 #         xmin_wrisurf=-xywidth_wrisurf/2.
 #         xmax_wrisurf=+xywidth_wrisurf/2.

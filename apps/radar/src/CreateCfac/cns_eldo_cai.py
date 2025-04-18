@@ -29,6 +29,7 @@
 #   Converted to Python by Brenda Javornik at NCAR, November, 2024
 #******************************************************************
 
+import os.path
 import getopt
 import numpy as np
 # import read_input_parameters
@@ -365,6 +366,15 @@ def cns_eldo(input_parameters):
        print(' WILL READ "SURF_DTM_*" FILE :'
            ,dtm_file)
 
+    ihms_min = int(input_parameters['ihms_min'])
+    ihms_max = int(input_parameters['ihms_max'])
+    ih_min=ihms_min/10000
+    im_min=(ihms_min-10000*ih_min)/100
+    is_min=ihms_min-10000*ih_min-100*im_min
+    ih_max=ihms_max/10000
+    im_max=(ihms_max-10000*ih_max)/100
+    is_max=ihms_max-10000*ih_max-100*im_max
+
     nsf=0
     if(input_parameters['iwrisurfile'] == 1):
        # while(wrisurfile(nsf+1:nsf+1).ne.' '):
@@ -373,8 +383,8 @@ def cns_eldo(input_parameters):
        print(' WILL WRITE "SURF_EL_*" FILE : '
            ,wrisurfile)
        # tokens = f99.readline().split()
-       xywidth_wrisurf = input_parameters['xywidth_wrisurf']
-       hxy_wrisurf = input_parameters['hxy_wrisurf']
+       xywidth_wrisurf = float(input_parameters['xywidth_wrisurf'])
+       hxy_wrisurf = float(input_parameters['hxy_wrisurf'])
        xmin_wrisurf=-xywidth_wrisurf/2.
        xmax_wrisurf=+xywidth_wrisurf/2.
        ymin_wrisurf=-xywidth_wrisurf/2.
@@ -393,23 +403,44 @@ def cns_eldo(input_parameters):
 #  
 #**** OPEN "SURF_EL_*" FILE #30 FOR WRITING (if IWRISURFILE=1)
 #
+       directory = input_parameters['directory'] 
+       wrisurfile = input_parameters['wrisurfile'] 
+       orig_lat = float(input_parameters['orig_lat'])
+       orig_lon = float(input_parameters['orig_lon'])
+       # xmin_wrisurf = float(input_parameters['xmin_wrisurf'])
+       # ymin_wrisurf = float(input_parameters['ymin_wrisurf'])
+       # hxy_wrisurf = float(input_parameters['hxy_wrisurf'])
+       path = os.path.join(directory, wrisurfile)
        print(' OPEN "SURF_EL_*" FILE #30 FOR WRITING :'
-          ,directory//'/'//wrisurfile)
-       with open(directory//'/'//wrisurfile, 'w') as f30:
+          , path)
+       if not os.path.exists(directory):
+          os.makedirs(directory)
+       with open(path, 'w') as f30:
             # ,form='formatted',status='unknown')
           iolat_wrisurf=(1000.*orig_lat)
           iolon_wrisurf=(1000.*orig_lon)
           ixmin_wrisurf=(1000.*xmin_wrisurf)
           iymin_wrisurf=(1000.*ymin_wrisurf)
           ihxy_wrisurf=(1000.*hxy_wrisurf)
-          f30.write(yymmdd,'ELDO'
-             ,iolat_wrisurf,iolon_wrisurf
-             ,0,0,0,0,0
-             ,ih_min,im_min,is_min
-             ,ih_max,im_max,is_max
-             ,ixmin_wrisurf,iymin_wrisurf,0
-             ,nx_wrisurf,ny_wrisurf,1
-             ,ihxy_wrisurf,ihxy_wrisurf,0)
+          #format(a12,a4,22i7)
+          #f30.write(yymmdd,'ELDO'
+          #   ,iolat_wrisurf,iolon_wrisurf
+          #   ,0,0,0,0,0
+          #   ,ih_min,im_min,is_min
+          #   ,ih_max,im_max,is_max
+          #   ,ixmin_wrisurf,iymin_wrisurf,0
+          #   ,nx_wrisurf,ny_wrisurf,1
+          #   ,ihxy_wrisurf,ihxy_wrisurf,0)
+
+          f30.write(f"{yymmdd:<12}{'ELDO':<4}")
+          f30.write(''.join(f"{i:<7}" for i in [
+              iolat_wrisurf, iolon_wrisurf, 0, 0, 0, 0, 0,
+              ih_min, im_min, is_min,
+              ih_max, im_max, is_max,
+              ixmin_wrisurf, iymin_wrisurf, 0,
+              nx_wrisurf, ny_wrisurf, 1,
+              ihxy_wrisurf, ihxy_wrisurf, 0
+          ]))
 #
     else:
        print(' NO "SURF_EL_*" FILE WILL BE WRITTEN')
