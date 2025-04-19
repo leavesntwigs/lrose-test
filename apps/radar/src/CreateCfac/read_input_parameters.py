@@ -246,7 +246,7 @@ def read_input_parameters(file_name):
       tokens = f99.readline().replace('\'', ' ').split()
       idtmfile = int(tokens[0])
       dtm_file = tokens[1]
-      zsurf_cst = tokens[2]
+      zsurf_cst = float(tokens[2])
       input_parameters['idtmfile'] = idtmfile
       input_parameters['dtm_file'] = dtm_file.strip()
       input_parameters['zsurf_cst'] = zsurf_cst

@@ -445,4 +445,117 @@ def cns_eldo(input_parameters):
     else:
        print(' NO "SURF_EL_*" FILE WILL BE WRITTEN')
 
+    saltdtm=0.
 
+    if idtmfile == 1:
+        print("WARNING: code path not tested!")
+        # generate_surface_arrays.generate_surface_arrays(directory,
+        #   idtmfile, dtm_file)
+    elif idtmfile == 0:   # sample param file has idtmfile = 0
+        #   
+        #------------------------------------------------------------------
+        #---- FROM ZSURF_CST (read in DATA_cns)
+        #------------------------------------------------------------------
+        #   
+        print(' IFIDTM=0 -> ALT_SURF(i,j)=cst'
+               ,' (',zsurf_cst,' )')
+        xmin_dtm=xmin_wrisurf
+        ymin_dtm=ymin_wrisurf
+        hx_dtm=hxy_wrisurf
+        hy_dtm=hxy_wrisurf
+        nx_dtm=nx_wrisurf
+        ny_dtm=ny_wrisurf
+        xmax_dtm=xmin_dtm+float(nx_dtm-1)*hx_dtm
+        ymax_dtm=ymin_dtm+float(ny_dtm-1)*hy_dtm
+        #do jdtm=1,ny_dtm
+        # do idtm=1,nx_dtm
+        #    alt_dtm(idtm,jdtm)=zsurf_cst
+        # enddo
+        #enddo
+        for jdtm in range(int(ny_dtm)):
+            for idtm in range(int(nx_dtm)):
+                alt_dtm[idtm][jdtm]=zsurf_cst
+        altdtm_mean=zsurf_cst
+        altdtm_min=zsurf_cst
+        altdtm_max=zsurf_cst
+    else:
+        print("WARNING: No logic for idtmfile not equal 1 or 0")
+
+    print('     -> NPTS:',int(saltdtm)
+           ,' ALTSURF_mean,min,max:',altdtm_mean
+           ,altdtm_min,altdtm_max)
+    zsurfrad_min=altdtm_min-1.
+    zsurfrad_max=altdtm_max+1.
+    print(' ')
+    print(' -> AUTHORIZED ZSURF_RAD_min,max :'
+           ,zsurfrad_min,zsurfrad_max)
+    #
+    #******************************************************************
+    #**** MIN AND MAX TIMES
+    #******************************************************************
+    #
+    tmin=3.6*float(ih_min)+0.06*float(im_min) \
+        +0.001*float(is_min)
+    tmax=3.6*float(ih_max)+0.06*float(im_max) \
+        +0.001*float(is_max)
+
+    c_hms_min = f"{1000000 + ihms_min:7d}"
+    c_hms_max = f"{1000000 + ihms_max:7d}"
+
+    fich_cornav = f"CORNAV_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
+    fich_sis = f"SIS_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
+
+    # writes output to a string
+    # write(c_hms_min,"(i7)")1000000+ihms_min
+    # write(c_hms_max,"(i7)")1000000+ihms_max
+    # write(fich_cornav,"('CORNAV_E_',a6,'_',a6)")
+    #      c_hms_min(2:7),c_hms_max(2:7)
+    # write(fich_sis,"('SIS_E_',a6,'_',a6)")
+    #      c_hms_min(2:7),c_hms_max(2:7)
+    #
+    #******************************************************************
+    #**** OPEN THE OUPUT "CORNAV_EL_*" FILE #10
+    #******************************************************************
+    #
+    path = os.path.join(directory, fich_cornav)
+    print(' ')
+    print(' OPEN "CORNAV_EL_*" FILE #10 :', path)
+    if not os.path.exists(directory):
+       os.makedirs(directory)
+    with open(path, 'w') as f10:
+        #open(10,file=directory(1:ndir)//'/'//fich_cornav
+        #       ,form='formatted',status='unknown')
+        f10.write(f"{' YYYYMMDD : '}{yymmdd:<12}")
+        #f10.write(f"{' HHMMSS_min HHMMSS_max : '}{,a6,3x,a6,/)")
+        #     c_hms_min(2:7),c_hms_max(2:7)
+#        f10.write(f"{ ' FIELDS TAKEN INTO ACCOUNT',/
+#                   ,'  -> REL.WGHT_dZsurf,Vsurf,dVinsitu : ',3f6.3,/)")
+#             rw_dzsurf,rw_vsurf,rw_dvinsitu
+#        f10.write(f"{ ' VARIABLES TAKEN INTO ACCOUNT',/
+#                   ,'  -> D_TILT_AFT,D_TILT_FORE (1/0) : ',2i2,/
+#                   ,'  -> D_ROTA_AFT,D_ROTA_FORE (1/0) : ',2i2,/
+#                   ,'  -> D_PITCH,D_HEADING (1/0) : ',2i2,/
+#                   ,'  -> RANGE_DELAY_AFT,RANGE_DELAY_FORE (1/0) : '
+#                   ,2i2,/
+#                   ,'  -> D_XWE,D_YSN,D_ZACFT (1/0) : ',3i2,/
+#                   ,'  -> D_VHACFT (1/0) : ',i2)")
+#             idtiltaft,idtiltfore
+#            ,idrotaaft,idrotafore
+#            ,idpitch,idhdg
+#            ,irdaft,irdfore
+#            ,idxwe,idysn,idzacft
+#            ,idvh
+#        if idtmfile == 1:
+#          f10.write(f"{' READS THE SURF_DTM_* FILE :',a50)")
+#               directory(1:ndir)//'/'//dtm_file(1:ndtmfile)
+#        else:
+#          f10.write(f"{ ' NO SURF_DTM_* FILE TO READ '
+#                     ,'-> ALT_SURF(x,y)=CST (',f6.3,')')")
+#               zsurf_cst
+#        # endif
+#        if iwrisurfile == 1:
+#          f10.write(f"{' WRITES THE SURF_EL_* FILE :',a50,//)")
+#               directory(1:ndir)//'/'//wrisurfile(1:nsf)
+#        else:
+#          f10.write(f"{' NO SURF_EL_* FILE TO WRITE ',//)")
+#    
