@@ -116,4 +116,59 @@ Now, I am thinking to try a top down approach.
  4. Now, break into separate functions. 
 
 
- 
+4/22/2025
+testing the original fortran code in container ...
+
+# start the container and run interactively ...
+(base) eol-amalfi:CreateCfac brenda$ docker run -v .:/data -it cai-et-al:latest 
+
+# must have a subdir "corrections" in the starting directory
+lrose@f3bc7e164e58:/data/fortran_run$ /home/lrose/Airborne-Radar-QC/navigation/cns_eldo_cai /data/DATA_cns.txt
+
+ ***
+
+testing python conversion ...
+
+(plotly_dash) eol-amalfi:CreateCfac brenda$ mamba activate plotly_dash
+(plotly_dash) eol-amalfi:CreateCfac brenda$ python run_cns_eldo_cai.py
+
+ ***
+I looked for some test data; cannot find any.  I will need to create my own test data.  
+1. Start with text files of data, based on the read formats.
+    a. All zeros
+    b. All ones
+    c. random numbers
+2. try some real ELDORA data; just one to three files; many need to create a new DATA_cns.txt file. 
+
+how to pass the meta_data and data between read and  process:
+>>> x = 3
+>>> y = 6
+>>> u = 8
+>>> meta = (x,y,z)
+Traceback (most recent call last):
+  File "<python-input-3>", line 1, in <module>
+    meta = (x,y,z)
+                ^
+NameError: name 'z' is not defined
+>>> meta = (x,y,u)
+>>> print meta
+  File "<python-input-5>", line 1
+    print meta
+    ^^^^^^^^^^
+SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?
+>>> print(meta)
+(3, 6, 8)
+>>> def myf(meta):
+...     (x, y, z) = meta
+...     print(x)
+...     print(y)
+...     print(z)
+...     
+>>> myf(meta)
+3
+6
+8
+
+
+using this data ...
+$ ~/lrose/bin/RadxPrint -f  ~/data/from_isaac/cfrad.19950516_221950.411_to_19950516_221953.219_TA-ELDR_AIR.nc

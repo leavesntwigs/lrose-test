@@ -33,6 +33,8 @@ import os.path
 import getopt
 import numpy as np
 # import read_input_parameters
+import read_eldora_data_file
+import process_ray
 
 # arg is a dictionary of parameters
 def cns_eldo(input_parameters):
@@ -293,7 +295,7 @@ def cns_eldo(input_parameters):
     wrisurfile = ""  # 50 characters
     yymmdd_dtm = ""  # 12 characters
     suff_dtm = ""  # 20 characters
-    yymmdd = ""  # 12 characters
+    yymmdd = input_parameters["yymmdd"]  # 12 characters
     c_hms_min = ""  # 7 characters
     c_hms_max = ""  # 7 characters
     argu = "" # 30 characters
@@ -377,6 +379,7 @@ def cns_eldo(input_parameters):
 
     nsf=0
     if(input_parameters['iwrisurfile'] == 1):
+       wrisurfile = input_parameters['wrisurfile']
        # while(wrisurfile(nsf+1:nsf+1).ne.' '):
        #     nsf=nsf+1
        nsf = len(wrisurfile)
@@ -432,7 +435,8 @@ def cns_eldo(input_parameters):
           #   ,nx_wrisurf,ny_wrisurf,1
           #   ,ihxy_wrisurf,ihxy_wrisurf,0)
 
-          f30.write(f"{yymmdd:<12}{'ELDO':<4}")
+          print(f'{yymmdd}{"ELDO":4}') # TODO compare to container output, I think the format may be wrong
+          f30.write(f'{yymmdd:12}{"ELDO":4}')
           f30.write(''.join(f"{i:<7}" for i in [
               iolat_wrisurf, iolon_wrisurf, 0, 0, 0, 0, 0,
               ih_min, im_min, is_min,
@@ -525,6 +529,7 @@ def cns_eldo(input_parameters):
     with open(path, 'w') as f10:
         #open(10,file=directory(1:ndir)//'/'//fich_cornav
         #       ,form='formatted',status='unknown')
+        print("yymmdd: ", yymmdd)
         f10.write(f"{' YYYYMMDD : '}{yymmdd:<12}")
         #f10.write(f"{' HHMMSS_min HHMMSS_max : '}{,a6,3x,a6,/)")
         #     c_hms_min(2:7),c_hms_max(2:7)
@@ -550,7 +555,7 @@ def cns_eldo(input_parameters):
 #               directory(1:ndir)//'/'//dtm_file(1:ndtmfile)
 #        else:
 #          f10.write(f"{ ' NO SURF_DTM_* FILE TO READ '
-#                     ,'-> ALT_SURF(x,y)=CST (',f6.3,')')")
+#   #                  ,'-> ALT_SURF(x,y)=CST (',f6.3,')')")
 #               zsurf_cst
 #        # endif
 #        if iwrisurfile == 1:
@@ -559,3 +564,30 @@ def cns_eldo(input_parameters):
 #        else:
 #          f10.write(f"{' NO SURF_EL_* FILE TO WRITE ',//)")
 #    
+
+# open and write OUTPUT "SIS_EL_*" FILE #50
+
+# initializations
+
+# read ELDORA data (from text files originally, then move to CfRadial/binary files
+# while more data files
+    data_dir = input_parameters['dir_read']
+    data_file_path = os.path.join(data_dir, "made_up_data.txt")
+    # meta_data, data = read_eldora_data_file(path)
+    nranges = 2
+    # (counter, nsweep, NTIMES, NRANGES, 
+     # start_year, start_mon, start_day, start_hour, start_min, start_sec,
+     # time, azimuth, elevation, latitude, longitude, 
+     # altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
+     # azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction),
+
+    # ZE, NCP, VR, SW 
+    (m1, m2, m3), ranges = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
+    # (m1, m2, m3), ranges  = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
+    # if last file
+    # otherwise increment file counter
+    meta_data = (m1, m2, m3)
+    process_ray.process_ray(meta_data, ranges) # , ZE, NCP, VR, SW)   # meta data is a class(or tuple?)  with 
+# end while
+# CONTROL FOR THE END OF THE READING ALL TEXT FILES
+# control_for_end_of_all_text_files()

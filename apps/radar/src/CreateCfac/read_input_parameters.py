@@ -75,9 +75,9 @@ def read_input_parameters(file_name):
       input_parameters['directory'] = directory
 
       print(' ')
-      #aline = f99.readline().replace('\'', ' ')
-      #tokens = aline.split()
-      dir_read = f99.readline().split()[0].strip()
+      aline = f99.readline().replace('\'', ' ')
+      tokens = aline.split()
+      dir_read = tokens[0].strip()
       input_parameters['dir_read'] = dir_read 
       #ndirr=len(dir_read) # ndirr-1
       print(' DIRECTORY FOR READ FILES :',dir_read)
@@ -94,7 +94,7 @@ def read_input_parameters(file_name):
       # iyymmdd = f99.readline().split()
 # convert date format to string
 #      write(yymmdd,"(i12)")10000*iyymmdd(3)+100*iyymmdd(2)+iyymmdd(1)
-      print(' YYYYMMDD :',yymmdd.isoformat())
+      print(' YYYYMMDD :',yymmdd.strftime("%Y%d%m"))  # this is probably a bug in the original code; the date is printed as 
       input_parameters['yymmdd'] = yymmdd
 #
       tokens = f99.readline().split()
@@ -111,38 +111,48 @@ def read_input_parameters(file_name):
       input_parameters['ihms_max'] = ihms_max
 #
       tokens = f99.readline().split()
-      orig_lat = tokens[0]
-      orig_lon = tokens[1]
-      print(' ORIGIN_LATITUDE,_LONGITUDE :',orig_lat,orig_lon)
+      orig_lat = float(tokens[0])
+      orig_lon = float(tokens[1])
+      print(f" ORIGIN_LATITUDE,_LONGITUDE : {orig_lat:14.7f}{orig_lon:14.7f}")
       input_parameters['orig_lat'] = orig_lat
       input_parameters['orig_lon'] = orig_lon
 #
       print(' ')
-      ig_dismiss = f99.readline()
-      print(' 15 GATES TO DISMISS (0 if not) :',ig_dismiss)
+      tokens = list(f99.readline().split())
+      print(tokens)
+      i = 0
+      ig_dismiss = []
+      while (tokens[i] != '!'):
+          ig_dismiss.append(int(tokens[i])) 
+          i += 1
+      message = " ".join([f'{k:5}' for k in ig_dismiss]) 
+      print(' 15 GATES TO DISMISS (0 if not) :',message)
+
       input_parameters['ig_dismiss'] = ig_dismiss
 #
       print(' ')
       tokens = f99.readline().split()
-      dmin0 = tokens[0]
-      dmax0 = tokens[1]
-      print(' DMIN,DMAX FROM RADAR [km]:',dmin0,dmax0)
-      input_parameters['ig_dismiss'] = ig_dismiss
+      dmin0 = float(tokens[0])
+      dmax0 = float(tokens[1])
+      print(f" DMIN,DMAX FROM RADAR [km]:{dmin0:13.7f}{dmax0:13.7f}")
+      input_parameters['dmin0'] = dmin0
+      input_parameters['dmax0'] = dmax0
 #
       print(' ')
       ipr_alt = f99.readline().split()[0]
       print(' ALTITUDE (1:pressure,2:radar) :',ipr_alt)
-      input_parameters['ig_dismiss'] = ig_dismiss
+      input_parameters['ipr_alt'] = ipr_alt
 #
       print(' ')
       tokens = f99.readline().split()
       ref_min0 = tokens[0]
       ref_max = tokens[1]
       print(' REF_min(at 10km),REF_max [dBZ]:',ref_min0,ref_max)
-      input_parameters['ig_dismiss'] = ig_dismiss
+      input_parameters['ref_min0'] = ref_min0
+      input_parameters['ref_max'] = ref_max
 #
       print(' ')
-      ichoice_vdop = f99.readline().split()[0]
+      ichoice_vdop = int(f99.readline().split()[0])
       print(' WHICH VDOP (1:VR,2:VG,3:VU) :'
          ,ichoice_vdop)
       if(ichoice_vdop == 1 or ichoice_vdop == 2):
@@ -160,9 +170,9 @@ def read_input_parameters(file_name):
       kdvinsitu=1
       f99.readline() # ignore ---- line
       tokens = f99.readline().split()
-      rw_dzsurf = tokens[0] 
-      rw_vsurf = tokens[1] 
-      rw_dvinsitu = tokens[2] 
+      rw_dzsurf = float(tokens[0])
+      rw_vsurf = float(tokens[1])
+      rw_dvinsitu = float(tokens[2])
       print('   -> REL.WGHT_dZsurf,Vsurf,dVinsitu (1/0) :'
              ,rw_dzsurf,rw_vsurf,rw_dvinsitu)
       input_parameters['kdzsurf'] = kdzsurf
@@ -176,33 +186,46 @@ def read_input_parameters(file_name):
       print(' CORRECTIONS TO CALCULATE:')
       f99.readline() # ignore ---- line
       tokens = f99.readline().split()
-      idtiltaft = tokens[0]
-      idtiltfore = tokens[1]
+      idtiltaft = int(tokens[0])
+      idtiltfore = int(tokens[1])
       print('   -> D_TILT_AFT,D_TILT_FORE (1/0) :'
              ,idtiltaft,idtiltfore)
       tokens = f99.readline().split()
-      idrotaaft = tokens[0]
-      idrotafore = tokens[1]
+      idrotaaft = int(tokens[0])
+      idrotafore = int(tokens[1])
       print('   -> D_ROTA_AFT,D_ROTA_FORE (1/0) :'
              ,idrotaaft,idrotafore)
       tokens = f99.readline().split()
-      idpitch = tokens[0]
-      idhdg = tokens[1]
+      idpitch = int(tokens[0])
+      idhdg = int(tokens[1])
       print('   -> D_PITCH,D_HEADING (1/0) :'
          ,idpitch,idhdg)
       tokens = f99.readline().split()
-      irdaft = tokens[0]
-      irdfore = tokens[1]
+      irdaft = int(tokens[0])
+      irdfore = int(tokens[1])
       print('   -> RANGE_DELAY_AFT,RANGE_DELAY_FORE (1/0) :'
          ,irdaft,irdfore)
       tokens = f99.readline().split()
-      idxwe = tokens[0]
-      idysn = tokens[1]
-      idzacft = tokens[2]
+      idxwe = int(tokens[0])
+      idysn = int(tokens[1])
+      idzacft = int(tokens[2])
       print('   -> D_XWE,D_YSN,D_ZACFT (1/0) :'
          ,idxwe,idysn,idzacft)
-      idvh = f99.readline().split()[0]
+      idvh = int(f99.readline().split()[0])
       print('   -> D_VHACFT (1/0) :',idvh)
+      input_parameters['idtiltaft'] = idtiltaft
+      input_parameters['idtiltfore'] = idtiltfore
+      input_parameters['idrotaaft'] = idrotaaft
+      input_parameters['idrotafore'] = idrotafore
+      input_parameters['idpitch'] = idpitch
+      input_parameters['idhdg'] = idhdg
+      input_parameters['irdaft'] = irdaft
+      input_parameters['irdfore'] = irdfore
+      input_parameters['idxwe'] = idxwe
+      input_parameters['idysn'] = idysn
+      input_parameters['idzacft'] = idzacft
+      input_parameters['idvh'] = idvh
+      
 #
       print(' ')
       f99.readline()
@@ -278,7 +301,7 @@ def read_input_parameters(file_name):
           hxy_wrisurf = tokens[1]
           input_parameters['xywidth_wrisurf'] = xywidth_wrisurf
           input_parameters['hxy_wrisurf'] = hxy_wrisurf
-          print("just inserted xywidth_wrisurf and hxy_wrisurf")
+          #print("just inserted xywidth_wrisurf and hxy_wrisurf")
 
 #         xmin_wrisurf=-xywidth_wrisurf/2.
 #         xmax_wrisurf=+xywidth_wrisurf/2.
