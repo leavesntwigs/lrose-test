@@ -572,7 +572,7 @@ def cns_eldo(input_parameters):
 # read ELDORA data (from text files originally, then move to CfRadial/binary files
 # while more data files
     data_dir = input_parameters['dir_read']
-    data_file_path = os.path.join(data_dir, "made_up_data.txt")
+    data_file_path = os.path.join(data_dir, "1.txt")
     # meta_data, data = read_eldora_data_file(path)
     nranges = 2
     # (counter, nsweep, NTIMES, NRANGES, 
@@ -582,12 +582,28 @@ def cns_eldo(input_parameters):
      # azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction),
 
     # ZE, NCP, VR, SW 
-    (m1, m2, m3), ranges = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
+    meta_data, ranges, ZE, NCP, VR, SW = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
+    # fmt = '{:10d}' + ' '*2 + ' '*50 + '{:10d}'*3 + '{:5d}' + '{:3d}'*5 + '{:20.8f}' + '{:10.4f}'*2 + '{:20.8f}'*3 + '{:10.4f}'*29
+    print(meta_data[0:10])
+    return
+
     # (m1, m2, m3), ranges  = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
     # if last file
     # otherwise increment file counter
-    meta_data = (m1, m2, m3)
-    process_ray.process_ray(meta_data, ranges) # , ZE, NCP, VR, SW)   # meta data is a class(or tuple?)  with 
+    #meta_data = (m1, m2, m3)
+
+    process_ray.process_ray(meta_data, ranges) # , ZE, NCP, VR, SW)   # meta data tuple 
+
+    # CONTROL FOR THE END OF THE READING ALL TEXT FILES
+    iend = control_for_end_of_all_text_files() # calls  iend_equals_2()
+    if iend == 2:
+        # break
+        print("should break !")
+
 # end while
-# CONTROL FOR THE END OF THE READING ALL TEXT FILES
-# control_for_end_of_all_text_files()
+
+# control_for_end_of_all_text_files_wo_gotos()
+
+    if iend==2: 
+        iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
+    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv)

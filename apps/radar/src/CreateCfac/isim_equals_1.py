@@ -1,0 +1,31 @@
+        call azel( rota_ray+roll_acft
+                  ,tilt_ray
+                  ,hdg_acft,drift_acft
+                  ,pitch_acft
+                  ,azeast_ray_true,elhor_ray_true
+                  ,cxa_true,cya_true,cza_true
+                  ,cwe_true,csn_true,cnz_true)
+        caze_true=caze
+	saze_true=saze
+	celh_true=celh
+	selh_true=selh
+
+#
+        dcwe_dt_true=+crr*sti*spit*shdg-srr*sti*chdg+cti*cpit*shdg
+        dcwe_dr_true=+srr*cti*spit*shdg+crr*cti*chdg
+        dcwe_dp_true=-crr*cti*cpit*shdg-sti*spit*shdg
+        dcwe_dh_true=-crr*cti*spit*chdg-srr*cti*shdg+sti*cpit*chdg
+#
+        dcsn_dt_true=+crr*sti*spit*chdg+srr*sti*shdg+cti*cpit*chdg
+        dcsn_dr_true=+srr*cti*spit*chdg-crr*cti*shdg
+        dcsn_dp_true=-crr*cti*cpit*chdg-sti*spit*chdg
+        dcsn_dh_true=+crr*cti*spit*shdg-srr*cti*chdg-sti*cpit*shdg
+#
+        dcnz_dt_true=-crr*sti*cpit+cti*spit
+        dcnz_dr_true=-srr*cti*cpit
+        dcnz_dp_true=-crr*cti*spit+sti*cpit
+        dcnz_dh_true=0.
+#
+        duacft_dv_true=+shdg*cdri+chdg*sdri
+        dvacft_dv_true=+chdg*cdri-shdg*sdri
+#

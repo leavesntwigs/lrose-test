@@ -1,3 +1,14 @@
+
+How to compile the Fortran code:
+see email
+How to build container for cai-et-al:
+see email
+$ docker build -t caibuild:20250430 .
+
+How to run container:
+$ docker run -v .:/data -it caibuild:20250430 
+This makes the current directory available in /data and the /data/cfradial directory has sample data
+
 I think we need examples of these files:
 1. DATA_cns_Cai (or the file 99 parameters)
    see https://github.com/mmbell/Airborne-Radar-QC/blob/master/navigation/DATA_cns_run
@@ -172,3 +183,5 @@ SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?
 
 using this data ...
 $ ~/lrose/bin/RadxPrint -f  ~/data/from_isaac/cfrad.19950516_221950.411_to_19950516_221953.219_TA-ELDR_AIR.nc
+
+no_lect is never set in the original cns...f code; Building and running the original Fortran code in a container, no_lect is set to zero, by default.  So, the no_lect variable can removed from the cns...py code.
