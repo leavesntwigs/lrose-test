@@ -10,17 +10,17 @@ SW = 40
 
 
 counter = 0
-nsweep = 0
-NTIMES = 0
-NRANGES = 0
+nsweep = 1
+NTIMES = 1
+NRANGES = nranges
        
-start_year = 0
-start_mon = 0
-start_day = 0
+start_year = 1999 
+start_mon = 1
+start_day = 1
        
 start_hour = 0
 start_min = 0
-start_sec = 0
+start_sec = 1
 time = 0
        
 azimuth = 0
@@ -92,9 +92,32 @@ print(fmt.format(
 #meta_data = [i for i in range(50)]
 #meta_data_str = " ".join(str(x) for x in meta_data)
 #print(meta_data_str)
-#for i in range(nranges):
-#    # format(I10,2000f10.4)
-#    zero = 0.0
-#    message = " ".join([f"{zero:10.4f}" for k in range(2000)])
-#    print(f'{start_range*i:10d}', message)
-#    #print(start_range*i, ZE+i, NCP+i, VR+i, SW+i)
+for i in range(1):  # ranges, ZE, NCP, VR, SW
+    # format(I10,2000f10.4)
+    zero = 0.0
+    message = " ".join([f"{zero:10.4f}" for k in range(nranges)])
+    print(f'{start_range*i:10d}', message)
+    #print(start_range*i, ZE+i, NCP+i, VR+i, SW+i)
+for i in range(1):  # ranges, ZE, NCP, VR, SW
+    # format(I10,2000f10.4)
+    zero = 0.0
+    message = " ".join([f"{ZE:10.4f}" for k in range(nranges)])
+    print(f'{start_range*i:10d}', message)
+
+for i in range(1):  # ranges, ZE, NCP, VR, SW
+    # format(I10,2000f10.4)
+    zero = 0.0
+    message = " ".join([f"{NCP:10.4f}" for k in range(nranges)])
+    print(f'{start_range*i:10d}', message)
+
+for i in range(1):  # ranges, ZE, NCP, VR, SW
+    # format(I10,2000f10.4)
+    zero = 0.0
+    message = " ".join([f"{VR:10.4f}" for k in range(nranges)])
+    print(f'{start_range*i:10d}', message)
+
+for i in range(1):  # ranges, ZE, NCP, VR, SW
+    # format(I10,2000f10.4)
+    zero = 0.0
+    message = " ".join([f"{SW:10.4f}" for k in range(nranges)])
+    print(f'{start_range*i:10d}', message)

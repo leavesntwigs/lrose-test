@@ -86,7 +86,7 @@ def read_input_parameters(file_name):
       print(' ')
       nfile = f99.readline().strip()
       print(' Total Number of Sweep Files :',nfile)
-      input_parameters['nfile'] = nfile 
+      input_parameters['nfile'] = int(nfile)
 
       tokens = f99.readline().split()
       yymmdd = datetime.date(int(tokens[2]), int(tokens[0]), int(tokens[1]))

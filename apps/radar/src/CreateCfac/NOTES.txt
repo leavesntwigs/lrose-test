@@ -185,3 +185,45 @@ using this data ...
 $ ~/lrose/bin/RadxPrint -f  ~/data/from_isaac/cfrad.19950516_221950.411_to_19950516_221953.219_TA-ELDR_AIR.nc
 
 no_lect is never set in the original cns...f code; Building and running the original Fortran code in a container, no_lect is set to zero, by default.  So, the no_lect variable can removed from the cns...py code.
+
+
+-----
+
+To build a modified version of cns_eldo_cai, use this container:
+$ docker run -v .:/data -it caibuild:20250430
+
+I needed to edit the cna_eldo...f file to make it read the cfradial files:
+      else
+        print *,' NO "SURF_EL_*" FILE WILL BE WRITTEN'
+      endif
+c
+      close(99)
+      no_lect = 0   <<<<<<  added this line >>>>>
+      if(no_lect.gt.900)go to 3
+
+to build, don't use the Makefile, it doesn't work; use this command:
+gfortran -g  -o cns_eldo_cai cns_eldo_cai.f chol_inv.f -fallow-argument-mismatch -fallow-invalid-boz -I/usr/include -L/usr/local/lib -lnetcdf -lnetcdff -lcurl -L/usr/lib/aarch64-linux-gnu/hdf5/serial -lhdf5 -lhdf5_hl -I/usr/local/include 
+
+to run,  (but, zero data case is an infinite loop, so quickly ctrl-C to kill the process)
+/data# /Airborne-Radar-QC/navigation/cns_eldo_cai DATA_cns.txt > docker_run_output.txt
+
+-----
+
+To run full container, as user LROSE:
+eol-amalfi:CreateCfac brenda$ docker run -v .:/data -it cai-et-al:latest 
+
+----
+
+Notes on testing:
+
+NRANGES/nranges must be > 0 (in the data file), otherwise the file read for ranges fails/ENDS and the flow of execution goes to 5. 
+The time must be > 0, otherwise, there is an infinite loop, reading the same data file over and over, since the ifile is never changed.
+ihhmmss >= 0 
+
+After computer update, need to rebuild mamba environment (import numpy is giving strange errors).
+
+mamba create -n nameofmyenv <list of packages>
+mamba create -n cfac numpy xarray xradar
+mamba activate cfac
+THIS SEEMS TO FIX THE WEIRD ERRORS; THINGS ARE WORKING AGAIN
+

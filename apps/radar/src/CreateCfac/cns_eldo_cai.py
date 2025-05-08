@@ -570,40 +570,91 @@ def cns_eldo(input_parameters):
 # initializations
 
 # read ELDORA data (from text files originally, then move to CfRadial/binary files
-# while more data files
-    data_dir = input_parameters['dir_read']
-    data_file_path = os.path.join(data_dir, "1.txt")
-    # meta_data, data = read_eldora_data_file(path)
-    nranges = 2
-    # (counter, nsweep, NTIMES, NRANGES, 
-     # start_year, start_mon, start_day, start_hour, start_min, start_sec,
-     # time, azimuth, elevation, latitude, longitude, 
-     # altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
-     # azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction),
-
-    # ZE, NCP, VR, SW 
-    meta_data, ranges, ZE, NCP, VR, SW = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
-    # fmt = '{:10d}' + ' '*2 + ' '*50 + '{:10d}'*3 + '{:5d}' + '{:3d}'*5 + '{:20.8f}' + '{:10.4f}'*2 + '{:20.8f}'*3 + '{:10.4f}'*29
-    print(meta_data[0:10])
-    return
-
-    # (m1, m2, m3), ranges  = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
-    # if last file
-    # otherwise increment file counter
-    #meta_data = (m1, m2, m3)
-
-    process_ray.process_ray(meta_data, ranges) # , ZE, NCP, VR, SW)   # meta data tuple 
-
-    # CONTROL FOR THE END OF THE READING ALL TEXT FILES
-    iend = control_for_end_of_all_text_files() # calls  iend_equals_2()
-    if iend == 2:
-        # break
-        print("should break !")
-
-# end while
-
-# control_for_end_of_all_text_files_wo_gotos()
-
-    if iend==2: 
-        iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
-    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv)
+    nfile = input_parameters['nfile']
+    for ifile in range(nfile):
+        ifile += 1
+        data_dir = input_parameters['dir_read']
+        infilename = os.path.join(data_dir, str(ifile)+".txt")
+        print("reading ", infilename)
+        # infilename = f"{dir_read[0:ndirr]}/{infile:10d}.txt"
+        with open(infilename, 'r') as f:
+    
+            try:
+                data = f.readline().strip().split()
+                counter, nsweep, NTIMES, nranges, start_year, start_mon, start_day, start_hour, start_min, start_sec, time, azimuth, elevation, latitude, longitude, altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction = map(float, data)
+                nranges = int(nranges)
+                ranges = np.zeros(nranges)
+                ZE = np.zeros(nranges)
+                NCP = np.zeros(nranges)
+                VR = np.zeros(nranges)
+                SW = np.zeros(nranges) 
+    
+                # read(55,102,END=5)counter,(range(J),J=1,nranges) 
+                # on error, goto 5
+                # read counter (format I10), range(1), range(2), ... (format 2000f10.4)
+    
+                # for J in range(nranges):
+                #     data = f.readline().strip().split()
+                #     ranges[J], ZE[J], NCP[J], VR[J], SW[J] = map(float, data)
+        
+                data = f.readline().strip().split()
+                # data_iterator = map(float, data)
+                counter = int(data[0]) 
+                for J in range(nranges):
+                    ranges[J] = float(data[J+1])  # map(float, data)
+        
+               # process ray ...
+    
+    
+            except EOFError:
+                # jump here on EOF
+                print("Error reading data file:", ifile)
+       
+    # may not be needed ... 
+    #    data_dir = input_parameters['dir_read']
+    #    data_file_path = os.path.join(data_dir, "1.txt")
+    #    # meta_data, data = read_eldora_data_file(path)
+    #    nranges = 2
+    #    # (counter, nsweep, NTIMES, NRANGES, 
+    #     # start_year, start_mon, start_day, start_hour, start_min, start_sec,
+    #     # time, azimuth, elevation, latitude, longitude, 
+    #     # altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
+    #     # azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction),
+    #
+    #    # ZE, NCP, VR, SW 
+    #    meta_data, ranges, ZE, NCP, VR, SW = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
+    #    # fmt = '{:10d}' + ' '*2 + ' '*50 + '{:10d}'*3 + '{:5d}' + '{:3d}'*5 + '{:20.8f}' + '{:10.4f}'*2 + '{:20.8f}'*3 + '{:10.4f}'*29
+    #    print(meta_data[0:10])
+    #    return
+    #
+    #    # (m1, m2, m3), ranges  = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
+    #    # if last file
+    #    # otherwise increment file counter
+    #    #meta_data = (m1, m2, m3)
+    #
+    #    process_ray.process_ray(meta_data, ranges) # , ZE, NCP, VR, SW)   # meta data tuple 
+    #
+    #    # CONTROL FOR THE END OF THE READING ALL TEXT FILES
+    #    iend = control_for_end_of_all_text_files() # calls  iend_equals_2()
+    #    if iend == 2:
+    #        # break
+    #        print("should break !")
+    #
+    #
+    #    control_for_end_of_all_text_files_wo_gotos()
+    # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
+    #    -> NAVIGATIONAL ERROS CAN BE CALCULATED
+    if ssurfins.gt.ssurfins_min:
+        calculate_navigational_errors
+    else:
+        print(' /////////////////////////////////////////////')
+        print(' ')
+        print(' /////////////////////////////////////////////')
+        print('    NO CORRECTIONS FOR NAVIGATIONAL ERRORS')
+        print(' //////////// (not enough points) ////////////')
+        print(' /////////////////////////////////////////////')
+        print(' ')
+    #
+    #    if iend==2: 
+    #        iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
+    #    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv)
