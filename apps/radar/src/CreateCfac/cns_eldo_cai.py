@@ -36,6 +36,9 @@ import numpy as np
 import read_eldora_data_file
 import process_ray
 
+def enough_points(ssurfins, ssurfins_min):
+    return ssurfins > ssurfins_min
+
 # arg is a dictionary of parameters
 def cns_eldo(input_parameters):
 
@@ -506,33 +509,33 @@ def cns_eldo(input_parameters):
     c_hms_min = f"{1000000 + ihms_min:7d}"
     c_hms_max = f"{1000000 + ihms_max:7d}"
 
-    fich_cornav = f"CORNAV_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
-    fich_sis = f"SIS_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
-
-    # writes output to a string
-    # write(c_hms_min,"(i7)")1000000+ihms_min
-    # write(c_hms_max,"(i7)")1000000+ihms_max
-    # write(fich_cornav,"('CORNAV_E_',a6,'_',a6)")
-    #      c_hms_min(2:7),c_hms_max(2:7)
-    # write(fich_sis,"('SIS_E_',a6,'_',a6)")
-    #      c_hms_min(2:7),c_hms_max(2:7)
-    #
-    #******************************************************************
-    #**** OPEN THE OUPUT "CORNAV_EL_*" FILE #10
-    #******************************************************************
-    #
-    path = os.path.join(directory, fich_cornav)
-    print(' ')
-    print(' OPEN "CORNAV_EL_*" FILE #10 :', path)
-    if not os.path.exists(directory):
-       os.makedirs(directory)
-    with open(path, 'w') as f10:
-        #open(10,file=directory(1:ndir)//'/'//fich_cornav
-        #       ,form='formatted',status='unknown')
-        print("yymmdd: ", yymmdd)
-        f10.write(f"{' YYYYMMDD : '}{yymmdd:<12}")
-        #f10.write(f"{' HHMMSS_min HHMMSS_max : '}{,a6,3x,a6,/)")
-        #     c_hms_min(2:7),c_hms_max(2:7)
+#    fich_cornav = f"CORNAV_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
+#    fich_sis = f"SIS_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
+#
+#    # writes output to a string
+#    # write(c_hms_min,"(i7)")1000000+ihms_min
+#    # write(c_hms_max,"(i7)")1000000+ihms_max
+#    # write(fich_cornav,"('CORNAV_E_',a6,'_',a6)")
+#    #      c_hms_min(2:7),c_hms_max(2:7)
+#    # write(fich_sis,"('SIS_E_',a6,'_',a6)")
+#    #      c_hms_min(2:7),c_hms_max(2:7)
+#    #
+#    #******************************************************************
+#    #**** OPEN THE OUPUT "CORNAV_EL_*" FILE #10
+#    #******************************************************************
+#    #
+#    path = os.path.join(directory, fich_cornav)
+#    print(' ')
+#    print(' OPEN "CORNAV_EL_*" FILE #10 :', path)
+#    if not os.path.exists(directory):
+#       os.makedirs(directory)
+#    with open(path, 'w') as f10:
+#        #open(10,file=directory(1:ndir)//'/'//fich_cornav
+#        #       ,form='formatted',status='unknown')
+#        print("yymmdd: ", yymmdd)
+#        f10.write(f"{' YYYYMMDD : '}{yymmdd:<12}")
+#        #f10.write(f"{' HHMMSS_min HHMMSS_max : '}{,a6,3x,a6,/)")
+#        #     c_hms_min(2:7),c_hms_max(2:7)
 #        f10.write(f"{ ' FIELDS TAKEN INTO ACCOUNT',/
 #                   ,'  -> REL.WGHT_dZsurf,Vsurf,dVinsitu : ',3f6.3,/)")
 #             rw_dzsurf,rw_vsurf,rw_dvinsitu
@@ -603,8 +606,11 @@ def cns_eldo(input_parameters):
                 for J in range(nranges):
                     ranges[J] = float(data[J+1])  # map(float, data)
         
-               # process ray ...
-    
+               # process ray / sweep  ...
+               process_ray(meta_data, ranges)  # , ZE, NCP, VR, SW)
+               # TODO: rename this function ...
+               iend = control_for_end_of_all_text_files() # ih_ray= (967) ... to tilt_prev= (3841); calls  iend_equals_2()
+ 
     
             except EOFError:
                 # jump here on EOF
@@ -644,7 +650,7 @@ def cns_eldo(input_parameters):
     #    control_for_end_of_all_text_files_wo_gotos()
     # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
     #    -> NAVIGATIONAL ERROS CAN BE CALCULATED
-    if ssurfins.gt.ssurfins_min:
+    if enough_points(ssurfins, ssurfins_min):
         calculate_navigational_errors
     else:
         print(' /////////////////////////////////////////////')
