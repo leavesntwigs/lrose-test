@@ -1,6 +1,6 @@
 './corrections'        ! 'DIRECTORY FOR WRITING'
 './cfradial'     ! 'DIRECTORY FOR READING TEXT FILE
-       1
+       2
 09 14 2008                 ! DD MM YYYY
 234700 235500              ! HHMMSS_start HHMMSS_stop
 16.64  148.00                 ! LAT LON ORIGIN (degrees)

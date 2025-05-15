@@ -1,0 +1,7 @@
+
+
+break  806
+(gdb) run /data/DATA_cns.txt
+break 832   # after reading data
+
+break 942

@@ -3,10 +3,10 @@
 nranges = 5
 # 2x
 start_range = 200
-ZE = 10
-NCP = 20
-VR = 30
-SW = 40
+ZE = 11
+NCP = 21
+VR = 31
+SW = 41
 
 
 counter = 0
@@ -19,7 +19,7 @@ start_mon = 1
 start_day = 1
        
 start_hour = 0
-start_min = 0
+start_min = 1
 start_sec = 1
 time = 0
        

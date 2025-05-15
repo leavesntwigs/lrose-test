@@ -1,40 +1,34 @@
+import numpy as np
 
-def process_ray(meta_data, ranges):  # , ZE, NCP, VR, SW):
-            (counter, nsweep, NTIMES, NRANGES, 
-            start_year, start_mon, start_day, start_hour, start_min, start_sec, 
+# seems to just be renaming input variables ? 
+
+def process_ray(nranges, MAXRAD, MAXPORAD,
+            nsweep, 
+            start_hour, start_min, start_sec, 
             time, azimuth, elevation, 
             latitude, longitude, altitude, altitude_agl, 
             heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
-            azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction) = meta_data
-
-#            # sanity check the ray data have the expected dimensions    
-#            ranges = np.zeros(nranges)
-#            ZE = np.zeros(nranges)
-#            NCP = np.zeros(nranges)
-#            VR = np.zeros(nranges)
-#            SW = np.zeros(nranges)
-#    
-#            for J in range(nranges):
-#                data = f.readline().strip().split()
-#                ranges[J], ZE[J], NCP[J], VR[J], SW[J] = map(float, data)
-#    
-#    # process ray ...
+            azimuth_correction, elevation_correction, range_correction, longitude_correction,
+            latitude_correction, pressure_altitude_correction, radar_altitude_correction, 
+            ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction,
+            heading_correction, roll_correction, pitch_correction, drift_correction,
+            rotation_correction, tilt_correction):
 
      # ************ Get the ray time *************
             ih_rdl1 = start_hour
             im_rdl1 = start_min
             is_rdl1 = start_sec
-            ims_rdl1 = (time-INT(time))*1000
+            ims_rdl1 = (time-int(time))*1000
     
     # add to the start seconds by time, which is the elpased time after start time
-            is_rdl1 = is_rdl1+INT(time)
+            is_rdl1 = is_rdl1+int(time)
     # adjusting hh,mm,ss for passing 60 mark, assign to Frank's ray time variables
             ims_rdl = ims_rdl1
-            is_rdl = MOD(is_rdl1,60)
+            is_rdl = is_rdl1 % 60
             im_rdl1 = im_rdl1+is_rdl1/60
-            im_rdl = MOD(im_rdl1, 60)
+            im_rdl = im_rdl1 % 60
             ih_rdl1 = ih_rdl1+im_rdl1/60
-            ih_rdl = MOD(ih_rdl1, 60)
+            ih_rdl = ih_rdl1 % 60
     
     # Assign the aircraft position/angles to Frank's variables
             azest_rdl = azimuth
@@ -59,6 +53,7 @@ def process_ray(meta_data, ranges):  # , ZE, NCP, VR, SW):
     # Assign  the total number of gates and range of each gates,
     #  The aft/fore radar are different
             nb_portes = nranges
+            d_porte = np.zeros(MAXPORAD, dtype=np.float16)
             if (tilt  <  0): # AFT,iradar_ray=1,iaftfore= -1
                # do ig = 1, nranges
                #    d_porte(ig) = range(ig)
@@ -79,6 +74,23 @@ def process_ray(meta_data, ranges):  # , ZE, NCP, VR, SW):
     # Assign the correction factors to Frank's variable
     # NOTE: Here the correction factors are arrays with two elements
     # This is different from any other variables
+
+            corr_azest = np.zeros(MAXRAD, dtype=np.float16)
+            corr_elhor = np.zeros(MAXRAD, dtype=np.float16)
+            corr_dist = np.zeros(MAXRAD, dtype=np.float16)
+            corr_lon = np.zeros(MAXRAD, dtype=np.float16)
+            corr_lat = np.zeros(MAXRAD, dtype=np.float16)
+            corr_p_alt = np.zeros(MAXRAD, dtype=np.float16)
+            corr_r_alt = np.zeros(MAXRAD, dtype=np.float16)
+            corr_vwe_av = np.zeros(MAXRAD, dtype=np.float16)
+            corr_vsn_av = np.zeros(MAXRAD, dtype=np.float16)
+            corr_vnz_av = np.zeros(MAXRAD, dtype=np.float16)
+            corr_cap = np.zeros(MAXRAD, dtype=np.float16)
+            corr_roul = np.zeros(MAXRAD, dtype=np.float16)
+            corr_tang = np.zeros(MAXRAD, dtype=np.float16)
+            corr_derv = np.zeros(MAXRAD, dtype=np.float16)
+            corr_rota = np.zeros(MAXRAD, dtype=np.float16)
+            corr_incl = np.zeros(MAXRAD, dtype=np.float16)
     
             if tilt  <  0:   # AFT, iradar_ray=1,iaftfore= -1
                corr_azest[0] = azimuth_correction
@@ -123,4 +135,4 @@ def process_ray(meta_data, ranges):  # , ZE, NCP, VR, SW):
     #           ,' HHMMSS:',ih_rdl,im_rdl,is_rdl,' EL:',elhor_rdl
     # TEST-END
     
-            return
+            return corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl, im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz

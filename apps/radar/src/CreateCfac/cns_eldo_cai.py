@@ -148,27 +148,27 @@ def cns_eldo(input_parameters):
 
 # From COMMON /CSPD_OU_CELV/
 #    np.int32 nb_portes
-    d_porte = np.zeros(MAXPORAD, dtype=np.float16)
+    # d_porte = np.zeros(MAXPORAD, dtype=np.float16)
 
 # From COMMON /CFAC/
 #
     # float corr_azest(MAXRAD),corr_elhor(MAXRAD),corr_dist(MAXRAD)
-    corr_azest = np.zeros(MAXRAD, dtype=np.float16)
-    corr_elhor = np.zeros(MAXRAD, dtype=np.float16)
-    corr_dist = np.zeros(MAXRAD, dtype=np.float16)
-    corr_lon = np.zeros(MAXRAD, dtype=np.float16)
-    corr_lat = np.zeros(MAXRAD, dtype=np.float16)
-    corr_p_alt = np.zeros(MAXRAD, dtype=np.float16)
-    corr_r_alt = np.zeros(MAXRAD, dtype=np.float16)
-    corr_vwe_av = np.zeros(MAXRAD, dtype=np.float16)
-    corr_vsn_av = np.zeros(MAXRAD, dtype=np.float16)
-    corr_vnz_av = np.zeros(MAXRAD, dtype=np.float16)
-    corr_cap = np.zeros(MAXRAD, dtype=np.float16)
-    corr_roul = np.zeros(MAXRAD, dtype=np.float16)
-    corr_tang = np.zeros(MAXRAD, dtype=np.float16)
-    corr_derv = np.zeros(MAXRAD, dtype=np.float16)
-    corr_rota = np.zeros(MAXRAD, dtype=np.float16)
-    corr_incl = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_azest = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_elhor = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_dist = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_lon = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_lat = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_p_alt = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_r_alt = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_vwe_av = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_vsn_av = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_vnz_av = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_cap = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_roul = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_tang = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_derv = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_rota = np.zeros(MAXRAD, dtype=np.float16)
+#    corr_incl = np.zeros(MAXRAD, dtype=np.float16)
 
 # From COMMON /RYIB/
 #
@@ -571,6 +571,8 @@ def cns_eldo(input_parameters):
 # open and write OUTPUT "SIS_EL_*" FILE #50
 
 # initializations
+    time_prev=-999
+    ihms_prev=-999
 
 # read ELDORA data (from text files originally, then move to CfRadial/binary files
     nfile = input_parameters['nfile']
@@ -606,12 +608,101 @@ def cns_eldo(input_parameters):
                 for J in range(nranges):
                     ranges[J] = float(data[J+1])  # map(float, data)
         
-               # process ray / sweep  ...
-               process_ray(meta_data, ranges)  # , ZE, NCP, VR, SW)
-               # TODO: rename this function ...
-               iend = control_for_end_of_all_text_files() # ih_ray= (967) ... to tilt_prev= (3841); calls  iend_equals_2()
- 
-    
+                # process ray / sweep  ...
+                corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz = process_ray.process_ray(
+                    nranges, MAXRAD, MAXPORAD, nsweep, start_hour, start_min, start_sec, time, azimuth, elevation, 
+                    latitude, longitude, altitude, altitude_agl, 
+                    heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
+                    azimuth_correction, elevation_correction, range_correction, longitude_correction,
+                    latitude_correction, pressure_altitude_correction, radar_altitude_correction, 
+                    ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction,
+                    heading_correction, roll_correction, pitch_correction, drift_correction,
+                    rotation_correction, tilt_correction)
+
+                # ih_rdl, im_rdl, is_rdl, ims_rdl = process_ray(meta_data, ranges)  # , ZE, NCP, VR, SW)
+                # TODO: rename this function ...
+                # iend = control_for_end_of_all_text_files() # ih_ray= (967) ... to tilt_prev= (3841); calls  iend_equals_2()
+                # various check for control flow: time, lat, lon, end of sweep, etc.
+                #c******************************************************************
+                #c**** CONTROL OF CURRENT TIME 
+                #c******************************************************************
+                ih_ray=ih_rdl
+                im_ray=im_rdl
+                is_ray=is_rdl
+                ims_ray=ims_rdl
+                ihhmmss=10000*ih_ray+100*im_ray+is_ray
+                if ihhmmss <= 0:    # go to 1 
+                    # skip to next file
+                    continue
+                time_ks=3.6*float(ih_ray)+0.06*float(im_ray)+0.001*float(is_ray)+1.e-6*float(ims_ray)
+                if time_ks-time_prev < -80.  or time_ks-tmin < -80.: 
+                    time_ks=time_ks+86.4
+                    ihhmmss=ihhmmss+240000
+                time_prev=time_ks
+                if time_ks < tmin:
+                    if ihhmmss/10 > ihms_prev:
+                        print(' HHMMSS:',ihhmmss,' < HHMMSS_min:',ihms_min)
+                        ihms_prev=ihhmmss/10
+                    if iend !=  2: #  go to 1   ! only when end of text file not reached
+                        # skip to next file
+                        continue
+                if time_ks > tmax:
+                    iend=2
+                    print(' ')
+                    print(' HHMMSSms:',100*ihhmmss+ims_rdl
+                          ,' > HHMMSSms_max:',100*ihms_max)
+                if iend != 2:  
+                    #
+                    #******************************************************************
+                    #**** CONTROL OF LAT, LON, P_ALT AND R_ALT
+                    #******************************************************************
+                    #
+                    if (   abs(lat_av) < 0.001
+                        or abs(lon_av) < 0.001
+                        or (     abs(p_alt_av) < 0.001
+                        and abs(r_alt_av) < 0.001)):  # go to 1 # read next file
+                        continue
+                    #   print('P_ALT_AV= ',p_alt_av
+                    #
+     
+                    #******************************************************************
+                    #**** RADAR IDENTIFICATION THROUGH TILT_RAY (=INCL_RDL)
+                    #****  -> AFT : IRADAR_RAY=1, IAFTFORE=-1
+                    #****  -> FORE : IRADAR_RAY=2, IAFTFORE=+1
+                    #**********************F********************************************
+                    #
+                    tilt_ray=incl_rdl
+                    if abs(tilt_ray) < 15. :
+                        continue  # go to 1 # read next file
+                    elif abs(tilt_ray) < 30. :
+                        if tilt_ray < -15. :
+                            iradar_ray=1
+                            iaftfore=-1
+                            swp[iradar_ray]=num_swp
+                        if tilt_ray > +15. :
+                            iradar_ray=2
+                            iaftfore=+1
+                            swp[iradar_ray]=num_swp
+                    else:
+                        continue  # go to 1 # read next file
+                    #******************************************************************
+                    #**** CONTROL FOR AN END OF SWEEP
+                    #******************************************************************
+                    if(nb_ray(iradar_ray) == 1):
+                        tandrot=0.
+                    else:
+                        tandrot=tan(conv*(rota_rdl-rota_prev(iradar_ray)))
+              
+                    if(     nb_ray(iradar_ray) > 1
+                        and (    (swp[iradar_ray].ne.swp_prev(iradar_ray))
+                        or (abs(tandrot) > 0.2)       ) ):
+                          iend=1
+                    #******************************************************************
+                    #****    END OF A SWEEP ( IEND = 1 )
+                    #**** or END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
+                    #******************************************************************
+                # end_of_sweep_iend_eq_1()
+
             except EOFError:
                 # jump here on EOF
                 print("Error reading data file:", ifile)
@@ -650,7 +741,7 @@ def cns_eldo(input_parameters):
     #    control_for_end_of_all_text_files_wo_gotos()
     # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
     #    -> NAVIGATIONAL ERROS CAN BE CALCULATED
-    if enough_points(ssurfins, ssurfins_min):
+    if False:   # enough_points(ssurfins, ssurfins_min):
         calculate_navigational_errors
     else:
         print(' /////////////////////////////////////////////')
