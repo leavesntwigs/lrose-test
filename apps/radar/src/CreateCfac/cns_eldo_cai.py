@@ -35,6 +35,9 @@ import numpy as np
 # import read_input_parameters
 import read_eldora_data_file
 import process_ray
+import iend_ge_1
+import iend_equals_2
+import control_for_end_of_all_text_files_wo_gotos
 
 def enough_points(ssurfins, ssurfins_min):
     return ssurfins > ssurfins_min
@@ -194,16 +197,16 @@ def cns_eldo(input_parameters):
     vdop_corr = np.full(MAXPORT, -999, dtype=np.float32)
     xms = np.zeros(9, dtype=np.float32)
     xml = np.zeros(9, dtype=np.float32)
-    rota_start = np.full(2, -999, dtype=np.float32)
-    rota_end = np.full(2, -999, dtype=np.float32)
+    #rota_start = np.full(2, -999, dtype=np.float32)
+    #rota_end = np.full(2, -999, dtype=np.float32)
     xp = np.zeros(2, dtype=np.float32)
-    ssc = np.zeros(2, dtype=np.float32)
-    scc = np.zeros(2, dtype=np.float32)
-    sxa = np.zeros(2, dtype=np.float32)
-    sya = np.zeros(2, dtype=np.float32)
-    sza = np.zeros(2, dtype=np.float32)
+    #ssc = np.zeros(2, dtype=np.float32)
+    #scc = np.zeros(2, dtype=np.float32)
+    #sxa = np.zeros(2, dtype=np.float32)
+    #sya = np.zeros(2, dtype=np.float32)
+    #sza = np.zeros(2, dtype=np.float32)
     sacfthspd = np.zeros(2, dtype=np.float32)
-    stime = np.zeros(2, dtype=np.float32)
+    # stime = np.zeros(2, dtype=np.float32)
     xp_acft = np.zeros(2, dtype=np.float32)
     su_acft = np.zeros(2, dtype=np.float32)
     sv_acft = np.zeros(2, dtype=np.float32)
@@ -212,8 +215,8 @@ def cns_eldo(input_parameters):
     sv_wind = np.zeros(2, dtype=np.float32)
     sw_wind = np.zeros(2, dtype=np.float32)
     xp_wind = np.zeros(2, dtype=np.float32)
-    stilt = np.zeros(2, dtype=np.float32)
-    stilt2 = np.zeros(2, dtype=np.float32)
+    # stilt = np.zeros(2, dtype=np.float32)
+    # stilt2 = np.zeros(2, dtype=np.float32)
     xsweeps = np.zeros(2, dtype=np.float32)
     # rota_prev(iradar)=-999
     rota_prev = np.full(2, -999, dtype=np.float32)
@@ -287,6 +290,8 @@ def cns_eldo(input_parameters):
     ihms_dtm = np.zeros(6, dtype=np.int32)
     ialtsurf_wri = np.zeros(nxysurfmax, dtype=np.int32)
 
+    iradar_ray = 0
+    iaftfore = 0
 #
 
     path_abs = ""  # 18 characters
@@ -330,8 +335,8 @@ def cns_eldo(input_parameters):
 #
     path_abs='/d1/navigation/roux_nav/'
     pipi=6.38319
-    deg_lon0=111.32
-    deg_lat=111.13
+    # deg_lon0=111.32  # used only in control_for...
+    # deg_lat=111.13
     conv=3.14159/180.
     rayter=6370.
     xncp_min=0.25
@@ -573,11 +578,13 @@ def cns_eldo(input_parameters):
 # initializations
     time_prev=-999
     ihms_prev=-999
+    iend = 0
 
 # read ELDORA data (from text files originally, then move to CfRadial/binary files
     nfile = input_parameters['nfile']
-    for ifile in range(nfile):
-        ifile += 1
+    # for ifile in range(nfile):
+    ifile = 1
+    while ifile < nfile and iend == 0:
         data_dir = input_parameters['dir_read']
         infilename = os.path.join(data_dir, str(ifile)+".txt")
         print("reading ", infilename)
@@ -631,6 +638,7 @@ def cns_eldo(input_parameters):
                 is_ray=is_rdl
                 ims_ray=ims_rdl
                 ihhmmss=10000*ih_ray+100*im_ray+is_ray
+                print("ihhmmss= ", ihhmmss, " is_ray= ", is_ray, " im_ray=", im_ray, " ih_ray=", ih_ray)
                 if ihhmmss <= 0:    # go to 1 
                     # skip to next file
                     continue
@@ -639,6 +647,7 @@ def cns_eldo(input_parameters):
                     time_ks=time_ks+86.4
                     ihhmmss=ihhmmss+240000
                 time_prev=time_ks
+# >>>>>> disagreement here on HHMMSSms compared to .f !
                 if time_ks < tmin:
                     if ihhmmss/10 > ihms_prev:
                         print(' HHMMSS:',ihhmmss,' < HHMMSS_min:',ihms_min)
@@ -696,47 +705,94 @@ def cns_eldo(input_parameters):
                     if(     nb_ray(iradar_ray) > 1
                         and (    (swp[iradar_ray].ne.swp_prev(iradar_ray))
                         or (abs(tandrot) > 0.2)       ) ):
-                          iend=1
+                          # iend=1
+                          iend_ge_1.iend_ge_1()
                     #******************************************************************
                     #****    END OF A SWEEP ( IEND = 1 )
                     #**** or END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
                     #******************************************************************
                 # end_of_sweep_iend_eq_1()
 
+                #
+                #******************************************************************
+                #**** END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
+                #******************************************************************
+                #
+                if iend == 2:
+                    print("end of tape or end of considered period: iend = 2")
+                    kdzsurf = int(input_parameters['kdzsurf'])
+                    kvsurf = int(input_parameters['kvsurf'])
+                    kdvinsitu = int(input_parameters['kdvinsitu'])
+                    dtiltaft_guess = float(input_parameters['dtiltaft_guess'])
+                    dtiltfore_guess = float(input_parameters['dtiltfore_guess'])
+                    drotaaft_guess = float(input_parameters['drotaaft_guess'])
+                    drotafore_guess = float(input_parameters['drotafore_guess'])
+                    dhdg_guess = float(input_parameters['dhdg_guess'])
+                    dpitch_guess = float(input_parameters['dpitch_guess'])
+                    rdfore_guess = float(input_parameters['rdfore_guess'])
+                    rdaft_guess = float(input_parameters['rdaft_guess'])
+                    dxwe_guess = float(input_parameters['dxwe_guess'])
+                    dysn_guess = float(input_parameters['dysn_guess'])
+                    dzacft_guess = float(input_parameters['dzacft_guess'])
+                    isim = int(input_parameters['isim'])
+                    ipr_alt = int(input_parameters['ipr_alt'])
+                    dmax0 = float(input_parameters['dmax0'])
+                    continue_processing = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
+                        kdzsurf, kvsurf, kdvinsitu,
+                        iradar_ray, nb_ray,
+                        iaftfore, isim, ipr_alt,
+                        time_ks,
+corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
+                        dtiltaft_guess,
+                        drotaaft_guess,
+                        dtiltfore_guess,
+                        drotafore_guess,
+                        dhdg_guess,
+                        dpitch_guess,
+                        rdfore_guess,
+                        rdaft_guess,
+                        dxwe_guess,
+                        dysn_guess,
+                        dzacft_guess,
+                        orig_lat, orig_lon,
+                        dmax0,
+#, kdvinsitu, 
+#                        swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, 
+#                        x_vpv, xvv_vpv
+                        )
+                    if continue_processing:
+                        swdzmsurf_tot = 0
+                        swdzsurf_tot = 0
+                        swdz2surf_tot = 0
+                        swvmsurf_tot = 0
+                        swvsurf_tot = 0
+                        swv2surf_tot = 0
+                        swdvminsitu_tot = 0
+                        swdvinsitu_tot = 0
+                        swv2insitu_tot = 0
+                        print(' ')
+                        print(' ****************************************************')
+                        print('   HHMMSS :',ih_ray,im_ray,is_ray
+                                  ,'   -> END OF CONSIDERED PERIOD')
+                        print('   NB_SWEEPS_READ FOR AFT AND FORE RADARS :'
+                                  ,nb_sweep)
+                        print(' ****************************************************')
+                        print(' ')
+                        print(' ')
+                        #    xv_vpv, x_vpv, xvv_vpv
+                        iend_equals_2.iend_equals_2(
+                            kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, 
+                            swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
+                            swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, 
+                            xv_vpv, x_vpv, xvv_vpv
+                            )
+                #endif    !!  of  !! if(iend == 2):  !!
+               
             except EOFError:
                 # jump here on EOF
                 print("Error reading data file:", ifile)
-       
-    # may not be needed ... 
-    #    data_dir = input_parameters['dir_read']
-    #    data_file_path = os.path.join(data_dir, "1.txt")
-    #    # meta_data, data = read_eldora_data_file(path)
-    #    nranges = 2
-    #    # (counter, nsweep, NTIMES, NRANGES, 
-    #     # start_year, start_mon, start_day, start_hour, start_min, start_sec,
-    #     # time, azimuth, elevation, latitude, longitude, 
-    #     # altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
-    #     # azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction),
-    #
-    #    # ZE, NCP, VR, SW 
-    #    meta_data, ranges, ZE, NCP, VR, SW = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
-    #    # fmt = '{:10d}' + ' '*2 + ' '*50 + '{:10d}'*3 + '{:5d}' + '{:3d}'*5 + '{:20.8f}' + '{:10.4f}'*2 + '{:20.8f}'*3 + '{:10.4f}'*29
-    #    print(meta_data[0:10])
-    #    return
-    #
-    #    # (m1, m2, m3), ranges  = read_eldora_data_file.read_eldora_data_file(data_file_path, nranges)
-    #    # if last file
-    #    # otherwise increment file counter
-    #    #meta_data = (m1, m2, m3)
-    #
-    #    process_ray.process_ray(meta_data, ranges) # , ZE, NCP, VR, SW)   # meta data tuple 
-    #
-    #    # CONTROL FOR THE END OF THE READING ALL TEXT FILES
-    #    iend = control_for_end_of_all_text_files() # calls  iend_equals_2()
-    #    if iend == 2:
-    #        # break
-    #        print("should break !")
-    #
+        ifile += 1
+
     #
     #    control_for_end_of_all_text_files_wo_gotos()
     # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)

@@ -229,36 +229,49 @@ def read_input_parameters(file_name):
 #
       print(' ')
       f99.readline()
-      isim = f99.readline().split()[0]
+      isim = int(f99.readline().split()[0])
       print(' SIMULATION AVEC +dXXX_GUESS INITIAUX (1/0) :',isim)
+      input_parameters['isim'] = isim
+      
 #
       print(' ')
       f99.readline()
       tokens = f99.readline().split()
-      dtiltaft_guess = tokens[0]
-      dtiltfore_guess = tokens[1]
+      dtiltaft_guess = float(tokens[0])
+      dtiltfore_guess = float(tokens[1])
+      input_parameters['dtiltaft_guess'] = dtiltaft_guess
+      input_parameters['dtiltfore_guess'] = dtiltfore_guess
       print(' D_TILT_AFT,D_TILT_FORE (deg) guess :'
          ,dtiltaft_guess,dtiltfore_guess)
       tokens = f99.readline().split()
-      drotaaft_guess = tokens[0]
-      drotafore_guess = tokens[1]
+      drotaaft_guess = float(tokens[0])
+      drotafore_guess = float(tokens[1])
+      input_parameters['drotaaft_guess'] = drotaaft_guess
+      input_parameters['drotafore_guess'] = drotafore_guess
       print(' D_ROTA_AFT,D_ROTA_FORE (deg) guess :'
          ,drotaaft_guess,drotafore_guess)
       tokens = f99.readline().split()
-      dpitch_guess = tokens[0]
-      dhdg_guess = tokens[1]
+      dpitch_guess = float(tokens[0])
+      dhdg_guess = float(tokens[1])
+      input_parameters['dpitch_guess'] = dpitch_guess
+      input_parameters['dhdg_guess'] = dhdg_guess
       print(' D_PITCH,D_HEADING (deg) guess :',
          # ,droll_guess,  # not used ???
          dpitch_guess,dhdg_guess)
       tokens = f99.readline().split()
-      rdaft_guess = tokens[0]
-      rdfore_guess = tokens[1]
+      rdaft_guess = float(tokens[0])
+      rdfore_guess = float(tokens[1])
+      input_parameters['rdaft_guess'] = rdaft_guess
+      input_parameters['rdfore_guess'] = rdfore_guess
       print(' RANGE_DELAY_AFT,RANGE_DELAY_FORE (km) guess :'
          ,rdaft_guess,rdfore_guess)
       tokens = f99.readline().split()
-      dxwe_guess = tokens[0]
-      dysn_guess = tokens[1]
-      dzacft_guess = tokens[2]
+      dxwe_guess = float(tokens[0])
+      dysn_guess = float(tokens[1])
+      dzacft_guess = float(tokens[2])
+      input_parameters['dxwe_guess'] = dxwe_guess
+      input_parameters['dysn_guess'] = dysn_guess
+      input_parameters['dzacft_guess'] = dzacft_guess
       print(' D_XWE,D_YSN,D_ZACFT (km) guess :'
          ,dxwe_guess,dysn_guess,dzacft_guess)
       dvh_guess = f99.readline().split()[0]

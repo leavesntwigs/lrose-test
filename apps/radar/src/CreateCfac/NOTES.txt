@@ -227,3 +227,6 @@ mamba create -n cfac numpy xarray xradar
 mamba activate cfac
 THIS SEEMS TO FIX THE WEIRD ERRORS; THINGS ARE WORKING AGAIN
 
+
+process_ray and control_for_end_of... share variables.
+

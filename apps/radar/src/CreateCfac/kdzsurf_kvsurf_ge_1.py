@@ -1,3 +1,6 @@
+
+def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf):
+
 #******************************************************************
 #**** ( if     ( KZsurf=1  or  KVsurf=1 )
 #****      and  Z_ACFT > Z_ACFTmin

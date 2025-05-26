@@ -6,8 +6,7 @@
 
 # args: ih_rdl, im_rdl, ix_rdl, ims_rdl
 
-def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
-    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv):
+def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu):
 
 #******************************************************************
 #**** CONTROL FOR THE END OF THE READING ALL TEXT FILES
@@ -463,8 +462,5 @@ def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot,
       rota_prev(iradar_ray)=rota_ray
       tilt_prev=tilt_ray
 #
-#     if iend==2:
-#         iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
-#     swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv)
     return iend
 

@@ -8,15 +8,6 @@ import numpy as np
 def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
     swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv):
 
-    print(' ')
-    print(' ****************************************************')
-    #print('   HHMMSS :',ih_ray,im_ray,is_ray
-    #          ,'   -> END OF CONSIDERED PERIOD')
-    #print('   NB_SWEEPS_READ FOR AFT AND FORE RADARS :'
-    #          ,nb_sweep)
-    print(' ****************************************************')
-    print(' ')
-    print(' ')
     #write(10,"(' NB_SWEEPS FOR THE AFT AND FORE RADARS: '
     #            ,2i5,/)")
     #            ,int(xsweeps(1)),int(xsweeps(2))

@@ -24,11 +24,11 @@ def process_ray(nranges, MAXRAD, MAXPORAD,
             is_rdl1 = is_rdl1+int(time)
     # adjusting hh,mm,ss for passing 60 mark, assign to Frank's ray time variables
             ims_rdl = ims_rdl1
-            is_rdl = is_rdl1 % 60
-            im_rdl1 = im_rdl1+is_rdl1/60
-            im_rdl = im_rdl1 % 60
-            ih_rdl1 = ih_rdl1+im_rdl1/60
-            ih_rdl = ih_rdl1 % 60
+            is_rdl = int(is_rdl1 % 60)
+            im_rdl1 = im_rdl1+int(is_rdl1/60)
+            im_rdl = int(im_rdl1 % 60)
+            ih_rdl1 = ih_rdl1+int(im_rdl1/60)
+            ih_rdl = int(ih_rdl1 % 60)
     
     # Assign the aircraft position/angles to Frank's variables
             azest_rdl = azimuth
