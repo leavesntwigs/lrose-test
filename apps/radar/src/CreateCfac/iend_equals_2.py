@@ -1,12 +1,18 @@
 import numpy as np
 
+import write_surf_el
+
 # test 
 # >>> inner = [1,2,3]
 # >>> l = [inner, inner]
 # >>> result = iend_equals_2.iend_equals_2(1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, l, l, l)
 
 def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
-    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv):
+    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv,
+    iwrisurfile, wrisurfile_path,
+    swdzsurf_wri, sw_or_altsurf_wri,
+    nx_wrisurf,ny_wrisurf,nxysurfmax,
+    ):
 
     #write(10,"(' NB_SWEEPS FOR THE AFT AND FORE RADARS: '
     #            ,2i5,/)")
@@ -209,12 +215,13 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
 #    #**** WRITES THE "SURF_EL*" FILE #30 (if IWRISURFILE=1)
 #    #******************************************************************
 #    #
-#              if iwrisurfile == 1:
-#                write_surf_el(directory, wrisurfile,
-#                    swdzsurf_wri, sw_or_altsurf_wri
-#                    ,nx_wrisurf,ny_wrisurf,nxysurfmax,
-#                    )
-#    
+        if iwrisurfile == 1:
+            write_surf_el.write_surf_el(
+                wrisurfile_path,
+                swdzsurf_wri, sw_or_altsurf_wri,
+                nx_wrisurf,ny_wrisurf,nxysurfmax,
+                )
+    
 #    #******************************************************************
 #    #**** END OF "SIS_EL_*" FILE #50
 #    #******************************************************************

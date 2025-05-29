@@ -288,7 +288,7 @@ def cns_eldo(input_parameters):
     istart_sweep = np.zeros(2, dtype=np.int32)
     itab = np.zeros(nxysurfmax, dtype=np.int32)
     ihms_dtm = np.zeros(6, dtype=np.int32)
-    ialtsurf_wri = np.zeros(nxysurfmax, dtype=np.int32)
+    # ialtsurf_wri = np.zeros(nxysurfmax, dtype=np.int32)
 
     iradar_ray = 0
     iaftfore = 0
@@ -378,15 +378,16 @@ def cns_eldo(input_parameters):
 
     ihms_min = int(input_parameters['ihms_min'])
     ihms_max = int(input_parameters['ihms_max'])
-    ih_min=ihms_min/10000
-    im_min=(ihms_min-10000*ih_min)/100
-    is_min=ihms_min-10000*ih_min-100*im_min
-    ih_max=ihms_max/10000
-    im_max=(ihms_max-10000*ih_max)/100
-    is_max=ihms_max-10000*ih_max-100*im_max
+    ih_min=int(ihms_min/10000)
+    im_min=int((ihms_min-10000*ih_min)/100)
+    is_min=int(ihms_min-10000*ih_min-100*im_min)
+    ih_max=int(ihms_max/10000)
+    im_max=int((ihms_max-10000*ih_max)/100)
+    is_max=int(ihms_max-10000*ih_max-100*im_max)
 
     nsf=0
-    if(input_parameters['iwrisurfile'] == 1):
+    iwrisurfile = int(input_parameters['iwrisurfile'])
+    if(iwrisurfile == 1):
        wrisurfile = input_parameters['wrisurfile']
        # while(wrisurfile(nsf+1:nsf+1).ne.' '):
        #     nsf=nsf+1
@@ -403,8 +404,8 @@ def cns_eldo(input_parameters):
        print(' -> Xmin,max_wrisurf:',xmin_wrisurf,xmax_wrisurf)
        print('    Ymin,max_wrisurf:',ymin_wrisurf,ymax_wrisurf)
        print('    Hx,y_wrisurf:',hxy_wrisurf)
-       nx_wrisurf=((xmax_wrisurf-xmin_wrisurf)/hxy_wrisurf+1.)
-       ny_wrisurf=((ymax_wrisurf-ymin_wrisurf)/hxy_wrisurf+1.)
+       nx_wrisurf=int((xmax_wrisurf-xmin_wrisurf)/hxy_wrisurf+1.)
+       ny_wrisurf=int((ymax_wrisurf-ymin_wrisurf)/hxy_wrisurf+1.)
        print('    Nx,Ny_wrisurf:',nx_wrisurf,ny_wrisurf)
        if(nx_wrisurf > nxysurfmax or ny_wrisurf > nxysurfmax):
           print(' !!!! Nx,Ny_wrisurf :',nx_wrisurf,ny_wrisurf
@@ -421,12 +422,12 @@ def cns_eldo(input_parameters):
        # xmin_wrisurf = float(input_parameters['xmin_wrisurf'])
        # ymin_wrisurf = float(input_parameters['ymin_wrisurf'])
        # hxy_wrisurf = float(input_parameters['hxy_wrisurf'])
-       path = os.path.join(directory, wrisurfile)
+       wrisurfile_path = os.path.join(directory, wrisurfile)
        print(' OPEN "SURF_EL_*" FILE #30 FOR WRITING :'
-          , path)
+          , wrisurfile_path)
        if not os.path.exists(directory):
           os.makedirs(directory)
-       with open(path, 'w') as f30:
+       with open(wrisurfile_path, 'w') as f30:
             # ,form='formatted',status='unknown')
           iolat_wrisurf=(1000.*orig_lat)
           iolon_wrisurf=(1000.*orig_lon)
@@ -444,8 +445,9 @@ def cns_eldo(input_parameters):
           #   ,ihxy_wrisurf,ihxy_wrisurf,0)
 
           print(f'{yymmdd}{"ELDO":4}') # TODO compare to container output, I think the format may be wrong
-          f30.write(f'{yymmdd:12}{"ELDO":4}')
-          f30.write(''.join(f"{i:<7}" for i in [
+          #f30.write(f'{yymmdd:12>}{"ELDO":4}')
+          f30.write(f'{yymmdd.strftime("%Y%d%m"):>12}{"ELDO"}')
+          f30.write(''.join(f"{i:7n}" for i in [
               iolat_wrisurf, iolon_wrisurf, 0, 0, 0, 0, 0,
               ih_min, im_min, is_min,
               ih_max, im_max, is_max,
@@ -784,7 +786,10 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
                             kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, 
                             swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
                             swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, 
-                            xv_vpv, x_vpv, xvv_vpv
+                            xv_vpv, x_vpv, xvv_vpv,
+                            iwrisurfile, wrisurfile_path,
+                            swdzsurf_wri, sw_or_altsurf_wri,
+                            nx_wrisurf,ny_wrisurf,nxysurfmax,
                             )
                 #endif    !!  of  !! if(iend == 2):  !!
                

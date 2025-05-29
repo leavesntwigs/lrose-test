@@ -21,7 +21,7 @@ def inter(sp, nx, ny, nxysurfmax):  # BEJ conversion
                 sz[i, j] = sz[i, j] / sp[i, j]
                 nin += 1
             else:
-                print('sp[i,j]=', sp[i,j], ' setting sz[', i, ',', j, ']=-999')
+                # print('sp[i,j]=', sp[i,j], ' setting sz[', i, ',', j, ']=-999')
                 sz[i, j] = -999.0
 
     print('     -> ALONG X')
