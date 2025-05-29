@@ -611,3 +611,11 @@ def calculate_navigational_errors(directory, fich_cornav,
               )")
     #
 
+
+    return range_delay_corr_aft,
+        pressure_alt_corr,
+        ew_gndspd_corr,
+        pitch_corr_cfac,
+        drift_corr_cfac,
+        rot_angle_corr_aft,
+        tilt_corr_aft

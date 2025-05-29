@@ -1,6 +1,7 @@
 import numpy as np
 
 import write_surf_el
+import write_aft_cfac
 
 # test 
 # >>> inner = [1,2,3]
@@ -187,7 +188,7 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
 #    #******************************************************************
 #    
 #    # Write the aft cafc file
-#             write_aft_cafc(
+#         write_aft_cfac.write_aft_cafc(
 #                 directory,
 #                 range_delay_corr_aft,
 #                 pressure_alt_corr,

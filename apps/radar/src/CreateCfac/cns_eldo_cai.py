@@ -38,6 +38,7 @@ import process_ray
 import iend_ge_1
 import iend_equals_2
 import control_for_end_of_all_text_files_wo_gotos
+import write_aft_cfac
 
 def enough_points(ssurfins, ssurfins_min):
     return ssurfins > ssurfins_min
@@ -110,6 +111,13 @@ def cns_eldo(input_parameters):
 #    float range_delay_corr_fore
 #    float pressure_alt_corr
 #    float ew_gndspd_corr
+    range_delay_corr_aft = 0.0
+    pressure_alt_corr = 0.0
+    ew_gndspd_corr = 0.0
+    pitch_corr_cfac = 0.0
+    drift_corr_cfac = 0.0
+    rot_angle_corr_aft = 0.0
+    tilt_corr_aft = 0.0 
 #
 #! Scaler variable for each ray
 #
@@ -803,7 +811,14 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
     #    -> NAVIGATIONAL ERROS CAN BE CALCULATED
     if False:   # enough_points(ssurfins, ssurfins_min):
-        calculate_navigational_errors
+        range_delay_corr_aft,
+        pressure_alt_corr,
+        ew_gndspd_corr,
+        pitch_corr_cfac,
+        drift_corr_cfac,
+        rot_angle_corr_aft,
+        tilt_corr_aft = calculate_navigational_errors()
+
     else:
         print(' /////////////////////////////////////////////')
         print(' ')
@@ -812,7 +827,43 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
         print(' //////////// (not enough points) ////////////')
         print(' /////////////////////////////////////////////')
         print(' ')
+
+#        range_delay_corr_aft = 0.0
+#        pressure_alt_corr = 0.0
+#        ew_gndspd_corr = 0.0
+#        pitch_corr_cfac = 0.0
+#        drift_corr_cfac = 0.0
+#        rot_angle_corr_aft = 0.0
+#        tilt_corr_aft = 0.0 
     #
     #    if iend==2: 
     #        iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
     #    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv)
+
+
+#    #******************************************************************
+#    #             Write the cfac files using SOLO format
+#    #******************************************************************
+#    
+#    # Write the aft cafc file
+    write_aft_cfac.write_aft_cfac(
+        directory,
+        range_delay_corr_aft,
+        pressure_alt_corr,
+        ew_gndspd_corr,
+        pitch_corr_cfac,
+        drift_corr_cfac,
+        rot_angle_corr_aft,
+        tilt_corr_aft)
+     
+#    # Write the fore cafc file
+#              write_fore_cafc(directory,
+#                  range_delay_corr,
+#                  pressure_alt_corr,
+#                  ew_gndspd_corr,
+#                  pitch_corr_cfac,
+#                  drift_corr_cfac,
+#                  rot_angle_corr_fore,
+#                  tilt_corr_fore)
+#   
+#    # CAI ******  End of writing the cfac files  ******************    
