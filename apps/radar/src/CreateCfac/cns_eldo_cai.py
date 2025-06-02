@@ -39,6 +39,7 @@ import iend_ge_1
 import iend_equals_2
 import control_for_end_of_all_text_files_wo_gotos
 import write_cfac
+import write_cornav_file
 
 def enough_points(ssurfins, ssurfins_min):
     return ssurfins > ssurfins_min
@@ -527,6 +528,45 @@ def cns_eldo(input_parameters):
     c_hms_min = f"{1000000 + ihms_min:7d}"
     c_hms_max = f"{1000000 + ihms_max:7d}"
 
+    rw_dzsurf = input_parameters['rw_dzsurf']
+    rw_vsurf = input_parameters['rw_vsurf']
+    rw_dvinsitu = input_parameters['rw_dvinsitu']
+    idtiltaft = input_parameters['idtiltaft']
+    idtiltfore = input_parameters['idtiltfore']
+    idrotaaft = input_parameters['idrotaaft']
+    idrotafore = input_parameters['idrotafore']
+    idhdg = input_parameters['idhdg']
+    idpitch = input_parameters['idpitch']
+    irdaft = input_parameters['irdaft']
+    irdfore = input_parameters['irdfore']
+    idxwe = input_parameters['idxwe']
+    idysn = input_parameters['idysn']
+    idzacft = input_parameters['idzacft']
+    idvh = input_parameters['idvh']
+    #idpitch = input_parameters['idpitch']
+    #idpitch = input_parameters['idpitch']
+    #idpitch = input_parameters['idpitch']
+
+    write_cornav_file.write_cornav_file(
+        directory,
+        c_hms_min,
+        c_hms_max,
+        yymmdd,
+        rw_dzsurf,
+        rw_vsurf,
+        rw_dvinsitu,
+        idtiltaft,idtiltfore,
+        idrotaaft,idrotafore,
+        idpitch,idhdg,
+        irdaft,irdfore,
+        idxwe,idysn,idzacft,
+        idvh,
+        idtmfile,
+        dtm_file,
+        zsurf_cst,
+        iwrisurfile,
+        wrisurfile,
+        )
 #    fich_cornav = f"CORNAV_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
 #    fich_sis = f"SIS_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
 #
