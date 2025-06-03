@@ -46,8 +46,7 @@ def write_cornav_file(directory,
         #       ,form='formatted',status='unknown')
         print("yymmdd: ", yymmdd)
         f10.write(f"{' YYYYMMDD : '}{yymmdd.strftime("%Y%d%m"):>12}\n") # yymmdd:<12}\n")
-        #f10.write(f'{"' HHMMSS_min HHMMSS_max : '}{,a6,3x,a6,/)")
-        #     c_hms_min(2:7),c_hms_max(2:7)
+        f10.write(f" HHMMSS_min HHMMSS_max : {c_hms_min[1:7]}   {c_hms_max[1:7]}\n")
         f10.write(f'{" FIELDS TAKEN INTO ACCOUNT\n"}')
         f10.write(f'{"  -> REL.WGHT_dZsurf,Vsurf,dVinsitu : "}{rw_dzsurf:6.3f}{rw_vsurf:6.3f}{rw_dvinsitu:6.3f}\n')
         f10.write(" VARIABLES TAKEN INTO ACCOUNT\n")
@@ -72,4 +71,4 @@ def write_cornav_file(directory,
         else:
           f10.write(f'{" NO SURF_EL_* FILE TO WRITE "}')
     
-
+    return path

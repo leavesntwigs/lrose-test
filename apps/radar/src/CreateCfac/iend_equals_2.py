@@ -13,11 +13,12 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
     iwrisurfile, wrisurfile_path,
     swdzsurf_wri, sw_or_altsurf_wri,
     nx_wrisurf,ny_wrisurf,nxysurfmax,
+    cornav_path,    #  cornav_path = os.path.join(directory, fich_cornav)
+    xsweeps,
     ):
 
-    #write(10,"(' NB_SWEEPS FOR THE AFT AND FORE RADARS: '
-    #            ,2i5,/)")
-    #            ,int(xsweeps(1)),int(xsweeps(2))
+    with open(cornav_path, 'a') as f10:
+        f10.write(f' NB_SWEEPS FOR THE AFT AND FORE RADARS: {int(xsweeps[0]):5n}{int(xsweeps[1]):5n}\n\n\n\n')
     #
     #******************************************************************
     #****  SUM OF INDIVIDUAL WEIGHTS, MEAN, RMS VALUES OF
@@ -39,30 +40,44 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
         stdv_dzsurf = np.sqrt(swdzsurf_tot * swdz2surf_tot - swdzmsurf_tot * swdzmsurf_tot) / max(1.0, swdzsurf_tot)
         print(' ')
         print(f' dZ_surf (km) sum_wghts,mean,stdv : {swdzsurf_tot:10.1f} {bias_dzsurf:8.3f} {stdv_dzsurf:8.3f}')
+
+
+        with open(cornav_path, 'a') as f10:
+            f10.write(f' dZ_surf (km) sum_wghts,mean,stdv :{swdzsurf_tot:10.1f}{bias_dzsurf:8.3f}{stdv_dzsurf:8.3f}\n\n')
+            
     
     if kvsurf == 1:  # always 1
         bias_vsurf = swvmsurf_tot / max(1.0, swvsurf_tot)
         stdv_vsurf = np.sqrt(swvsurf_tot * swv2surf_tot - swvmsurf_tot * swvmsurf_tot) / max(1.0, swvsurf_tot)
         print(' ')
         print(f' VDOP_surf (m/s) sum_wghts,mean,stdv : {swvsurf_tot:10.1f} {bias_vsurf:8.3f} {stdv_vsurf:8.3f}')
+        with open(cornav_path, 'a') as f10:
+            f10.write(f' VDOP_surf (m/s) sum_wghts,mean,stdv :{swvsurf_tot:10.1f}{bias_vsurf:8.3f}{stdv_vsurf:8.3f}\n\n')
     
     if kdvinsitu == 1:  # always 1
         bias_dvinsitu = swdvminsitu_tot / max(1.0, swdvinsitu_tot)
         stdv_dvinsitu = np.sqrt(swdvinsitu_tot * swv2insitu_tot - swdvminsitu_tot * swdvminsitu_tot) / max(1.0, swdvinsitu_tot)
         print(' ')
         print(f' dVDOP_insitu (m/s) sum_wghts,mean,stdv : {swdvinsitu_tot:10.1f} {bias_dvinsitu:8.3f} {stdv_dvinsitu:8.3f}')
+        with open(cornav_path, 'a') as f10:
+            f10.write(f' dVDOP_insitu (m/s) sum_wghts,mean,stdv :{swdvinsitu_tot:10.1f}{bias_dvinsitu:8.3f}{stdv_dvinsitu:8.3f}\n')
         
         for iradar in range(1, 3):
             print('   IRADAR (AR=1,AV=2) :', iradar)
             bias_dvinsitu_ir_g = xv_vpv[iradar-1][0] / max(1.0, x_vpv[iradar-1][0])
             stdv_dvinsitu_ir_g = np.sqrt(x_vpv[iradar-1][0] * xvv_vpv[iradar-1][0] - xv_vpv[iradar-1][0] * xv_vpv[iradar-1][0]) / max(1.0, x_vpv[iradar-1][0])
-            # print('     -> VDOP-PROJWIND_LEFT_npts,mean,stdv:', x_vpv[iradar-1][0], bias_dvinsitu_ir_g, stdv_dvinsitu_ir_g)
-            # print(f'   IRADAR (AR=1,AV=2) : {iradar}   
-            print(f'     -> VDOP-PROJWIND_LEFT_npts,mean,stdv: {x_vpv[iradar-1][0]:10.1f} {bias_dvinsitu_ir_g:8.3f} {stdv_dvinsitu_ir_g:8.3f}')
+            print(f'   IRADAR (AR=1,AV=2) : {iradar}')   
+            print(f'    -> VDOP-PROJWIND_LEFT_npts,mean,stdv: {x_vpv[iradar-1][0]:10.1f} {bias_dvinsitu_ir_g:8.3f} {stdv_dvinsitu_ir_g:8.3f}')
+            with open(cornav_path, 'a') as f10:
+               #  print('    -> VDOP-PROJWIND_LEFT_npts,mean,stdv:', x_vpv[iradar-1][0], bias_dvinsitu_ir_g, stdv_dvinsitu_ir_g)
+                f10.write(f'   IRADAR (AR=1,AV=2) :{iradar}\n')
+                f10.write(f'    -> VDOP-PROJWIND_LEFT_npts,mean,stdv:{x_vpv[iradar-1][0]:10.1f}{bias_dvinsitu_ir_g:8.3f}{stdv_dvinsitu_ir_g:8.3f}\n')
             
             bias_dvinsitu_ir_d = xv_vpv[iradar-1][1] / max(1.0, x_vpv[iradar-1][1])
             stdv_dvinsitu_ir_d = np.sqrt(x_vpv[iradar-1][1] * xvv_vpv[iradar-1][1] - xv_vpv[iradar-1][1] * xv_vpv[iradar-1][1]) / max(1.0, x_vpv[iradar-1][1])
-            print(f'     -> VDOP-PROJWIND_RIGHT_npts,mean,stdv: {x_vpv[iradar-1][1]:10.1f} {bias_dvinsitu_ir_d:8.3f} {stdv_dvinsitu_ir_d:8.3f}')
+            print(f'    -> VDOP-PROJWIND_RIGHT_npts,mean,stdv: {x_vpv[iradar-1][1]:10.1f} {bias_dvinsitu_ir_d:8.3f} {stdv_dvinsitu_ir_d:8.3f}')
+            with open(cornav_path, 'a') as f10:
+                f10.write(f'    -> VDOP-PROJWIND_RIGHT_npts,mean,stdv:{x_vpv[iradar-1][1]:10.1f}{bias_dvinsitu_ir_d:8.3f}{stdv_dvinsitu_ir_d:8.3f}\n')
         
         print(' ')
         print()

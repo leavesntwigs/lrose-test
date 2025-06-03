@@ -547,7 +547,7 @@ def cns_eldo(input_parameters):
     #idpitch = input_parameters['idpitch']
     #idpitch = input_parameters['idpitch']
 
-    write_cornav_file.write_cornav_file(
+    cornav_path = write_cornav_file.write_cornav_file(
         directory,
         c_hms_min,
         c_hms_max,
@@ -841,6 +841,8 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
                             iwrisurfile, wrisurfile_path,
                             swdzsurf_wri, sw_or_altsurf_wri,
                             nx_wrisurf,ny_wrisurf,nxysurfmax,
+                            cornav_path,
+                            xsweeps,
                             )
                 #endif    !!  of  !! if(iend == 2):  !!
                
