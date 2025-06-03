@@ -75,4 +75,5 @@ def generate_surface_arrays(
  #             else:
 # 		alt_dtm(idtm,jdtm)=-999.
        altdtm_mean=altdtm_mean/amax1(1.,saltdtm)
+
    return

@@ -1,4 +1,12 @@
-def iend_ge_1(): # end of sweep
+# end of sweep
+import numpy as np
+
+def iend_ge_1(iradar_ray,
+    rota_prev,
+    nb_ray,
+    ):
+
+    rota_end = np.full(2, -999, dtype=np.float32)
 
     rota_end[iradar_ray]=rota_prev[iradar_ray]
     #
@@ -121,4 +129,4 @@ def iend_ge_1(): # end of sweep
   #
       #endif    !!  of  !! if(nb_ray[iradar_ray] > 1):  !!
 
-
+    return rota_end

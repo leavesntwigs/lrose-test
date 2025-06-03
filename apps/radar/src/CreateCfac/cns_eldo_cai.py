@@ -40,6 +40,7 @@ import iend_equals_2
 import control_for_end_of_all_text_files_wo_gotos
 import write_cfac
 import write_cornav_file
+import write_surf_el
 
 def enough_points(ssurfins, ssurfins_min):
     return ssurfins > ssurfins_min
@@ -633,15 +634,36 @@ def cns_eldo(input_parameters):
     ihms_prev=-999
     iend = 0
 
+
+    kdzsurf = int(input_parameters['kdzsurf'])
+    kvsurf = int(input_parameters['kvsurf'])
+    kdvinsitu = int(input_parameters['kdvinsitu'])
+    dtiltaft_guess = float(input_parameters['dtiltaft_guess'])
+    dtiltfore_guess = float(input_parameters['dtiltfore_guess'])
+    drotaaft_guess = float(input_parameters['drotaaft_guess'])
+    drotafore_guess = float(input_parameters['drotafore_guess'])
+    dhdg_guess = float(input_parameters['dhdg_guess'])
+    dpitch_guess = float(input_parameters['dpitch_guess'])
+    rdfore_guess = float(input_parameters['rdfore_guess'])
+    rdaft_guess = float(input_parameters['rdaft_guess'])
+    dxwe_guess = float(input_parameters['dxwe_guess'])
+    dysn_guess = float(input_parameters['dysn_guess'])
+    dzacft_guess = float(input_parameters['dzacft_guess'])
+    isim = int(input_parameters['isim'])
+    ipr_alt = int(input_parameters['ipr_alt'])
+    dmax0 = float(input_parameters['dmax0'])
+
+
 # read ELDORA data (from text files originally, then move to CfRadial/binary files
     nfile = input_parameters['nfile']
-    # for ifile in range(nfile):
-    ifile = 1
-    while ifile < nfile and iend == 0:
+    ifile = 0
+    lastfile = 0
+    all_done = False    
+    while ifile < nfile and not all_done:
+        ifile = ifile +1
         data_dir = input_parameters['dir_read']
         infilename = os.path.join(data_dir, str(ifile)+".txt")
         print("reading ", infilename)
-        # infilename = f"{dir_read[0:ndirr]}/{infile:10d}.txt"
         with open(infilename, 'r') as f:
     
             try:
@@ -653,10 +675,6 @@ def cns_eldo(input_parameters):
                 NCP = np.zeros(nranges)
                 VR = np.zeros(nranges)
                 SW = np.zeros(nranges) 
-    
-                # read(55,102,END=5)counter,(range(J),J=1,nranges) 
-                # on error, goto 5
-                # read counter (format I10), range(1), range(2), ... (format 2000f10.4)
     
                 # for J in range(nranges):
                 #     data = f.readline().strip().split()
@@ -682,6 +700,17 @@ def cns_eldo(input_parameters):
                 # ih_rdl, im_rdl, is_rdl, ims_rdl = process_ray(meta_data, ranges)  # , ZE, NCP, VR, SW)
                 # TODO: rename this function ...
                 # iend = control_for_end_of_all_text_files() # ih_ray= (967) ... to tilt_prev= (3841); calls  iend_equals_2()
+
+            except EOFError:
+                print("Error reading data file:", ifile)
+                if ifile == nfile:
+                    lastfile=1
+                else:
+                    continue # skip_file
+            iend=0
+            if ifile == nfile and lastfile == 1:
+                iend=2
+            if True: #  I just don't want to change all the indents at the moment
                 # various check for control flow: time, lat, lon, end of sweep, etc.
                 #c******************************************************************
                 #c**** CONTROL OF CURRENT TIME 
@@ -692,8 +721,7 @@ def cns_eldo(input_parameters):
                 ims_ray=ims_rdl
                 ihhmmss=10000*ih_ray+100*im_ray+is_ray
                 print("ihhmmss= ", ihhmmss, " is_ray= ", is_ray, " im_ray=", im_ray, " ih_ray=", ih_ray)
-                if ihhmmss <= 0:    # go to 1 
-                    # skip to next file
+                if ihhmmss <= 0:    
                     continue
                 time_ks=3.6*float(ih_ray)+0.06*float(im_ray)+0.001*float(is_ray)+1.e-6*float(ims_ray)
                 if time_ks-time_prev < -80.  or time_ks-tmin < -80.: 
@@ -706,7 +734,6 @@ def cns_eldo(input_parameters):
                         print(' HHMMSS:',ihhmmss,' < HHMMSS_min:',ihms_min)
                         ihms_prev=ihhmmss/10
                     if iend !=  2: #  go to 1   ! only when end of text file not reached
-                        # skip to next file
                         continue
                 if time_ks > tmax:
                     iend=2
@@ -724,8 +751,6 @@ def cns_eldo(input_parameters):
                         or (     abs(p_alt_av) < 0.001
                         and abs(r_alt_av) < 0.001)):  # go to 1 # read next file
                         continue
-                    #   print('P_ALT_AV= ',p_alt_av
-                    #
      
                     #******************************************************************
                     #**** RADAR IDENTIFICATION THROUGH TILT_RAY (=INCL_RDL)
@@ -758,121 +783,123 @@ def cns_eldo(input_parameters):
                     if(     nb_ray(iradar_ray) > 1
                         and (    (swp[iradar_ray].ne.swp_prev(iradar_ray))
                         or (abs(tandrot) > 0.2)       ) ):
-                          # iend=1
-                          iend_ge_1.iend_ge_1()
+                        iend=1
+                if iend >= 1:
+                    rota_end = iend_ge_1.iend_ge_1(iradar_ray,
+                        rota_prev,
+                        nb_ray,
+                        )
                     #******************************************************************
                     #****    END OF A SWEEP ( IEND = 1 )
                     #**** or END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
                     #******************************************************************
-                # end_of_sweep_iend_eq_1()
 
                 #
                 #******************************************************************
                 #**** END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
                 #******************************************************************
                 #
-                if iend == 2:
-                    print("end of tape or end of considered period: iend = 2")
-                    kdzsurf = int(input_parameters['kdzsurf'])
-                    kvsurf = int(input_parameters['kvsurf'])
-                    kdvinsitu = int(input_parameters['kdvinsitu'])
-                    dtiltaft_guess = float(input_parameters['dtiltaft_guess'])
-                    dtiltfore_guess = float(input_parameters['dtiltfore_guess'])
-                    drotaaft_guess = float(input_parameters['drotaaft_guess'])
-                    drotafore_guess = float(input_parameters['drotafore_guess'])
-                    dhdg_guess = float(input_parameters['dhdg_guess'])
-                    dpitch_guess = float(input_parameters['dpitch_guess'])
-                    rdfore_guess = float(input_parameters['rdfore_guess'])
-                    rdaft_guess = float(input_parameters['rdaft_guess'])
-                    dxwe_guess = float(input_parameters['dxwe_guess'])
-                    dysn_guess = float(input_parameters['dysn_guess'])
-                    dzacft_guess = float(input_parameters['dzacft_guess'])
-                    isim = int(input_parameters['isim'])
-                    ipr_alt = int(input_parameters['ipr_alt'])
-                    dmax0 = float(input_parameters['dmax0'])
-                    continue_processing = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
-                        kdzsurf, kvsurf, kdvinsitu,
-                        iradar_ray, nb_ray,
-                        iaftfore, isim, ipr_alt,
-                        time_ks,
+                    if iend == 2:
+                        all_done = True
+                        continue
+                    initialize_sweep_beginning()
+                 
+                print("end of tape or end of considered period: iend = 2")
+                # kdzsurf = int(input_parameters['kdzsurf'])
+                # kvsurf = int(input_parameters['kvsurf'])
+                # kdvinsitu = int(input_parameters['kdvinsitu'])
+                # dtiltaft_guess = float(input_parameters['dtiltaft_guess'])
+                # dtiltfore_guess = float(input_parameters['dtiltfore_guess'])
+                # drotaaft_guess = float(input_parameters['drotaaft_guess'])
+                # drotafore_guess = float(input_parameters['drotafore_guess'])
+                # dhdg_guess = float(input_parameters['dhdg_guess'])
+                # dpitch_guess = float(input_parameters['dpitch_guess'])
+                # rdfore_guess = float(input_parameters['rdfore_guess'])
+                # rdaft_guess = float(input_parameters['rdaft_guess'])
+                # dxwe_guess = float(input_parameters['dxwe_guess'])
+                # dysn_guess = float(input_parameters['dysn_guess'])
+                # dzacft_guess = float(input_parameters['dzacft_guess'])
+                # isim = int(input_parameters['isim'])
+                # ipr_alt = int(input_parameters['ipr_alt'])
+                # dmax0 = float(input_parameters['dmax0'])
+                continue_processing = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
+                    kdzsurf, kvsurf, kdvinsitu,
+                    iradar_ray, nb_ray,
+                    iaftfore, isim, ipr_alt,
+                    time_ks,
 corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
-                        dtiltaft_guess,
-                        drotaaft_guess,
-                        dtiltfore_guess,
-                        drotafore_guess,
-                        dhdg_guess,
-                        dpitch_guess,
-                        rdfore_guess,
-                        rdaft_guess,
-                        dxwe_guess,
-                        dysn_guess,
-                        dzacft_guess,
-                        orig_lat, orig_lon,
-                        dmax0,
+                    dtiltaft_guess,
+                    drotaaft_guess,
+                    dtiltfore_guess,
+                    drotafore_guess,
+                    dhdg_guess,
+                    dpitch_guess,
+                    rdfore_guess,
+                    rdaft_guess,
+                    dxwe_guess,
+                    dysn_guess,
+                    dzacft_guess,
+                    orig_lat, orig_lon,
+                    dmax0,
 #, kdvinsitu, 
-#                        swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, 
-#                        x_vpv, xvv_vpv
-                        )
-                    if continue_processing:
-                        swdzmsurf_tot = 0
-                        swdzsurf_tot = 0
-                        swdz2surf_tot = 0
-                        swvmsurf_tot = 0
-                        swvsurf_tot = 0
-                        swv2surf_tot = 0
-                        swdvminsitu_tot = 0
-                        swdvinsitu_tot = 0
-                        swv2insitu_tot = 0
-                        print(' ')
-                        print(' ****************************************************')
-                        print('   HHMMSS :',ih_ray,im_ray,is_ray
-                                  ,'   -> END OF CONSIDERED PERIOD')
-                        print('   NB_SWEEPS_READ FOR AFT AND FORE RADARS :'
-                                  ,nb_sweep)
-                        print(' ****************************************************')
-                        print(' ')
-                        print(' ')
-                        #    xv_vpv, x_vpv, xvv_vpv
-                        iend_equals_2.iend_equals_2(
-                            kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, 
-                            swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
-                            swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, 
-                            xv_vpv, x_vpv, xvv_vpv,
-                            iwrisurfile, wrisurfile_path,
-                            swdzsurf_wri, sw_or_altsurf_wri,
-                            nx_wrisurf,ny_wrisurf,nxysurfmax,
-                            cornav_path,
-                            xsweeps,
-                            )
-                #endif    !!  of  !! if(iend == 2):  !!
+#                    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, 
+#                    x_vpv, xvv_vpv
+                    )
+    # end while
+    if all_done:
+        swdzmsurf_tot = 0
+        swdzsurf_tot = 0
+        swdz2surf_tot = 0
+        swvmsurf_tot = 0
+        swvsurf_tot = 0
+        swv2surf_tot = 0
+        swdvminsitu_tot = 0
+        swdvinsitu_tot = 0
+        swv2insitu_tot = 0
+        print(' ')
+        print(' ****************************************************')
+        print('   HHMMSS :',ih_ray,im_ray,is_ray
+                  ,'   -> END OF CONSIDERED PERIOD')
+        print('   NB_SWEEPS_READ FOR AFT AND FORE RADARS :'
+                  ,nb_sweep)
+        print(' ****************************************************')
+        print(' ')
+        print(' ')
+        #    xv_vpv, x_vpv, xvv_vpv
+        iend_equals_2.iend_equals_2(
+            kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, 
+            swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
+            swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, 
+            xv_vpv, x_vpv, xvv_vpv,
+            iwrisurfile, wrisurfile_path,
+            swdzsurf_wri, sw_or_altsurf_wri,
+            nx_wrisurf,ny_wrisurf,nxysurfmax,
+            cornav_path,
+            xsweeps,
+            )
                
-            except EOFError:
-                # jump here on EOF
-                print("Error reading data file:", ifile)
-        ifile += 1
-
     #
     #    control_for_end_of_all_text_files_wo_gotos()
     # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
     #    -> NAVIGATIONAL ERROS CAN BE CALCULATED
-    if False:   # enough_points(ssurfins, ssurfins_min):
-        range_delay_corr_aft,
-        pressure_alt_corr,
-        ew_gndspd_corr,
-        pitch_corr_cfac,
-        drift_corr_cfac,
-        rot_angle_corr_aft,
-        tilt_corr_aft = calculate_navigational_errors()
-
-    else:
-        print(' /////////////////////////////////////////////')
-        print(' ')
-        print(' /////////////////////////////////////////////')
-        print('    NO CORRECTIONS FOR NAVIGATIONAL ERRORS')
-        print(' //////////// (not enough points) ////////////')
-        print(' /////////////////////////////////////////////')
-        print(' ')
-
+#    if False:   # enough_points(ssurfins, ssurfins_min):
+#        range_delay_corr_aft,
+#        pressure_alt_corr,
+#        ew_gndspd_corr,
+#        pitch_corr_cfac,
+#        drift_corr_cfac,
+#        rot_angle_corr_aft,
+#        tilt_corr_aft = calculate_navigational_errors()
+#
+#    else:
+#        print(' /////////////////////////////////////////////')
+#        print(' ')
+#        print(' /////////////////////////////////////////////')
+#        print('    NO CORRECTIONS FOR NAVIGATIONAL ERRORS')
+#        print(' //////////// (not enough points) ////////////')
+#        print(' /////////////////////////////////////////////')
+#        print(' ')
+#
 #        range_delay_corr_aft = 0.0
 #        pressure_alt_corr = 0.0
 #        ew_gndspd_corr = 0.0
@@ -891,26 +918,31 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
 #    #******************************************************************
 #    
 #    # Write the aft cafc file
-    write_cfac.write_cfac(
-        directory,
-        'aft',
-        range_delay_corr_aft,
-        pressure_alt_corr,
-        ew_gndspd_corr,
-        pitch_corr_cfac,
-        drift_corr_cfac,
-        rot_angle_corr_aft,
-        tilt_corr_aft)
-     
-    # Write the fore cafc file
-    write_cfac.write_cfac(directory,
-        'fore',
-        range_delay_corr_fore,
-        pressure_alt_corr,
-        ew_gndspd_corr,
-        pitch_corr_cfac,
-        drift_corr_cfac,
-        rot_angle_corr_fore,
-        tilt_corr_fore)
-   
+        write_cfac.write_cfac(
+            directory,
+            'aft',
+            range_delay_corr_aft,
+            pressure_alt_corr,
+            ew_gndspd_corr,
+            pitch_corr_cfac,
+            drift_corr_cfac,
+            rot_angle_corr_aft,
+            tilt_corr_aft)
+         
+        # Write the fore cafc file
+        write_cfac.write_cfac(directory,
+            'fore',
+            range_delay_corr_fore,
+            pressure_alt_corr,
+            ew_gndspd_corr,
+            pitch_corr_cfac,
+            drift_corr_cfac,
+            rot_angle_corr_fore,
+            tilt_corr_fore)
+       
 #    # CAI ******  End of writing the cfac files  ******************    
+
+        # if iwrisurfile == 1:
+        #    write_surf_el.write_surf_el(wrisurfile_path,
+        #        swdzsurf_wri, sw_or_altsurf_wri,
+        #        nx_wrisurf,ny_wrisurf,nxysurfmax)
