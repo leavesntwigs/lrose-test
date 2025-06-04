@@ -82,8 +82,6 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
         print(' ')
         print()
     
-    
-    
     # autoconverted end
     
 #    print(' ')

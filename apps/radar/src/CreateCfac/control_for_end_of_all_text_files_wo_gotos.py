@@ -21,6 +21,7 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     dzacft_guess,
     orig_lat, orig_lon,
     dmax0,
+    nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins,
 ):
 
     continue_processing = True
@@ -318,7 +319,8 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
 ##!!!   endif
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    ze_actions.ze_actions()
+    nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = ze_actions.ze_actions(
+        nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins)
 
 #
 #******************************************************************
@@ -331,5 +333,6 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     rota_prev[iradar_ray]=rota_ray
     tilt_prev=tilt_ray
 #
-    return continue_processing, # swdzmsurf_tot
+    # return continue_processing, # swdzmsurf_tot
+    return nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins
 

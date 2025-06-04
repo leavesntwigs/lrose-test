@@ -109,7 +109,8 @@ def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu):
        #****    END OF A SWEEP ( IEND = 1 )
        #**** or END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
        #******************************************************************
-#   2   continue
+#   2   continue       # cns... contains code above this line
+                       # control_for..._wo_gotos contains code below this line
       done = iend_ge_1()
 #
 #************************************************************************
@@ -353,6 +354,8 @@ def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu):
 #!!!!     endif
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #
+    # end code in control_for..._wo_gotos
+    # ze_actions contain code below here ...
 #******************************************************************
 #**** DISMISS THE SPECIFIED RANGE GATES
 #******************************************************************
@@ -451,6 +454,8 @@ def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu):
 #******************************************************************
 #
       dvdop_insitu()
+#    end of ze_actions code
+#    control_for..._wo_gotos contains the code from here to end of file
 #
 #******************************************************************
 #**** STORE FOR NEXT RAY

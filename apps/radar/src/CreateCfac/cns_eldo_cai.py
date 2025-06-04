@@ -321,6 +321,19 @@ def cns_eldo(input_parameters):
     c_hms_max = ""  # 7 characters
     argu = "" # 30 characters
 
+
+    nb1=0
+    nb2=0
+    nb3=0 
+    nb4=0 
+    nb5=0 
+    nb6=0 
+    nb7=0 
+    nb8=0
+    nsup=0
+    nbtotals=0
+    nbon=0
+    nmauvais=0
 #
 #     include '/home/users/rouf/SOURCES/ELDO/mes_commons'
 #
@@ -368,6 +381,7 @@ def cns_eldo(input_parameters):
     dvdopinsitu_max=999.
     selhinsitu_max=0.1
     ssurfins_min=1.
+    ssurfins=0.
 #
 #******************************************************************
 #**** READ THE INPUT PARAMETERS IN FILE "DATA_cns"
@@ -822,7 +836,7 @@ def cns_eldo(input_parameters):
                 # isim = int(input_parameters['isim'])
                 # ipr_alt = int(input_parameters['ipr_alt'])
                 # dmax0 = float(input_parameters['dmax0'])
-                continue_processing = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
+                nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
                     kdzsurf, kvsurf, kdvinsitu,
                     iradar_ray, nb_ray,
                     iaftfore, isim, ipr_alt,
@@ -843,7 +857,8 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
                     dmax0,
 #, kdvinsitu, 
 #                    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, 
-#                    x_vpv, xvv_vpv
+#                    x_vpv, xvv_vpv,
+                     nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins
                     )
     # end while
     if all_done:
@@ -882,35 +897,41 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     #    control_for_end_of_all_text_files_wo_gotos()
     # (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
     #    -> NAVIGATIONAL ERROS CAN BE CALCULATED
-#    if False:   # enough_points(ssurfins, ssurfins_min):
-#        range_delay_corr_aft,
-#        pressure_alt_corr,
-#        ew_gndspd_corr,
-#        pitch_corr_cfac,
-#        drift_corr_cfac,
-#        rot_angle_corr_aft,
-#        tilt_corr_aft = calculate_navigational_errors()
-#
-#    else:
-#        print(' /////////////////////////////////////////////')
-#        print(' ')
-#        print(' /////////////////////////////////////////////')
-#        print('    NO CORRECTIONS FOR NAVIGATIONAL ERRORS')
-#        print(' //////////// (not enough points) ////////////')
-#        print(' /////////////////////////////////////////////')
-#        print(' ')
-#
-#        range_delay_corr_aft = 0.0
-#        pressure_alt_corr = 0.0
-#        ew_gndspd_corr = 0.0
-#        pitch_corr_cfac = 0.0
-#        drift_corr_cfac = 0.0
-#        rot_angle_corr_aft = 0.0
-#        tilt_corr_aft = 0.0 
+    
+    # dvdop_insitu.py:               ssurfins=ssurfins+wghtinsitu_ig
+    # kdzsurf_kvsurf_ge_1.py:        ssurfins=ssurfins+wghtsurf_ray
+
+    if enough_points(ssurfins, ssurfins_min):
+        range_delay_corr_aft,
+        pressure_alt_corr,
+        ew_gndspd_corr,
+        pitch_corr_cfac,
+        drift_corr_cfac,
+        rot_angle_corr_aft,
+        tilt_corr_aft = calculate_navigational_errors()
+
+    else:
+        print(' /////////////////////////////////////////////')
+        print(' ')
+        print(' /////////////////////////////////////////////')
+        print('    NO CORRECTIONS FOR NAVIGATIONAL ERRORS')
+        print(' //////////// (not enough points) ////////////')
+        print(' /////////////////////////////////////////////')
+        print(' ')
+
+        range_delay_corr_aft = 0.0
+        pressure_alt_corr = 0.0
+        ew_gndspd_corr = 0.0
+        pitch_corr_cfac = 0.0
+        drift_corr_cfac = 0.0
+        rot_angle_corr_aft = 0.0
+        tilt_corr_aft = 0.0 
     #
     #    if iend==2: 
     #        iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2surf_tot, swvmsurf_tot, swvsurf_tot,
     #    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, x_vpv, xvv_vpv)
+
+    print(' END OF "CORNAV_EL_*" FILE #10 :',cornav_path)
 
 
 #    #******************************************************************
@@ -918,31 +939,46 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
 #    #******************************************************************
 #    
 #    # Write the aft cafc file
-        write_cfac.write_cfac(
-            directory,
-            'aft',
-            range_delay_corr_aft,
-            pressure_alt_corr,
-            ew_gndspd_corr,
-            pitch_corr_cfac,
-            drift_corr_cfac,
-            rot_angle_corr_aft,
-            tilt_corr_aft)
-         
-        # Write the fore cafc file
-        write_cfac.write_cfac(directory,
-            'fore',
-            range_delay_corr_fore,
-            pressure_alt_corr,
-            ew_gndspd_corr,
-            pitch_corr_cfac,
-            drift_corr_cfac,
-            rot_angle_corr_fore,
-            tilt_corr_fore)
-       
+    write_cfac.write_cfac(
+        directory,
+        'aft',
+        range_delay_corr_aft,
+        pressure_alt_corr,
+        ew_gndspd_corr,
+        pitch_corr_cfac,
+        drift_corr_cfac,
+        rot_angle_corr_aft,
+        tilt_corr_aft)
+     
+    # Write the fore cafc file
+    write_cfac.write_cfac(directory,
+        'fore',
+        range_delay_corr_fore,
+        pressure_alt_corr,
+        ew_gndspd_corr,
+        pitch_corr_cfac,
+        drift_corr_cfac,
+        rot_angle_corr_fore,
+        tilt_corr_fore)
+   
 #    # CAI ******  End of writing the cfac files  ******************    
 
-        # if iwrisurfile == 1:
-        #    write_surf_el.write_surf_el(wrisurfile_path,
-        #        swdzsurf_wri, sw_or_altsurf_wri,
-        #        nx_wrisurf,ny_wrisurf,nxysurfmax)
+    if iwrisurfile == 1:
+        write_surf_el.write_surf_el(wrisurfile_path,
+            swdzsurf_wri, sw_or_altsurf_wri,
+            nx_wrisurf,ny_wrisurf,nxysurfmax)
+
+#     
+#******************************************************************
+#**** END OF PROGRAMM
+#******************************************************************
+#   
+    print(' ')
+    print(' **************************')
+    print(' **** END OF PROGRAMM  ****')
+    print(' **************************')
+
+    print('N1,N2,N3,N4,N5,N6,N7,N8= ',nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8)
+    print('NSUP=', nsup)
+    print('NTOTAL_OK= ',nbtotals)
+    print('NBON, NMAUVAIS= ',nbon,nmauvais)

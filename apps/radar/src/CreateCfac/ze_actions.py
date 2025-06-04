@@ -1,4 +1,4 @@
-def ze_actions():
+def ze_actions(nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins):
 #
 #******************************************************************
 #**** DISMISS THE SPECIFIED RANGE GATES
@@ -85,12 +85,15 @@ def ze_actions():
        #endif
     #enddo
 
-    # kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf)  needs ze ...
+    nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = kdzsurf_kvsurf_ge_1.kdzsurf_kvsurf_ge_1(
+        kdzsurf, kvsurf,
+        nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins) #  needs ze ...
 #
 #******************************************************************
 #**** CASE "DVDOP_insitu"
 #**** (if D<DMAX_insitu and ||sin(ELEV_HOR)||<0.1)
 #******************************************************************
 #
-    dvdop_insitu()  # needs ze ...
+    ssurfins = dvdop_insitu(ssurfins)  # needs ze ...
 
+    return nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins
