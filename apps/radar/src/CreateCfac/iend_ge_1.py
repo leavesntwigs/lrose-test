@@ -6,6 +6,9 @@ def iend_ge_1(iradar_ray,
     nb_ray,
     ):
 
+    print("\n\n>>>>>>>> inside iend_ge_1 <<<<<<<<\n\n")
+    print("nb_ray[iradar_ray]: ", nb_ray[iradar_ray])
+
     rota_end = np.full(2, -999, dtype=np.float32)
 
     rota_end[iradar_ray]=rota_prev[iradar_ray]

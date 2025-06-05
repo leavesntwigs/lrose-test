@@ -1,7 +1,26 @@
 
+apt-get update
+apt-get install gdb
 
+gdb /Airborne../nav.../cns...
 break  806
 (gdb) run /data/DATA_cns.txt
 break 832   # after reading data
 
 break 942
+
+1100	        if(nb_ray(iradar_ray).gt.1)then
+
+---
+
+regarding the SIS* file:
+
+(base) eol-amalfi:CreateCfac brenda$ hexdump -C corrections/SIS_E_234700_235500 
+00000000  16 00 00 00 09 00 0e 00  d8 07 00 00 14 43 b8 1e  |.............C..|
+00000010  85 41 cc 94 03 00 ec 97  03 00 16 00 00 00 30 00  |.A............0.|
+00000020  00 00 e7 03 00 00 e7 03  00 00 00 c0 79 c4 00 c0  |............y...|
+00000030  79 c4 00 c0 79 c4 00 c0  79 c4 00 c0 79 c4 00 c0  |y...y...y...y...|
+*
+00000050  79 c4 30 00 00 00 04 00  00 00 19 fc ff ff 04 00  |y.0.............|
+00000060  00 00 04 00 00 00 19 fc  ff ff 04 00 00 00 04 00  |................|
+00000070  00 00 19 fc ff ff 04 00  00 00                    |..........|
