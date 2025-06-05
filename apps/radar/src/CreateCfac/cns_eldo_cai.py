@@ -40,6 +40,7 @@ import iend_equals_2
 import control_for_end_of_all_text_files_wo_gotos
 import write_cfac
 import write_cornav_file
+import write_sisel_file
 import write_surf_el
 
 def enough_points(ssurfins, ssurfins_min):
@@ -444,8 +445,8 @@ def cns_eldo(input_parameters):
 #
        directory = input_parameters['directory'] 
        wrisurfile = input_parameters['wrisurfile'] 
-       orig_lat = float(input_parameters['orig_lat'])
-       orig_lon = float(input_parameters['orig_lon'])
+       orig_lat = int(input_parameters['orig_lat'])
+       orig_lon = int(input_parameters['orig_lon'])
        # xmin_wrisurf = float(input_parameters['xmin_wrisurf'])
        # ymin_wrisurf = float(input_parameters['ymin_wrisurf'])
        # hxy_wrisurf = float(input_parameters['hxy_wrisurf'])
@@ -582,6 +583,18 @@ def cns_eldo(input_parameters):
         iwrisurfile,
         wrisurfile,
         )
+
+    sisel_path = write_sisel_file.write_sisel_file(
+        directory,
+        c_hms_min,
+        c_hms_max,
+        ihms_min,
+        ihms_max,
+        iyymmdd,
+        orig_lon,
+        orig_lat,
+        )
+
 #    fich_cornav = f"CORNAV_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
 #    fich_sis = f"SIS_E_{c_hms_min[1:7]}_{c_hms_max[1:7]}"
 #
