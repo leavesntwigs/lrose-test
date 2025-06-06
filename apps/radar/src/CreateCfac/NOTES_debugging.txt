@@ -24,3 +24,36 @@ regarding the SIS* file:
 00000050  79 c4 30 00 00 00 04 00  00 00 19 fc ff ff 04 00  |y.0.............|
 00000060  00 00 04 00 00 00 19 fc  ff ff 04 00 00 00 04 00  |................|
 00000070  00 00 19 fc ff ff 04 00  00 00                    |..........|
+
+To compile ...
+root@f52ca00d4618:/data# gfortran -g -o readnetcdf_DBZ_VR readnetcdf_DBZ_VR.f90 -fallow-argument-mismatch -fallow-invalid-boz -I/usr/include -L/usr/local/lib -lnetcdf -lnetcdff -lcurl -L/usr/lib/aarch64-linux-gnu/hdf5/serial -lhdf5 -lhdf5_hl -I/usr/local/include
+
+but getting error when running 
+
+(gdb) run readnetcdf_DBZ_VR.input 
+Starting program: /Airborne-Radar-QC/navigation/readnetcdf_DBZ_VR readnetcdf_DBZ_VR.input
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+ Total Files =           2 file=           1   swp.1181010122951.N42RF-TS.196.-20.0_AIR_v3394                                                      
+ Failed to open input file
+ Netcdf return value was          -51
+ Abnormal termination.
+
+#define NC_ENOTNC       (-51)   // Not a netcdf file
+
+use RadxConvert to convert swp.* to netcdf? YES
+Then use the readnetcdf_DBZ_VR code to convert to 1.txt? YES
+
+From Alex's notes https://github.com/Alex-DesRosiers/radarqc_scans
+Navigation correction CFAC files have been added for the two airborne radar scans on 10/10/18. The 'cfac.aft' corrections apply to 'cfrad.20181010_122951.196_to_20181010_122955.166_N42RF-TS_AIR.nc' in it and the 'cfac.fore' corrections apply to 'cfrad.20181010_123925.137_to_20181010_123929.113_N42RF-TM_AIR.nc'.
+
+Run one file at a time through the cns* code?
+or run both files through the cns* code?
+How to set the GUESS in the cns* input file? How to set the other input parameters?
+I can get the date, time, lon, and lat.
+Using cfradial_TM_TS for the data directory and DATA_cns_TM_TS.txt for the input parameters.
+What is this?  0. 40.                     ! Dmin, Dmax (km) FOR RADAR_DATA ????
+
+There is both VG & VR in the TS data file.  Which to use?
+1                          ! VDOP(1:VR,2:VG,3:VU)
+Try VG, then VR
