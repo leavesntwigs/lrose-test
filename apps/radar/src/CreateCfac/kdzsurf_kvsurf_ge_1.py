@@ -4,7 +4,8 @@ import variable_indexes
 
 def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
     selh, selh_surf, z_acft, zacftmin_surf,
-     
+    nb_ray,  # array (2) of int 
+    iradar_ray,
     ):
 
 #******************************************************************
@@ -20,18 +21,18 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
         selh < selh_surf and
         z_acft > zacftmin_surf):
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if( nb_ray(iradar_ray) == 10*(nb_ray(iradar_ray)/10) ):
-            print(' ')
-            print(' ',1000*ihhmmss+ims_ray
-                   ,' IRADAR:',iradar_ray
-                   ,' NO_RAY:',nb_ray(iradar_ray))
-            print('    ROTA,TILT_RAY:',rota_ray,tilt_ray)
-            print('    ROLL,PITCH,HDG,DRIFT_ACFT:',roll_acft
-                   ,pitch_acft,hdg_acft,drift_acft)
-            print('    AZ_EAST:',azeast_ray,' EL_HOR:',elhor_ray)
-            print('    CWE,CSN,CNZ:',cwe,csn,cnz)
-            print('    U,V,W_ACFT:',acftspd_we,acftspd_sn,acftspd_nz
-                   ,' PROJ_VACFT:',proj_acftspd)
+        #if( nb_ray[iradar_ray] == 10*(nb_ray[iradar_ray]/10) ):
+            #print(' ')
+            #print(' ',1000*ihhmmss+ims_ray
+            #       ,' IRADAR:',iradar_ray
+            #       ,' NO_RAY:',nb_ray(iradar_ray))
+            #print('    ROTA,TILT_RAY:',rota_ray,tilt_ray)
+            #print('    ROLL,PITCH,HDG,DRIFT_ACFT:',roll_acft
+            #       ,pitch_acft,hdg_acft,drift_acft)
+            #print('    AZ_EAST:',azeast_ray,' EL_HOR:',elhor_ray)
+            #print('    CWE,CSN,CNZ:',cwe,csn,cnz)
+            #print('    U,V,W_ACFT:',acftspd_we,acftspd_sn,acftspd_nz
+            #       ,' PROJ_VACFT:',proj_acftspd)
             #!!!!        print('    U,V,W_WIND:',wind_we,wind_sn,wind_nz
             #!!!!               ,'    PROJ_WIND:',proj_wind
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
