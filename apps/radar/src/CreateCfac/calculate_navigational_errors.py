@@ -1,230 +1,25 @@
 import numpy as np
+import print_rms_normalized_variables
+import chol_inv
+import variable_indexes
 
 # writes to the CORNAV_EL_* file #10   fich_cornav= "('CORNAV_E_',a6,'_',a6)") c_hms_min(2:7),c_hms_max(2:7)
 # send the values that need to be written to the #10 file
+# from Fortran original code:  parameter (nvar=12,nxysurfmax=200), so nvar=12
+# 
 def calculate_navigational_errors(directory, fich_cornav,
     yymmdd, rw_dzsurf,rw_vsurf,rw_dvinsitu,
     idtmfile, iwrisurfile, 
     idtiltaft, idtiltfore, idrotaaft, idrotafore, idpitch, idhdg, irdaft, irdfore, idxwe, 
     idysn, idzacft, idvh, 
-    swdzsurf_tot, 
+    swdzsurf_tot,
+    nvar,
     ):
-   
+
     write_cornav_file()
 
+    print_rms_normalized_variables.print_rms_normalized_variables()
  
-#    print(' ')
-#    print(' **********************************************')
-#    print(' ')
-#    print(' ')
-#    print(' ')
-#    #
-#    #******************************************************************
-#    #****  (IF SUM_WGHTS_surf+insitu > SUM_WGHTS_min)
-#    #****   -> NAVIGATIONAL ERROS CAN BE CALCULATED
-#    #******************************************************************
-#    #
-#    if ssurfins > ssurfins_min:
-# ^^^^ this goes to enough_points.py
-    #
-    #******************************************************************
-    #**** RMS VALUES OF THE NORMALIZED VARIABLES
-    #******************************************************************
-    #
-    print(' ')
-    print(' **********************************************')
-    print(' *** RMS VALUES OF THE NORMALIZED VARIABLES ***')
-    print(' **********************************************')
-    print(' ')
-    
-    if swdzsurf_tot > 1.:
-        print(' DZ_surf -> sWGHTs:',swdzsurf_tot
-        print('          rms_VAR(dTaft,dTfore:'
-               ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=1,2)))
-        print('          -------(dRaft,dRfore:'
-               ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=3,4))
-        print('          -------(dPitch,dHdg:'
-               ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=5,6))
-        print('          -------(RDaft,RDfore:'
-               ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=7,8))
-        print('          -------(dXwe,dYsn,dZacft:'
-               ,(sqrt(rms_var_zsurf(i)/swadzsurf_tot),i=9,11))
-        print('          -------(dVHacft:'
-               ,sqrt(rms_var_zsurf(12)/swadzsurf_tot))
-    else:
-        print(' !!!! DZ_surf -> sWGHTs:',swdzsurf_tot,' !!!!')
-    # endif
-    #
-    if swvsurf_tot > 1.:
-        print(' VDOP_surf -> sWGHTs:',swvsurf_tot)
-        print('          rms_VAR(dTaft,dTfore:'
-               ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=1,2))
-        print('          -------(dRaft,dRfore:'
-               ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=3,4))
-        print('          -------(dPitch,dHdg:'
-               ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=5,6))
-        print('          -------(RDaft,RDfore:'
-               ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=7,8))
-        print('          -------(dXwe,dYsn,dZacft:'
-               ,(sqrt(rms_var_vsurf(i)/swavsurf_tot),i=9,11))
-        print('          -------(dVHacft:'
-               ,sqrt(rms_var_vsurf(12)/swavsurf_tot))
-    else:
-        print(' !!!! VDOP_surf -> sWGHTs:',swvsurf_tot,' !!!!')
-    # endif
-    #
-    if swdvinsitu_tot > 1.:
-        print(' DVDOP_insitu -> sWGHTs:',swdvinsitu_tot)
-        print('          rms_VAR(dTaft,dTfore:'
-               ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=1,2))
-        print('          -------(dRaft,dRfore:'
-               ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=3,4))
-        print('          -------(dPitch,dHdg:'
-               ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=5,6))
-        print('          -------(RDaft,RDfore:'
-               ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=7,8))
-        print('          -------(dXwe,dYsn,dZacft:'
-               ,(sqrt(rms_var_vinsitu(i)/swadvinsitu_tot),i=9,11))
-        print('          -------(dVHacft:'
-               ,sqrt(rms_var_vinsitu(12)/swadvinsitu_tot))
-    else:
-        print(' !!!! DVDOP_insitu -> sWGHTs:'
-               ,swdvinsitu_tot,' !!!!')
-    # endif
-    #
-    #******************************************************************
-    #**** NORMALIZED CORRELATION MATRIX BETWEEN THE NVAR VARIABLES
-    #******************************************************************
-    #
-    print(' ')
-    sp_zsvszi=swdzsurf_tot+swvsurf_tot+swdvinsitu_tot
-    if sp_zsvszi > 1.:
-        print(' **********************************************')
-	print(' ******* NORMALIZED CORRELATION MATRIX ********')
-	print(' *******            (*1000)            ********')
-	print(' *******   BETWEEN THE NVAR VARIABLES  ********')
-	print(' **********************************************')
-	print(' ')
-        print('        dTa-dTf-dRa-dRf-dP-dH-RDa-RDf' ,'-dX-dY-dZ-dV ')
-       #do i=1,nvar
-        for i in range(nvar):
-            match i:
-                case 1:
-                    print(' dTa  - '
-                        ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 2:
-                    print(' dTf  - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 3:
-                    print(' dRa  - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 4:
-                    print(' dRf  - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 5:
-                    print(' dP   - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 6:
-                    print(' dH   - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 7:
-                    print(' RDa - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 8:
-                    print(' RDf - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 9:
-                    print(' dX   - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 10:
-                    print(' dY   - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-                case 11:
-                    print(' dZ   - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-        #
-                case 12:
-                    print(' dV   - '
-                           ,(int(1000.*corr_var(i,j)
-                                 /amax1( 0.01
-                                        ,sqrt( corr_var(i,i)
-                                              *corr_var(j,j))))
-                             ,j=1,nvar))
-                case -:
-                    print("something went wrong with dTa - dTf")
-        #
-                # case / was endif
-         # enddo
-    else:
-         print(' !!!! sw_Zsurf+Vsurf+Vinsitu:',sp_zsvsvi,' !!!!')
-    # endif
-    print(' ')
-    #
-    #******************************************************************
-    #**** NORMALIZATION OF THE MATRICES AND VECTORS
-    #**** FOR DZ_surf, VDOP_surf et DVDOP_insitu
-    #**** BY THE SUM OF THE POSITIVE VALUES OF THE OBSERVED ERRORS
-    #**** THEN BUILD A UNIQUE MATRICE AND VECTOR BY SUMMING
-    #******************************************************************
-    #
-    print(' ')
-    print(' NORMALIZATION OF THE MATRICES AND VECTORS')
-    print(' SumPosVal_DZsurf,VDOPsurf,DVDOPinsitu:'
-        ,swadzsurf_tot,swavsurf_tot,swadvinsitu_tot)
-          
     #            itest_xmat=0
     #            do i=1,nvar
     #               vect(i)=0.
@@ -267,34 +62,33 @@ def calculate_navigational_errors(directory, fich_cornav,
     #            enddo
     
     # autoconverted begin
-    
     itest_xmat = 0
-    for i in range(1, nvar + 1:
-        vect[i - 1] = 0.0
+    for i in range(nvar):
+        vect[i] = 0.0
         if kdzsurf == 1 and swadzsurf_tot > 0:
-            vect[i - 1] += rw_dzsurf * vect_dzsurf[i - 1] / swadzsurf_tot
+            vect[i] += rw_dzsurf * vect_dzsurf[i] / swadzsurf_tot
         if kvsurf == 1 and swavsurf_tot > 0:
-            vect[i - 1] += rw_vsurf * vect_vsurf[i - 1] / swavsurf_tot
+            vect[i] += rw_vsurf * vect_vsurf[i] / swavsurf_tot
         if kdvinsitu == 1 and swadvinsitu_tot > 0:
-            vect[i - 1] += rw_dvinsitu * vect_dvinsitu[i - 1] / swadvinsitu_tot
+            vect[i] += rw_dvinsitu * vect_dvinsitu[i] / swadvinsitu_tot
         
-        for j in range(1, nvar + 1:
-            xmat[i - 1, j - 1] = 0.0
+        for j in range(nvar):
+            xmat[i, j] = 0.0
             if kdzsurf == 1 and swadzsurf_tot > 0:
-                xmat[i - 1, j - 1] += rw_dzsurf * xmat_dzsurf[i - 1, j - 1] / swadzsurf_tot
+                xmat[i, j] += rw_dzsurf * xmat_dzsurf[i, j] / swadzsurf_tot
             if kvsurf == 1 and swavsurf_tot > 0:
-                xmat[i - 1, j - 1] += rw_vsurf * xmat_vsurf[i - 1, j - 1] / swavsurf_tot
+                xmat[i, j] += rw_vsurf * xmat_vsurf[i, j] / swavsurf_tot
             if kdvinsitu == 1 and swadvinsitu_tot > 0:
-                xmat[i - 1, j - 1] += rw_dvinsitu * xmat_dvinsitu[i - 1, j - 1] / swadvinsitu_tot
-            if abs(xmat[i - 1, j - 1]) > 0:
+                xmat[i, j] += rw_dvinsitu * xmat_dvinsitu[i, j] / swadvinsitu_tot
+            if abs(xmat[i, j]) > 0:
                 itest_xmat = 1
     
-        if abs(xmat[i - 1, i - 1]) <= 0:
-            for j in range(1, nvar + 1:
-                xmat[i - 1, j - 1] = 0.0
-                xmat[j - 1, i - 1] = 0.0
-            xmat[i - 1, i - 1] = 1.0
-            vect[i - 1] = 0.0
+        if abs(xmat[i, i]) <= 0:
+            for j in range(nvar):
+                xmat[i, j] = 0.0
+                xmat[j, i] = 0.0
+            xmat[i, i] = 1.0
+            vect[i] = 0.0
     
     
     # autoconverted end 
@@ -316,7 +110,8 @@ def calculate_navigational_errors(directory, fich_cornav,
     #******************************************************************
     #
     if itest_xmat == 1:
-        resoud(xmat,xinv,vect,res,nvar)
+        # resoud(xmat,xinv,vect,res,nvar)
+        ierr, res = chol_inv.chol_inv(xmat, vect, nvar)
     else:
         print(' !!!! XMAT=0 !!!!')
     # endif
@@ -324,7 +119,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     #!!!!      print(' '
     #!!!!      print(' RESULTING VECTOR'
     #!!!!      do i=1,nvar
-    #!!!!         print(' RES(',i,':',res(i)
+    #!!!!         print(' RES(',i,':',res[i)
     #!!!!      enddo
     #!!!!      print(' '
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -356,7 +151,7 @@ def calculate_navigational_errors(directory, fich_cornav,
              ,//)")
     #
     if idtiltaft:
-        dtiltaft_res=res(1)
+        dtiltaft_res=res[variable_indexes.tilt_aft]
         print(' D_TILT_aft (deg) guess,residual,total : '
                ,dtiltaft_guess,dtiltaft_res
                ,dtiltaft_guess+dtiltaft_res)
@@ -372,7 +167,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     #endif
     #
     if idtiltfore:
-        dtiltfore_res=res(2)
+        dtiltfore_res=res[variable_indexes.tilt_fore]
         print(' D_TILT_fore (deg) guess,residual,total : '
              ,dtiltfore_guess,dtiltfore_res
              ,dtiltfore_guess+dtiltfore_res)
@@ -388,7 +183,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idrotaaft:
-        drotaaft_res=res(3)
+        drotaaft_res=res[variable_indexes.rot_aft]
         print(' D_ROTA_aft (deg) guess,residual,total : '
              ,drotaaft_guess,drotaaft_res
              ,drotaaft_guess+drotaaft_res
@@ -404,7 +199,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idrotafore:
-        drotafore_res=res(4)
+        drotafore_res=res[variable_indexes.rot_fore]
         print(' D_ROTA_fore (deg) guess,residual,total : '
              ,drotafore_guess,drotafore_res
              ,drotafore_guess+drotafore_res
@@ -420,7 +215,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idpitch:
-        dpitch_res=res(5)
+        dpitch_res=res[variable_indexes.pitch]
         print(' D_PITCH (deg) guess,residual,total : '
                ,dpitch_guess,dpitch_res,dpitch_guess+dpitch_res
         f10.write("(' D_PITCH (deg) guess,residual,total : '
@@ -434,7 +229,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idhdg:
-        dhdg_res=res(6)
+        dhdg_res=res[variable_indexes.dhdg]
         print(' D_HEADING (deg) guess,residual,total : '
              ,dhdg_guess,dhdg_res,dhdg_guess+dhdg_res
         f10.write("(' D_HEADING (deg) guess,residual,total : '
@@ -448,7 +243,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if irdaft:
-        rdaft_res=100.*res(7)
+        rdaft_res=100.*res[variable_indexes.rdaft]
         print(' RANGE_DELAY_AFT (m) guess,residual,total : '
              ,1000.*rdaft_guess,rdaft_res
              ,1000.*rdaft_guess+rdaft_res
@@ -464,7 +259,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if irdfore:
-        rdfore_res=100.*res(8)
+        rdfore_res=100.*res[variable_indexes.rdfore]
         print(' RANGE_DELAY_FORE (m) guess,residual,total : '
              ,1000.*rdfore_guess,rdfore_res
              ,1000.*rdfore_guess+rdfore_res
@@ -480,7 +275,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idxwe:
-        dxwe_res=100.*res(9)
+        dxwe_res=100.*res[variable_indexes.dxwe]
         print(' D_XWE (m) guess,residual,total : '
              ,1000.*dxwe_guess,dxwe_res
              ,1000.*dxwe_guess+dxwe_res
@@ -493,7 +288,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idysn:
-        dysn_res=100.*res(10)
+        dysn_res=100.*res[variable_indexes.dysn]
         print(' D_YSN (m) guess,residual,total : '
              ,1000.*dysn_guess,dysn_res
              ,1000.*dysn_guess+dysn_res
@@ -506,7 +301,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idzacft:
-        dzacft_res=100.*res(11)
+        dzacft_res=100.*res[variable_indexes.dzacft]
         print(' D_ZACFT (m) guess,residual,total : '
              ,1000.*dzacft_guess,dzacft_res
              ,1000.*dzacft_guess+dzacft_res
@@ -522,7 +317,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     # endif
     #
     if idvh:
-        dvh_res=res(12)
+        dvh_res=res[variable_indexes.dvh]
         print(' D_VHACFT (m/s) guess,residual,total : '
              ,dvh_guess,dvh_res,dvh_guess+dvh_res
         f10.write("(' D_VHACFT (m/s) guess,residual,total : '
