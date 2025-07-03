@@ -4,8 +4,17 @@ import variable_indexes
 
 def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
     selh, selh_surf, z_acft, zacftmin_surf,
-    nb_ray,  # array (2) of int 
+    nb_ray,  # array (2) of int   nb_ray(iradar_ray) is just the ray number and here it is just for printing debug lines
     iradar_ray,
+    n_dzsurf,
+    altdtm_min,
+    xmin_dtm,
+    isim,
+    igstart_surf,
+    ngates_max,
+    dgate_corr,
+    ze,
+    celh,
     ):
 
 #******************************************************************
@@ -41,6 +50,10 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
         dhorsurf_ray=-999.
         hsurf_ray=-999.
         refsurf_ray=0.
+        refsurf_min0=20.
+        gradrefsurf_min0=50.
+        dhsurf_max=999.
+
         refsurf_min=refsurf_min0*((abs(selh))**0.7)
         gradrefsurf_ray=0.
         gradrefsurf_min=gradrefsurf_min0*((abs(selh))**0.7)
@@ -56,6 +69,8 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
         d_gradrefmax=-999.
         h_gradrefmax=-999.
         z_gradrefmax=-999.
+
+        rayter=6370.
 #
 #******************************************************************
 #**** DETERMINE REFmax AND dREF/dD|max
@@ -74,7 +89,7 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
 
 # autoconverted begin
 
-        for ig in range(igstart_surf, ngates_max + 1):
+        for ig in range(igstart_surf, ngates_max):
             if dgate_corr[ig] <= distmax:
                 d_ig = dgate_corr[ig]
                 dver_ig = d_ig * selh
@@ -93,7 +108,7 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
                         dhor_refmax = dhor_ig
                         z_refmax = z_ig
                     
-                    if ig > 1 and ze[ig - 1] > -900.:
+                    if ig > 0 and ze[ig - 1] > -900.:
                         gradref = (ze[ig] - ze[ig - 1]) / (d_ig - dgate_corr[ig - 1])
                         if gradref > gradrefmax_ray:
                             gradrefmax_ray = gradref
@@ -455,13 +470,13 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
             #**** ARRAYS FOR "SIS_EL_*" FILE #variable_indexes.pitch0
             #******************************************************************
             #
-                        zs_rot[iradar_ray,n_dzsurf[iradar_ray]]=rota_ray
-                        zs_el[iradar_ray,n_dzsurf[iradar_ray]]=elhor_ray
-                        zs_az[iradar_ray,n_dzsurf[iradar_ray]]=azeast_ray
-                        zs_dsurf[iradar_ray,n_dzsurf[iradar_ray]]=dsurf_ray
-                        zs_dhor[iradar_ray,n_dzsurf[iradar_ray]] =side*dsurf_ray*celh
-                        zs_zsurf[iradar_ray,n_dzsurf[iradar_ray]]=hsurf_ray
-                        zs_hsurf[iradar_ray,n_dzsurf[iradar_ray]]=hsurf_dtm
+                        #zs_rot[iradar_ray,n_dzsurf[iradar_ray]]=rota_ray
+                        #zs_el[iradar_ray,n_dzsurf[iradar_ray]]=elhor_ray
+                        #zs_az[iradar_ray,n_dzsurf[iradar_ray]]=azeast_ray
+                        #zs_dsurf[iradar_ray,n_dzsurf[iradar_ray]]=dsurf_ray
+                        #zs_dhor[iradar_ray,n_dzsurf[iradar_ray]] =side*dsurf_ray*celh
+                        #zs_zsurf[iradar_ray,n_dzsurf[iradar_ray]]=hsurf_ray
+                        #zs_hsurf[iradar_ray,n_dzsurf[iradar_ray]]=hsurf_dtm
             #
 		    #endif     !!  of !! if(kdzsurf == 1):
       #
@@ -684,3 +699,4 @@ def kdzsurf_kvsurf_ge_1(kdzsurf, kvsurf,
         #endif  !!  of  !!  if(hsurf_ray > -999. and wghtsurf_ray > 0.)  !! B
     #endif  !!  of  !!  if(kdzsurf+kvsurf >= 1 ... )  !! A 
 #
+    return n_dzsurf 

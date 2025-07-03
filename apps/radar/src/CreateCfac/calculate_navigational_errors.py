@@ -14,6 +14,7 @@ def calculate_navigational_errors(directory, fich_cornav,
     idysn, idzacft, idvh, 
     swdzsurf_tot,
     nvar,
+    vect_dzsurf,
     ):
 
     write_cornav_file()

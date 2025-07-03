@@ -921,7 +921,16 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
         pitch_corr_cfac,
         drift_corr_cfac,
         rot_angle_corr_aft,
-        tilt_corr_aft = calculate_navigational_errors()
+        tilt_corr_aft = calculate_navigational_errors(
+            directory, fich_cornav,
+            yymmdd, rw_dzsurf,rw_vsurf,rw_dvinsitu,
+            idtmfile, iwrisurfile,
+            idtiltaft, idtiltfore, idrotaaft, idrotafore, idpitch, idhdg, irdaft, irdfore, idxwe,
+            idysn, idzacft, idvh,
+            swdzsurf_tot,
+            nvar,
+            vect_dzsurf,
+        )
 
     else:
         print(' /////////////////////////////////////////////')

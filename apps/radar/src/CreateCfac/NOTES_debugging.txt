@@ -75,6 +75,7 @@ https://www.aoml.noaa.gov/hrd/Storm_pages/michael2018/radar.html
 Alex's notes are here: https://github.com/Alex-DesRosiers/HawkEdit_Testing_Data/tree/main
 the document with the rinse and repeat notes is navcorr_doc.docx
 also see Alex's email from Feb 21, 2023,
+Alex recovered this file for the input parameters: DATA_cns_run1.dms
 
 
 I think the new data flow should be:
@@ -94,3 +95,19 @@ I guess I will have to create my own test data.
 2. test data with known cfac
 
 What would cause the cfac's to be zero?
+
+Generally, the algorithm is:
+fill xmat, vect --> perform chol_inv to solve system of linear equations --> res is solution vector which is the correction factors for each of the variables  --> cfacs
+
+NOTE: isim is always zero; set in the input parameter file; 
+      consider removing all the code with isim == 1???
+
+Calling structure:
+
+cns_eldo_cai
+    control_for_end_of_all text_files_wo_gotos   # fills dgate_corr
+        ze_actions
+            kdzsurf_k...    # uses dgate_corr
+                fills vect_dzsurf, vect_vsurf, xmat
+    iend_eq2...
+    calculate_navigation_errors
