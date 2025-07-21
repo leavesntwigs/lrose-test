@@ -1,4 +1,8 @@
 
+# fills xmat_dvinsitu, vect_dvinsitu
+#       xmat_vsurf,
+#       vi_dhor, vi_vdop, vi_vinsitu
+#
 def dvdop_insitu(kdvinsit, ngates_insitu_max,
     ictrl_contray,
     dgate_corr, # array
@@ -18,7 +22,7 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
     rota_ray,tilt_ray,  # just for debug print lines
     roll_acft,pitch_acft,hdg_acft,drift_acft,  # just for debug print lines
     azeast_ray,elhor_ray,  # just for debug print lines
-   
+    isim, 
     wa_we_true,dcwe_dt_true,
     wa_sn_true,dcsn_dt_true,
     wa_nz,dcnz_dt_true,
@@ -132,48 +136,10 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
 
         for ig in range(1,ngates_insitu_max):
 
-#  if(     ze[ig] > 10.
-#            and abs(vr[ig]) > 0.
-#            and abs(vr[ig]) < vdop_max
-#            and abs(vs[ig]) > 0.
-#            and abs(vs[ig]) < vdop_max
-#            and abs(vl[ig]) > 0.
-#            and abs(vl[ig]) < vdop_max
-#            and proj_acftspd > -900.
-#            and dgate_corr[ig] < 10.
-#            and elhor_ray < 5.
-#            and elhor_ray > -5.     ):  ! 111111
-#
-#       d_vs_vl=vs[ig]-vl[ig]     ! Olivier
-#       kvsl=ifix((d_vs_vl/vnyq_el)*0.5)+5      ! Olivier
-#       if(kvsl >= 1 and kvsl <= 9):         ! Olivier
-#         vs_depl=vs[ig]+xms(kvsl)*vnyq_el       ! Olivier
-#         vl_depl=vl[ig]+xml(kvsl)*vnyq_el       ! Olivier
-#         vsl_depl=(vs_depl+vl_depl)/2.         ! Olivier
-#
-#         if(     abs(vs_depl-vl_depl) < vnyq_el/2.
-# c            and abs(vr[ig]-vsl_depl) < vnyq_el/2.     ): ! 112 Oliv
-#    print('IG= ',ig
-#    print('VR= ',vr[ig]
-#    print('VS,VL= ',vs[ig],vl[ig]
-#    print('VS_depl,VL_depl= ',vs_depl,vl_depl
-#    print('VSL_depl= ',vsl_depl
-#
-#      if(proj_acftspd > -900.):
-#        v_corr=vr[ig]+proj_acftspd                ! Olivier
-#        vdop_corr[ig]=v_corr
-#              print('    -> VDOP_CORR :',v_corr       ! Olivier
-#      endif
-#
-#         endif
-#
-#       endif
-#  endif                               ! Olivier
-
 #------------------------------------------------------------------
 #---- ( IF ISIM=1 ) -> SIMULATED dV_dopinsitu WITH dXXX_GUESS
 #------------------------------------------------------------------
-            if (ig == 1 and isim == 1):
+            if (ig == 1 and isim == 1):    # SIMULATION is set to 0 in input parameters
                 ze[1]=999.
                 dv_dopinsitu=(-( wa_we_true*dcwe_dt_true
                     +wa_sn_true*dcsn_dt_true
@@ -199,7 +165,7 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
                     vdop_corr[iig]=-999.
                 #enddo
             #endif
-    #------------------------------------------------------------------
+    #------------------------------------------------------------------ finally some code that is accessible ...
             if (ze[ig] > -900. and vdop_corr[ig] > -900.):
                 wghtinsitu_ig=1.-0.5*dgate_corr[ig]/dmax_insitu
                 dv_dopinsitu=vdop_corr[ig]-proj_wind
@@ -212,13 +178,6 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
                     n_dvinsitu[iradar_ray]=n_dvinsitu[iradar_ray]+1
                     ssurfins=ssurfins+wghtinsitu_ig
                     swinsitu_sweep[iradar_ray]=swinsitu_sweep[iradar_ray]+wghtinsitu_ig
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #!!!!      if( nb_ray(iradar_ray) == 5*(nb_ray(iradar_ray)/5) ):
-    #!!!!        print('    IG=',ig,' -> DVDOPINSITU_RAY :',dv_dopinsitu
-    #!!!!        print('       SWVSURF_SWEEP(',iradar_ray,') :'
-    #!!!!               ,swvsurf_sweep(iradar_ray)
-    #!!!!      endif
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #
                     dvinsitusweep_mean[iradar_ray] =dvinsitusweep_mean[iradar_ray] +wghtinsitu_ig*dv_dopinsitu
                     dvinsitusweep_rms[iradar_ray] =dvinsitusweep_rms[iradar_ray] +wghtinsitu_ig*dv_dopinsitu*dv_dopinsitu
@@ -351,8 +310,10 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
     #
                  #endif  !!  of  !!  if(abs(dv_dopinsitu] < dvdopinsitu_max)  !!
     #
-               #endif  !!  of  !!  if(ze[ig] > -900. ... )  !!
-            #enddo !!  of  !!  for ig in range(1,ngates_insitu_max)  !!
+            #endif  !!  of  !!  if(ze[ig] > -900. ... )  !!
+        #enddo !!  of  !!  for ig in range(1,ngates_insitu_max)  !!
     #
     #endif  !!  of  !!  if(kdvinsitu == 1 and ngates_insitu_max > 1)  !!
     #
+
+    return xmat_dvinsitu, vect_dvinsitu, xmat_vsurf, vi_dhor, vi_vdop, vi_vinsitu
