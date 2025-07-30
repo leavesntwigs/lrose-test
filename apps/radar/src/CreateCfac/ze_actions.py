@@ -69,20 +69,19 @@ def ze_actions(nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurf
                   and abs(vr[ig]) > 0. and abs(vr[ig]) < vdop_max
                   and proj_acftspd > -900.):
                   vdop_read=vr[ig]+proj_acftspd
-         if (ichoice_vdop == 2
-             and abs(vr[ig]) > 0. and abs(vr[ig]) < vdop_max):
-             vdop_read=vr[ig]
+             if (ichoice_vdop == 2
+                 and abs(vr[ig]) > 0. and abs(vr[ig]) < vdop_max):
+                 vdop_read=vr[ig]
+             if (ichoice_vdop == 3
+                 and abs(vu[ig]) > 0. and abs(vu[ig]) < vdop_max):
+                 vdop_read=vu[ig]
 
-         if (ichoice_vdop == 3
-             and abs(vu[ig]) > 0. and abs(vu[ig]) < vdop_max):
-             vdop_read=vu[ig]
+             if vdop_read > -900.:
+                 ndop_ok[iradar_ray]=ndop_ok[iradar_ray]+1
+                 vdop_corr[ig]=vdop_read
+             #endif
 
-         if vdop_read > -900.:
-             ndop_ok[iradar_ray]=ndop_ok[iradar_ray]+1
-             vdop_corr[ig]=vdop_read
          #endif
-
-       #endif
     #enddo
 
     nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = kdzsurf_kvsurf_ge_1.kdzsurf_kvsurf_ge_1(
