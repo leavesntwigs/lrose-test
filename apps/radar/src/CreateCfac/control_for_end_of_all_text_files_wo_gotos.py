@@ -21,7 +21,8 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     dzacft_guess,
     orig_lat, orig_lon,
     dmax0,
-    nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins,
+    # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
+    nsup,nbtotals,nbon,nmauvais,ssurfins,
 ):
 
     continue_processing = True
@@ -319,8 +320,33 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
 ##!!!   endif
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = ze_actions.ze_actions(
-        nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins)
+    ze,vr,vu = dismiss_range_gates.dismiss_range_gates(ig_dismiss, ze, vr, vu)
+    ngates_insitu_max = set_ngates_insitu_max.set_ngates_insitu_max(selh, selhinsitu_max, MAXPORT, dgate_corr, dmax_insitu)
+
+    vdop_read, vdop_corr, ndop_ok, ze, vr, vu = ze_actions.ze_actions(
+        iradar_ray,
+        ze, vr, vu, 
+        ichoice_vdop,
+        dgate_corr, 
+        proj_acftspd,
+        ngates,
+        dmin, dmax,
+        xncp_min,
+        sw_max,
+        ref_mmin, ref_max,
+        # vdop_max = 200.,  # use default value defined in function
+        )
+
+    nsup,nbtotals,nbon,nmauvais,ssurfins = kdzsurf_kvsurf_ge_1.kdzsurf_kvsurf_ge_1(
+        kdzsurf, kvsurf,
+        nsup,nbtotals,nbon,nmauvais,ssurfins) #  needs ze ...
+#
+#******************************************************************
+#**** CASE "DVDOP_insitu"
+#**** (if D<DMAX_insitu and ||sin(ELEV_HOR)||<0.1)
+#******************************************************************
+#
+    ssurfins = dvdop_insitu(ssurfins)  # needs ze ...
 
 #
 #******************************************************************
@@ -334,5 +360,5 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     tilt_prev=tilt_ray
 #
     # return continue_processing, # swdzmsurf_tot
-    return nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins
+    return nsup,nbtotals,nbon,nmauvais,ssurfins
 

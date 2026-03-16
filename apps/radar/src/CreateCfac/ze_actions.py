@@ -1,33 +1,19 @@
-def ze_actions(nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins):
-#
-#******************************************************************
-#**** DISMISS THE SPECIFIED RANGE GATES
-#******************************************************************
-#
-    for iig in range(15): 
-       iig += 1
-       if (ig_dismiss[iig] > 0):
-           ig=ig_dismiss[iig]
-           ze[ig]=-999.
-           vr[ig]=-999.
-           vs[ig]=-999.	#Olivier
-           vl[ig]=-999.	#Olivier
-           vg[ig]=-999.
-           vu[ig]=-999.
-#
-#******************************************************************
-#**** RANGE GATES FOR COMPARISONS WITH FLIGHT-LEVEL (IN SITU) DATA
-#******************************************************************
-#
-    ngates_insitu_max=-999
-    if abs(selh) < selhinsitu_max:
-        ig=1
-        while (     ig < MAXPORT
-                 and dgate_corr[ig] < dmax_insitu):
-             ngates_insitu_max=ig
-             ig=ig+1
-      #enddo
-    # endif
+
+
+def ze_actions(
+    iradar_ray,
+    ze, vr, vu,
+    ichoice_vdop,
+    dgate_corr,
+    proj_acftspd,
+    ngates,
+    dmin, dmax,
+    xncp_min,
+    sw_max,
+    ref_mmin, ref_max,
+    vdop_max = 200.,
+    ):
+
 #
 #******************************************************************
 #**** CHECK THE NCP, SW AND REFLECTIVITY VALUES
@@ -44,9 +30,9 @@ def ze_actions(nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurf
             or ze[ig] > ref_max):
              ze[ig]=-999.
              vr[ig]=-999.
-             vs[ig]=-999.	#Olivier
-             vl[ig]=-999.	#Olivier
-             vg[ig]=-999.
+             # vs[ig]=-999.	#Olivier # not used
+             # vl[ig]=-999.	#Olivier # not used
+             # vg[ig]=-999.       # not used
              vu[ig]=-999.
          else:
              ngates_max=ig
@@ -61,7 +47,6 @@ def ze_actions(nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurf
 #******************************************************************
 
     for ig in range(ngates_max):
-
          vdop_read=-999.
          vdop_corr[ig]=-999.
          if ze[ig] > -900.:
@@ -79,20 +64,6 @@ def ze_actions(nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurf
              if vdop_read > -900.:
                  ndop_ok[iradar_ray]=ndop_ok[iradar_ray]+1
                  vdop_corr[ig]=vdop_read
-             #endif
 
-         #endif
-    #enddo
 
-    nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = kdzsurf_kvsurf_ge_1.kdzsurf_kvsurf_ge_1(
-        kdzsurf, kvsurf,
-        nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins) #  needs ze ...
-#
-#******************************************************************
-#**** CASE "DVDOP_insitu"
-#**** (if D<DMAX_insitu and ||sin(ELEV_HOR)||<0.1)
-#******************************************************************
-#
-    ssurfins = dvdop_insitu(ssurfins)  # needs ze ...
-
-    return nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins
+    return vdop_read, vdop_corr, ndop_ok, ze, vr, vu
