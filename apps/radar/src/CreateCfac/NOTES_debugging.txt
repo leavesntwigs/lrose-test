@@ -104,10 +104,94 @@ NOTE: isim is always zero; set in the input parameter file;
 
 Calling structure:
 
-cns_eldo_cai
-    control_for_end_of_all text_files_wo_gotos   # fills dgate_corr
-        ze_actions
-            kdzsurf_k...    # uses dgate_corr
-                fills vect_dzsurf, vect_vsurf, xmat
-    iend_eq2...
-    calculate_navigation_errors
+cns_eldo_cai.cns_eldo(input_params)
+    write_cornav_file
+    write_sisel_file
+    while ifile < nfile and !done
+        readfile
+        process_ray
+        control_for_end_of_all text_files_wo_gotos   # fills dgate_corr
+            dismiss_range_gates
+            set_ngates_insitu_max
+            ze_actions # sets vdop_read, vdop_corr, ndop_ok, ze, vr, vu based on ichoice_vdop which comes from input param: VDOP
+                       #  which doppler velocity to use: 1: RAW(VR), 2: CORRECTED FOR VACFT (VG), 3: unfolded (VU)
+                kdzsurf_kvsurf_ge_1    # uses dgate_corr
+                    fills vect_dzsurf, vect_vsurf, xmat
+                dvdop_insitu
+    if all_done:
+        iend_equals_2
+    if enough_points(...)
+        calculate_navigation_errors(...)
+        write_cfac
+        if iwri_surfile == 1
+            write_surf_el
+
+
+---
+
+Digital Terrain Map (DTM) the parameter file does NOLT use a DTM. Ignoring this code for now.
+
+Solving MX = N
+these are NOT correct!
+where M = [[], []]
+      X = []
+      N = []
+
+-------
+
+Nine parameters to calculate platform motion components and coordinate transform to map airborne radar data onto an Earth-relative coordinat system:
+1. heading  - aircraft angles
+2. drift    - aircraft angles
+3. pitch    - aircraft angles
+4. roll     - aircraft angles
+
+5. aircraft ground speed - aircraft speed
+6. vertical velocity     - aircraft speed
+
+7. tilt       - radar mounting and pointing
+8. rotation  - radar mounting and pointing
+
+9. range delay - radar hardware
+
+----
+DTM - detailed terrain map is oot used; set alt_dtm to zsurf_cst; assumes a flat Earth surface.
+
+Tests:
+1. Flat earth, 
+
+
+7/15/2025
+The code is converted to Python and it runs.  It is not tested.  Testing would probably take 1 full time SE  1 month to do.  Reasonable tests scenarios, e.g. flat earth, no correction; flat earth tilt only correction, etc. and especially test data are needed.  I have read the associated paper and cannot seem to make a correlation between the equations in the paper and the code. See Note and Citation below for a paper that is closer to the same equations.
+
+I think the code is broken into logical sections/chunks for functional and unit tests, but again, tests need to be created.  This could be a good summer intern project. 
+
+The matrix xmat_vsurf and vector vect_vsurf are filled in kdzsurf_kvsurf_ge_1 function.
+The matrix and vector linear equations are then solved using chol_inv function. 
+The sine and cosine of various variables are calculated and stored in a common block converted to a dictionary in the azel.py function.
+There are 12 variables/corrections to solve for using the xmat_vsurf and vect_vsurf matrix and vector.  The variables are referenced using the variable_indexes.py structure, which is an include file / global to import as needed. 
+The DTM is a Detailed Terrain Map, which is not used based on the sample DATA_cns.txt input parameter files.  If the "use DTM" flag is not set in the input parameter file, the internal alt_dtm matrix is set to a constant z?? which seems to imply a flat earth.
+var[i] is used to store intermediate values, which are then used to complete the non-diagonal elements of the xmat matrix.
+
+7/18/2025
+
+process_ray:
+  if tilt < 0 ==> AFT,iradar_ray=1,iaftfore= -1  ==> is_aft = True
+     then d_porte[ig] = range[ig]
+  else tilt > 0 ==> FORE,iradar_ray=2,iaftfore= +1  ==> is_aft = False
+     then d_port[2000 + ig] = range[ig]   # the ranges are kept in the d_porte array offset by 2000.  Hmmm.
+
+control_for_end_of_all_text_files_wo_gotos:
+   dgate correction, parallel array indexed by ig, is set to correction distance from data file plus the guess, 
+   iradar_ray is used as an index switch between fore and aft ? 
+       if tilt_ray < -15, then iradar_ray = 1, 
+       if tilt_ray >  15, then iradar_ray = 2; **** These should be 0 & 1 !!! Python indexing.
+   iaftfore should be a boolean!
+
+   dgate_corr[ig]=d_porte[(iradar_ray-1)*MAXPORT+ig]+corr_dist[iradar_ray]+d_dgate_guess
+
+NOTE: The code is closer to the Georgis paper
+Georgis, J.-F., F. Roux, and P. H. Hildebrand, 2000: Observation of precipitating systems over complex orography with meteorological Doppler radars: A feasibility study. Meteor. Atmos. Phys., 72, 185-202.
+
+
+7/30/2025
+Try to test ze_actions. 

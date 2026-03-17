@@ -3,7 +3,7 @@ import numpy as np
 # seems to just be renaming input variables ? 
 
 def process_ray(nranges, MAXRAD, MAXPORAD,
-            nsweep, 
+            # nsweep,   MOVED TO MAIN FUNCTION
             start_hour, start_min, start_sec, 
             time, azimuth, elevation, 
             latitude, longitude, altitude, altitude_agl, 
@@ -68,8 +68,8 @@ def process_ray(nranges, MAXRAD, MAXPORAD,
                for ig in range(0, nranges):
                    d_porte[MAXPORT+ig] = range[ig]
             # endif
-    # Assign the swp number read from text file to num_swp
-            num_swp = nsweep
+            # MOVED TO MAIN FUNCTION Assign the swp number read from text file to num_swp
+            # num_swp = nsweep
     
     # Assign the correction factors to Frank's variable
     # NOTE: Here the correction factors are arrays with two elements

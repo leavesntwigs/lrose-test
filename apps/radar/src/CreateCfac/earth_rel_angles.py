@@ -3,7 +3,7 @@
 #**** PARAMETERS FOR THE ANALYSIS
 #******************************************************************
 #
-      if(iaftfore == -1):
+      if is_aft:                       # (iaftfore == -1):
         dtilt_guess=dtiltaft_guess
         drota_guess=drotaaft_guess
       else

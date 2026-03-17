@@ -13,24 +13,25 @@
 # azeast_ray (out param)
 # elhor_ray (out param)
 # cxa, cya, cza, cwe, csn, cnz (out params)
-#
+# cosinang dictionary (out param)
 
 import math
 import numpy as np
 
 def azel(rotaroll,tilt_ray
       ,hdg_acft,drift_acft,pitch_acft
-      ,azeast_ray,elhor_ray
-      ,cxa,cya,cza,cwe,csn,cnz,
+      #,azeast_ray,elhor_ray
+      #,cxa,cya,cza,cwe,csn,cnz,
 #
 # CAUTION!!!
 # these common block variables could be in/out parameters
 # 
 #       common/cosinang/
-      cosinang
+#      cosinang
       ):
 #
       conv=3.14159/180.
+      cosinang = {}
 #
       cosinang['crr']=math.cos(conv*rotaroll)
       cosinang['srr']=math.sin(conv*rotaroll)

@@ -70,6 +70,8 @@ def cns_eldo(input_parameters):
     MAXPARAD=MAXRAD*MAXPARM
     MAXPORAD=MAXRAD*MAXPORT
     MAXPARIS=256
+    RADAR_RAY_AFT  = 0
+    RADAR_RAY_FORE = 1
 
     # Variable for reading text files
 
@@ -304,8 +306,8 @@ def cns_eldo(input_parameters):
     ihms_dtm = np.zeros(6, dtype=np.int32)
     # ialtsurf_wri = np.zeros(nxysurfmax, dtype=np.int32)
 
-    iradar_ray = 0
-    iaftfore = 0
+    iradar_ray = RADAR_RAY_AFT
+    is_aft = True  # iaftfore = 0  # boolean: True ==> AFT, False FORE
 #
 
     path_abs = ""  # 18 characters
@@ -714,8 +716,9 @@ def cns_eldo(input_parameters):
                     ranges[J] = float(data[J+1])  # map(float, data)
         
                 # process ray / sweep  ...
-                corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz = process_ray.process_ray(
-                    nranges, MAXRAD, MAXPORAD, nsweep, start_hour, start_min, start_sec, time, azimuth, elevation, 
+                corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz = process_ray.process_ray(nranges, MAXRAD, MAXPORAD, 
+                    #  nsweep, 
+                    start_hour, start_min, start_sec, time, azimuth, elevation, 
                     latitude, longitude, altitude, altitude_agl, 
                     heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, 
                     azimuth_correction, elevation_correction, range_correction, longitude_correction,
@@ -734,6 +737,10 @@ def cns_eldo(input_parameters):
                     lastfile=1
                 else:
                     continue # skip_file
+
+            # Assign the swp number read from text file to num_swp
+            num_swp = nsweep
+
             iend=0
             if ifile == nfile and lastfile == 1:
                 iend=2
@@ -790,12 +797,12 @@ def cns_eldo(input_parameters):
                         continue  # go to 1 # read next file
                     elif abs(tilt_ray) < 30. :
                         if tilt_ray < -15. :
-                            iradar_ray=1
-                            iaftfore=-1
+                            iradar_ray=RADAR_RAY_AFT
+                            is_aft = True # iaftfore=-1  # iaftfore is just keeping a toggle of aft vs. fore; iradar_ray is the index in swp: 1=>aft,2=>fore?
                             swp[iradar_ray]=num_swp
                         if tilt_ray > +15. :
-                            iradar_ray=2
-                            iaftfore=+1
+                            iradar_ray=RADAR_RAY_FORE
+                            is_aft = False # iaftfore=+1
                             swp[iradar_ray]=num_swp
                     else:
                         continue  # go to 1 # read next file
@@ -852,9 +859,10 @@ def cns_eldo(input_parameters):
                 nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
                     kdzsurf, kvsurf, kdvinsitu,
                     iradar_ray, nb_ray,
-                    iaftfore, isim, ipr_alt,
+                    is_aft,
+                    isim, ipr_alt,
                     time_ks,
-corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
+                    corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
                     dtiltaft_guess,
                     drotaaft_guess,
                     dtiltfore_guess,

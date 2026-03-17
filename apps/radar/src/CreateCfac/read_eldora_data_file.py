@@ -102,10 +102,10 @@ def read_eldora_data_file(path, nranges):
             ) = tuple(map(float, data))
     
         ranges = np.zeros(nranges)
-        ZE = np.zeros(nranges)
-        NCP = np.zeros(nranges)
-        VR = np.zeros(nranges)
-        SW = np.zeros(nranges)
+        ze = np.zeros(nranges)
+        ncp = np.zeros(nranges)
+        vr = np.zeros(nranges)
+        sw = np.zeros(nranges)
      
           #   for J in range(nranges):
           #       data = f.readline().strip().split()
@@ -114,4 +114,4 @@ def read_eldora_data_file(path, nranges):
         # return map(float, meta_data), ranges
     # , ranges, ZE, NCP, VR, SW
 
-    return meta_data, ranges, ZE, NCP, VR, SW
+    return meta_data, ranges, ze, ncp, vr, sw

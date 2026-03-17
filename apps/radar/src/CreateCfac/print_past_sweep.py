@@ -2,7 +2,7 @@
 def print_past_sweep(
           ihms,
           iradar_ray,
-          iaftfore,
+          is_aft,
           nb_sweep,
           xacft_mean,
           yacft_mean,zacft_mean,
@@ -32,8 +32,8 @@ swdzsurf_sweep,
 	  print(' *******************************************')
  	  print(' ')
 	  print(' HHMMSS :',ihms)
-          print(' RADAR(aft=1,fore=2) :',iradar_ray)
-          print(' SWEEP(aft=-1,fore=+1) :',iaftfore
+          print(' RADAR(aft=1,fore=2) :',iradar_ray+1)
+          print(' SWEEP(aft=-1,fore=+1) :',is_aft
                  ,' NO_SWEEP(this program) :',nb_sweep(iradar_ray)
                  ,'      [ on tape :',swp(iradar_ray),' ]')
           print(' X_we/OLON,Y_sn/OLAT,Z_acft :'

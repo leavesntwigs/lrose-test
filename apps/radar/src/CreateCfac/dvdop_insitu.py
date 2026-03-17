@@ -17,6 +17,7 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
     dvdop_max, 
     nb_ray,
     iradar_ray,
+    ilr,
     ihhmmss,  # just for debug print lines
     ims_ray,  # just for debug print lines
     rota_ray,tilt_ray,  # just for debug print lines
@@ -201,7 +202,7 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
     #****  - VAR(12) -> [dVH] in METER/SECOND
     #******************************************************************
     #
-                    if(iaftfore == -1):
+                    if is_aft:                 # (iaftfore == -1):
                         if(idtiltaft == 1):
                             var[1]=( wa_we*dcwe_dt+wa_sn*dcsn_dt +wa_nz*dcnz_dt)*conv
                         else:
@@ -219,7 +220,7 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
                         #endif
                     #endif
     #
-                    if(iaftfore == -1):
+                    if is_aft:                 # (iaftfore == -1):
                         if[idrotaaft == 1]:
                             var[3]=( wa_we*dcwe_dr+wa_sn*dcsn_dr +wa_nz*dcnz_dr)*conv
                         else:

@@ -1,7 +1,7 @@
 
 
 def ze_actions(
-    iradar_ray,
+    iradar_ray,    # either 0 or 1; corresponds to Fortran either 1 (AFT) or 2 (FORE)
     ze, vr, vu,
     ichoice_vdop,
     dgate_corr,

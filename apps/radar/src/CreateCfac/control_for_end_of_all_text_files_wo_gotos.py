@@ -5,9 +5,9 @@ import numpy as np
 
 # may not need this file
 def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu, iradar_ray, nb_ray,
-iaftfore, isim, ipr_alt,
+is_aft, isim, ipr_alt,
     time_ks,
-corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
+    corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
     dtiltaft_guess,
     drotaaft_guess,
     dtiltfore_guess,
@@ -91,7 +91,7 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
     #**** PARAMETERS FOR THE ANALYSIS
     #******************************************************************
     #
-    if(iaftfore == -1):
+    if is_aft:                      # (iaftfore == -1):
         dtilt_guess=dtiltaft_guess
         drota_guess=drotaaft_guess
     else:
@@ -178,7 +178,7 @@ corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, c
 #**** DISTANCE OF THE RANGE GATES
 #******************************************************************
 #
-    if(iaftfore == -1):
+    if is_aft:                      # (iaftfore == -1):
         d_dgate_guess=rdaft_guess
     else:
         d_dgate_guess=rdfore_guess

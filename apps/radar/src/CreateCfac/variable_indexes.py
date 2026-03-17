@@ -1,4 +1,6 @@
 
+nvar = 12
+
 # constants to reference the array contents with names
 tilt_aft  = 0
 tilt_fore = 1
