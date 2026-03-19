@@ -109,19 +109,21 @@ cns_eldo_cai.cns_eldo(input_params)
     write_sisel_file
     while ifile < nfile and !done
         readfile
-        process_ray
-        control_for_end_of_all text_files_wo_gotos   # fills dgate_corr
+        process_ray  # just renames input variables by placing them in arrays?
+        ** iend crazy logic ...
+        rota_end = iend_ge_1.calc_mean_values_for_sweep()
+        control_for_end_of_all_text_files_wo_gotos   # fills dgate_corr; accumulates xmat_vsurf, etc.
             dismiss_range_gates
             set_ngates_insitu_max
             ze_actions # sets vdop_read, vdop_corr, ndop_ok, ze, vr, vu based on ichoice_vdop which comes from input param: VDOP
                        #  which doppler velocity to use: 1: RAW(VR), 2: CORRECTED FOR VACFT (VG), 3: unfolded (VU)
-                kdzsurf_kvsurf_ge_1    # uses dgate_corr
-                    fills vect_dzsurf, vect_vsurf, xmat
-                dvdop_insitu
+                xmat_vsurf, .. = kdzsurf_kvsurf_ge_1(xmat_vsurf, ...)    # uses dgate_corr, fills vect_dzsurf, vect_vsurf, xmat_vsurf, ...
+                xmat_vsurf, ... = dvdop_insitu(xmat_vsurf, ...)
     if all_done:
-        iend_equals_2
+        iend_equals_2  # calculates bias & std for dzsurf, vsurf, dvinsitu, dvinsitu_ir_g, dvinsitu_ir_d
     if enough_points(...)
-        calculate_navigation_errors(...)
+        calculate_navigation_errors(xmat_vsurf)
+            chol_inv(xmat, ...)
         write_cfac
         if iwri_surfile == 1
             write_surf_el

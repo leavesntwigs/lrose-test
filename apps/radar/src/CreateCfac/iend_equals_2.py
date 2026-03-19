@@ -40,8 +40,6 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
         stdv_dzsurf = np.sqrt(swdzsurf_tot * swdz2surf_tot - swdzmsurf_tot * swdzmsurf_tot) / max(1.0, swdzsurf_tot)
         print(' ')
         print(f' dZ_surf (km) sum_wghts,mean,stdv : {swdzsurf_tot:10.1f} {bias_dzsurf:8.3f} {stdv_dzsurf:8.3f}')
-
-
         with open(cornav_path, 'a') as f10:
             f10.write(f' dZ_surf (km) sum_wghts,mean,stdv :{swdzsurf_tot:10.1f}{bias_dzsurf:8.3f}{stdv_dzsurf:8.3f}\n\n')
             
@@ -162,6 +160,7 @@ def iend_equals_2(kdzsurf, kvsurf, kdvinsitu, swdzmsurf_tot, swdzsurf_tot, swdz2
 #                         ,swdvinsitu_tot,' !!!!')
 #                # endif
 
+# the following code is moved to calculate_navigational_errors.py and adjusted to remove the -1 
 #    # autoconverted begin
 #    import numpy as np
 #    

@@ -7,7 +7,8 @@ import numpy as np
 def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu, iradar_ray, nb_ray,
 is_aft, isim, ipr_alt,
     time_ks,
-    corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
+    corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, 
+    vent_we, vent_sn, vent_nz,
     dtiltaft_guess,
     drotaaft_guess,
     dtiltfore_guess,
@@ -346,8 +347,26 @@ is_aft, isim, ipr_alt,
 #**** (if D<DMAX_insitu and ||sin(ELEV_HOR)||<0.1)
 #******************************************************************
 #
-    ssurfins = dvdop_insitu(ssurfins)  # needs ze ...
-
+    # ssurfins = dvdop_insitu(ssurfins) 
+    xmat_dvinsitu, vect_dvinsitu, xmat_vsurf, vi_dhor, vi_vdop, vi_vinsitu = dvdop_insitu(
+        kdvinsit, ngates_insitu_max,
+        ictrl_contray,
+        dgate_corr, # array
+        ze,         # array
+        vdop_corr,
+        proj_wind,
+        dmax_insitu,
+        nb_ray,
+        iradar_ray,
+        ilr,
+        ihhmmss,  # just for debug print lines
+        ims_ray,  # just for debug print lines
+        rota_ray,tilt_ray,  # just for debug print lines
+        roll_acft,pitch_acft,hdg_acft,drift_acft,  # just for debug print lines
+        azeast_ray,elhor_ray,  # just for debug print lines
+        isim, 
+        wa_nz,
+        conv)
 #
 #******************************************************************
 #**** STORE FOR NEXT RAY

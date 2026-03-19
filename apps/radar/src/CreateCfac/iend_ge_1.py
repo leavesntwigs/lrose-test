@@ -1,7 +1,7 @@
 # end of sweep
 import numpy as np
 
-def iend_ge_1(iradar_ray,
+def calc_mean_values_for_sweep(iradar_ray,
     rota_prev,
     nb_ray,
     ):

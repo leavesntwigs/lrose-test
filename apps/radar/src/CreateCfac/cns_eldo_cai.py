@@ -683,7 +683,7 @@ def cns_eldo(input_parameters):
     dmax0 = float(input_parameters['dmax0'])
 
 
-# read ELDORA data (from text files originally, then move to CfRadial/binary files
+    # read ELDORA data (from text files originally, then move to CfRadial/binary files
     nfile = input_parameters['nfile']
     ifile = 0
     lastfile = 0
@@ -814,15 +814,12 @@ def cns_eldo(input_parameters):
                     else:
                         tandrot=tan(conv*(rota_rdl-rota_prev(iradar_ray)))
               
-                    if(     nb_ray(iradar_ray) > 1
-                        and (    (swp[iradar_ray].ne.swp_prev(iradar_ray))
-                        or (abs(tandrot) > 0.2)       ) ):
+                    if ( nb_ray(iradar_ray) > 1 and
+                        (swp[iradar_ray] != swp_prev[iradar_ray]) or (abs(tandrot) > 0.2) ):
                         iend=1
                 if iend >= 1:
-                    rota_end = iend_ge_1.iend_ge_1(iradar_ray,
-                        rota_prev,
-                        nb_ray,
-                        )
+                    # calculate mean values for this sweep
+                    rota_end = iend_ge_1.calc_mean_values_for_sweep(iradar_ray, rota_prev, nb_ray)
                     #******************************************************************
                     #****    END OF A SWEEP ( IEND = 1 )
                     #**** or END OF THE TAPE or END OF CONSIDERED PERIOD ( IEND = 2 )
@@ -856,13 +853,20 @@ def cns_eldo(input_parameters):
                 # isim = int(input_parameters['isim'])
                 # ipr_alt = int(input_parameters['ipr_alt'])
                 # dmax0 = float(input_parameters['dmax0'])
-                nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
+                # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
+                nsup,nbtotals,nbon,nmauvais,ssurfins = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
                     kdzsurf, kvsurf, kdvinsitu,
                     iradar_ray, nb_ray,
                     is_aft,
                     isim, ipr_alt,
                     time_ks,
-                    corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz,
+                    corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, 
+                    nb_portes, d_porte, 
+                    ih_rdl, im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, 
+                    lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, 
+                    rota_rdl, incl_rdl, 
+                    vwe_av, vsn_av, vnz_av, 
+                    vent_we, vent_sn, vent_nz,
                     dtiltaft_guess,
                     drotaaft_guess,
                     dtiltfore_guess,
@@ -879,7 +883,8 @@ def cns_eldo(input_parameters):
 #, kdvinsitu, 
 #                    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, 
 #                    x_vpv, xvv_vpv,
-                     nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,nsup,nbtotals,nbon,nmauvais,ssurfins
+                     # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
+                     nsup,nbtotals,nbon,nmauvais,ssurfins
                     )
     # end while
     if all_done:
@@ -924,12 +929,15 @@ def cns_eldo(input_parameters):
 
     if enough_points(ssurfins, ssurfins_min):
         range_delay_corr_aft,
+        range_delay_corr_fore,
         pressure_alt_corr,
         ew_gndspd_corr,
         pitch_corr_cfac,
         drift_corr_cfac,
         rot_angle_corr_aft,
-        tilt_corr_aft = calculate_navigational_errors(
+        rot_angle_corr_fore,
+        tilt_corr_aft,
+        tilt_corr_fore = calculate_navigational_errors(
             directory, fich_cornav,
             yymmdd, rw_dzsurf,rw_vsurf,rw_dvinsitu,
             idtmfile, iwrisurfile,
