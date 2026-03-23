@@ -2,7 +2,7 @@ import numpy as np
 
 # seems to just be renaming input variables ? 
 
-def process_ray(nranges, MAXRAD, MAXPORAD,
+def process_ray(nranges, ranges, MAXRAD, MAXPORAD, MAXPORT,
             # nsweep,   MOVED TO MAIN FUNCTION
             start_hour, start_min, start_sec, 
             time, azimuth, elevation, 
@@ -60,13 +60,13 @@ def process_ray(nranges, MAXRAD, MAXPORAD,
                # enddo 
                # ig is a loop variable!  
                for ig in range(0, nranges):
-                   d_porte[ig] = range[ig]
+                   d_porte[ig] = ranges[ig]
             elif tilt  >  0: # FORE,iradar_ray=2,iaftfore= +1
                # do ig = 1, nranges
                #    d_porte(MAXPORT+ig) = range(ig)  # This change fixed icorrupted infilename
                # enddo
                for ig in range(0, nranges):
-                   d_porte[MAXPORT+ig] = range[ig]
+                   d_porte[MAXPORT+ig] = ranges[ig]
             # endif
             # MOVED TO MAIN FUNCTION Assign the swp number read from text file to num_swp
             # num_swp = nsweep
@@ -100,7 +100,7 @@ def process_ray(nranges, MAXRAD, MAXPORAD,
                corr_lat[0] = latitude_correction
                corr_p_alt[0] = pressure_altitude_correction
                corr_r_alt[0] = radar_altitude_correction
-               corr_vwe_av[0] = ew_gound_speed_correction
+               corr_vwe_av[0] = ew_ground_speed_correction
                corr_vsn_av[0] = ns_ground_speed_correction
                corr_vnz_av[0] = vertical_velocity_correction
                corr_cap[0] = heading_correction
@@ -117,7 +117,7 @@ def process_ray(nranges, MAXRAD, MAXPORAD,
                corr_lat[1] = latitude_correction
                corr_p_alt[1] = pressure_altitude_correction
                corr_r_alt[1] = radar_altitude_correction
-               corr_vwe_av[1] = ew_gound_speed_correction
+               corr_vwe_av[1] = ew_ground_speed_correction
                corr_vsn_av[1] = ns_ground_speed_correction
                corr_vnz_av[1] = vertical_velocity_correction
                corr_cap[1] = heading_correction

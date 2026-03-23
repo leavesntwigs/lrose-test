@@ -197,3 +197,14 @@ Georgis, J.-F., F. Roux, and P. H. Hildebrand, 2000: Observation of precipitatin
 
 7/30/2025
 Try to test ze_actions. 
+
+3/23/2026
+I had to modify the text conversion of the cfradial files:
+1. remove the file name as the second column?  '       361  2222   360 '   Error converting to float
+2. substitute 'D' for 'E': ValueError: could not convert string to float: '0.19600010D+00' 
+3. Error: range is not indexed; fix, ranges is the array name, NOT range
+Expected:   counter, nsweep, NTIMES, nranges, start_year,
+Actual 1:       1     1111     360      627     2018
+Actual 2:     361     2222     360      627     2018
+
+

@@ -1,0 +1,101 @@
+
+(cfac) eol-amalfi:CreateCfac brenda$ python
+Python 3.13.3 | packaged by conda-forge | (main, Apr 14 2025, 20:44:30) [Clang 18.1.8 ] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import run_cns_eldo_cai_TM_TS
+before input_parameters
+ 
+ DIRECTORY FOR THE OUTPUT FILES : ./corrections_TM_TS
+ 
+ DIRECTORY FOR READ FILES : ./cfradial_TM_TS
+ 
+ Total Number of Sweep Files : 2
+ YYYYMMDD : 20181010
+ HHMMSS (min,max) : 234700 235500
+ ORIGIN_LATITUDE,_LONGITUDE :     16.6400000   148.0000000
+ 
+['1', '2', '3', '4', '5', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '!', '15', 'GATES', 'TO', 'DISMISS', '(0', 'if', 'not)']
+ 15 GATES TO DISMISS (0 if not) :     1     2     3     4     5     0     0     0     0     0     0     0     0     0     0
+ 
+ DMIN,DMAX FROM RADAR [km]:    0.0000000   40.0000000
+ 
+ ALTITUDE (1:pressure,2:radar) : 1
+ 
+ REF_min(at 10km),REF_max [dBZ]: +5. 60.
+ 
+ WHICH VDOP (1:VR,2:VG,3:VU) : 1
+ -> WILL NOT CONTROL CONTINUITY ALONG THE RAY !!!!
+ 
+ CORRECTION OF NAVIGATIONAL ERRORS
+ 
+ FIELDS TAKEN INTO ACCOUNT:
+   -> REL.WGHT_dZsurf,Vsurf,dVinsitu (1/0) : 1.0 1.0 0.0
+ 
+ CORRECTIONS TO CALCULATE:
+   -> D_TILT_AFT,D_TILT_FORE (1/0) : 0 0
+   -> D_ROTA_AFT,D_ROTA_FORE (1/0) : 1 1
+   -> D_PITCH,D_HEADING (1/0) : 1 1
+   -> RANGE_DELAY_AFT,RANGE_DELAY_FORE (1/0) : 1 1
+   -> D_XWE,D_YSN,D_ZACFT (1/0) : 0 0 0
+   -> D_VHACFT (1/0) : 1
+ 
+ SIMULATION AVEC +dXXX_GUESS INITIAUX (1/0) : 0
+ 
+ D_TILT_AFT,D_TILT_FORE (deg) guess : 0.0 0.0
+ D_ROTA_AFT,D_ROTA_FORE (deg) guess : -1.2 -1.2
+ D_PITCH,D_HEADING (deg) guess : -1.0 -0.1
+ RANGE_DELAY_AFT,RANGE_DELAY_FORE (km) guess : 0.0 0.0
+ D_XWE,D_YSN,D_ZACFT (km) guess : -0.0 -0.0 0.0
+ D_VHACFT (m/s) guess : -0.500
+  
+<class 'int'> 1
+*************
+{'directory': './corrections_TM_TS', 'dir_read': './cfradial_TM_TS', 'nfile': 2, 'yymmdd': datetime.date(2018, 10, 10), 'ihms_min': '234700', 'ihms_max': '235500', 'orig_lat': 16.64, 'orig_lon': 148.0, 'ig_dismiss': [1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'dmin0': 0.0, 'dmax0': 40.0, 'ipr_alt': '1', 'ref_min0': '+5.', 'ref_max': '60.', 'kdzsurf': 1, 'kvsurf': 1, 'kdvinsitu': 1, 'rw_dzsurf': 1.0, 'rw_vsurf': 1.0, 'rw_dvinsitu': 0.0, 'idtiltaft': 0, 'idtiltfore': 0, 'idrotaaft': 1, 'idrotafore': 1, 'idpitch': 1, 'idhdg': 1, 'irdaft': 1, 'irdfore': 1, 'idxwe': 0, 'idysn': 0, 'idzacft': 0, 'idvh': 1, 'isim': 0, 'dtiltaft_guess': 0.0, 'dtiltfore_guess': 0.0, 'drotaaft_guess': -1.2, 'drotafore_guess': -1.2, 'dpitch_guess': -1.0, 'dhdg_guess': -0.1, 'rdaft_guess': 0.0, 'rdfore_guess': 0.0, 'dxwe_guess': -0.0, 'dysn_guess': -0.0, 'dzacft_guess': 0.0, 'idtmfile': 0, 'dtm_file': 'IHOP_DTM_1km', 'zsurf_cst': 0.0, 'iwrisurfile': 1, 'wrisurfile': 'SURF_E_1720-1725_C1', 'xywidth_wrisurf': '100.', 'hxy_wrisurf': '1.'}
+ NO "SURF_DTM_*" FILE WILL BE READ  -> ZSURF_CST (km) = 0.0
+ WILL WRITE "SURF_EL_*" FILE :  SURF_E_1720-1725_C1
+ -> Xmin,max_wrisurf: -50.0 50.0
+    Ymin,max_wrisurf: -50.0 50.0
+    Hx,y_wrisurf: 1.0
+    Nx,Ny_wrisurf: 101 101
+ OPEN "SURF_EL_*" FILE #30 FOR WRITING : ./corrections_TM_TS/SURF_E_1720-1725_C1
+2018-10-10ELDO
+ IFIDTM=0 -> ALT_SURF(i,j)=cst  ( 0.0  )
+     -> NPTS: 0  ALTSURF_mean,min,max: 0.0 0.0 0.0
+ 
+ -> AUTHORIZED ZSURF_RAD_min,max : -1.0 1.0
+ 
+ OPEN "CORNAV_EL_*" FILE #10 : ./corrections_TM_TS/CORNAV_E_234700_235500
+yymmdd:  2018-10-10
+ 
+ OPEN "SIS_EL_*" FILE #50 : ./corrections_TM_TS/SIS_E_234700_235500
+234700
+reading  ./cfradial_TM_TS/1.txt
+ihhmmss=  122951  is_ray=  51  im_ray= 29  ih_ray= 12
+ HHMMSS: 122951  < HHMMSS_min: 234700
+reading  ./cfradial_TM_TS/2.txt
+ihhmmss=  123925  is_ray=  25  im_ray= 39  ih_ray= 12
+ HHMMSS: 123925  < HHMMSS_min: 234700
+ /////////////////////////////////////////////
+ 
+ /////////////////////////////////////////////
+    NO CORRECTIONS FOR NAVIGATIONAL ERRORS
+ //////////// (not enough points) ////////////
+ /////////////////////////////////////////////
+ 
+ END OF "CORNAV_EL_*" FILE #10 : ./corrections_TM_TS/CORNAV_E_234700_235500
+nx_wrisurf,ny_wrisurf:  101 101
+ 
+ WRITES THE "SURF_EL_*" FILE #30 : ./corrections_TM_TS/SURF_E_1720-1725_C1
+ INTERPOLATION OF THE RADAR-DERIVED SURFACE MAP
+     -> ALONG X
+     -> ALONG Y
+     -> N_in,int_X,int_Y,out : 0 0 0 0
+ -> NPTS WRITTEN ON THE "SURF_EL_*" FILE #30 0
+ 
+ **************************
+ **** END OF PROGRAMM  ****
+ **************************
+N1,N2,N3,N4,N5,N6,N7,N8=  0 0 0 0 0 0 0 0
+NSUP= 0
+NTOTAL_OK=  0
+NBON, NMAUVAIS=  0 0

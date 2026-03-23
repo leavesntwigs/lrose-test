@@ -716,7 +716,7 @@ def cns_eldo(input_parameters):
                     ranges[J] = float(data[J+1])  # map(float, data)
         
                 # process ray / sweep  ...
-                corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz = process_ray.process_ray(nranges, MAXRAD, MAXPORAD, 
+                corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz = process_ray.process_ray(nranges, ranges, MAXRAD, MAXPORAD, MAXPORT,
                     #  nsweep, 
                     start_hour, start_min, start_sec, time, azimuth, elevation, 
                     latitude, longitude, altitude, altitude_agl, 
