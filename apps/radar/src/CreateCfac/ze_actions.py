@@ -1,18 +1,24 @@
 
+import numpy as np
 
 def ze_actions(
     iradar_ray,    # either 0 or 1; corresponds to Fortran either 1 (AFT) or 2 (FORE)
-    ze, vr, vu,
+    ncp, sw, ze, vr, vu,
     ichoice_vdop,
     dgate_corr,
+    vdop_corr,
     proj_acftspd,
     ngates,
     dmin, dmax,
-    xncp_min,
-    sw_max,
-    ref_mmin, ref_max,
+    ref_min0, ref_max,
     vdop_max = 200.,
+    xncp_min=0.25,
+    sw_max=5.,
     ):
+
+
+    nref_ok = np.zeros(2, dtype=np.int32)
+    ndop_ok = np.zeros(2, dtype=np.int32)
 
 #
 #******************************************************************
@@ -21,7 +27,7 @@ def ze_actions(
 #
     ngates_max=1
     for ig in range(ngates):
-         ref_min=ref_min0+20.*(alog10(dgate_corr[ig])-1.)
+         ref_min=ref_min0+20.*(np.log10(dgate_corr[ig])-1.)
          if (dgate_corr[ig] < dmin
             or dgate_corr[ig] > dmax
             or ncp[ig] < xncp_min
@@ -66,4 +72,4 @@ def ze_actions(
                  vdop_corr[ig]=vdop_read
 
 
-    return vdop_read, vdop_corr, ndop_ok, ze, vr, vu
+    return vdop_read, vdop_corr, ndop_ok, ze, vr, vu, ngates_max

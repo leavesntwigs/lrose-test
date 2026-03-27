@@ -132,10 +132,10 @@ def read_input_parameters(file_name):
 #
       print(' ')
       tokens = f99.readline().split()
-      dmin0 = float(tokens[0])
+      dmin = float(tokens[0])
       dmax0 = float(tokens[1])
-      print(f" DMIN,DMAX FROM RADAR [km]:{dmin0:13.7f}{dmax0:13.7f}")
-      input_parameters['dmin0'] = dmin0
+      print(f" DMIN,DMAX FROM RADAR [km]:{dmin:13.7f}{dmax0:13.7f}")
+      input_parameters['dmin'] = dmin
       input_parameters['dmax0'] = dmax0
 #
       print(' ')
@@ -145,14 +145,15 @@ def read_input_parameters(file_name):
 #
       print(' ')
       tokens = f99.readline().split()
-      ref_min0 = tokens[0]
-      ref_max = tokens[1]
+      ref_min0 = float(tokens[0])
+      ref_max = float(tokens[1])
       print(' REF_min(at 10km),REF_max [dBZ]:',ref_min0,ref_max)
       input_parameters['ref_min0'] = ref_min0
       input_parameters['ref_max'] = ref_max
 #
       print(' ')
       ichoice_vdop = int(f99.readline().split()[0])
+      input_parameters['ichoice_vdop'] = ichoice_vdop
       print(' WHICH VDOP (1:VR,2:VG,3:VU) :'
          ,ichoice_vdop)
       if(ichoice_vdop == 1 or ichoice_vdop == 2):
@@ -275,6 +276,7 @@ def read_input_parameters(file_name):
       print(' D_XWE,D_YSN,D_ZACFT (km) guess :'
          ,dxwe_guess,dysn_guess,dzacft_guess)
       dvh_guess = f99.readline().split()[0]
+      input_parameters['dvh_guess'] = dvh_guess
       print(' D_VHACFT (m/s) guess :',dvh_guess)
       f99.readline()
 #

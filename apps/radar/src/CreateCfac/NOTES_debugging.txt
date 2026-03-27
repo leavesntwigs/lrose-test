@@ -208,3 +208,23 @@ Actual 1:       1     1111     360      627     2018
 Actual 2:     361     2222     360      627     2018
 
 
+enough_points needs:
+ssurfins > ssurfins_min = 1
+
+dvdop_insitu.py:                    ssurfins += wghtinsitu_ig
+kdzsurf_kvsurf_ge_1.py:             ssurfins=ssurfins+wghtsurf_ray
+
+
+            if (ze[ig] > -900. and vdop_corr[ig] > -900.):
+                wghtinsitu_ig=1.-0.5*dgate_corr[ig]/dmax_insitu
+                dv_dopinsitu=vdop_corr[ig]-proj_wind
+                if(abs(dv_dopinsitu) < dvdopinsitu_max):
+                    ssurfins += wghtinsitu_ig
+
+
+-----
+
+I have Ophelia data files here:
+(base) eol-amalfi:CreateCfac brenda$ ls ~/data/cfac/ophelia_2005/
+
+

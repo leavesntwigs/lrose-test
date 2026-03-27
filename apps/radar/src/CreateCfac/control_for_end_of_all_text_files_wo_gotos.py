@@ -1,6 +1,11 @@
 
 import ze_actions
 import azel
+# import dismiss_range_gates
+import set_ngates_insitu_max
+import kdzsurf_kvsurf_ge_1
+import dvdop_insitu
+
 import numpy as np
 
 # may not need this file
@@ -14,6 +19,7 @@ is_aft, isim, ipr_alt,
     dtiltfore_guess,
     drotafore_guess,
     dhdg_guess,
+    dvh_guess,
     dpitch_guess,
     rdfore_guess,
     rdaft_guess, 
@@ -21,10 +27,25 @@ is_aft, isim, ipr_alt,
     dysn_guess,
     dzacft_guess,
     orig_lat, orig_lon,
-    dmax0,
+    dmin, dmax0,
     # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
     nsup,nbtotals,nbon,nmauvais,ssurfins,
+    sacfthspd,xp_acft,su_acft,sv_acft,sw_acft,
+    xp_wind,su_wind,sv_wind,sw_wind,
+    ncp, sw, ze, vr, vu,
+    ichoice_vdop,
+    ref_min0, ref_max,
+    # needed by kdzsurf_kvsurf_ge_1
+    n_dzsurf, altdtm_min, xmin_dtm, xmax_dtm, ymin_dtm, ymax_dtm, hx_dtm, hy_dtm, igstart_surf, alt_dtm,
+    # needed by dvdop_insitu
+    kdvinsit, ngates_insitu_max, ictrl_contray,
+        ihhmmss,  # just for debug print lines
+        ims_ray,  # just for debug print lines
+        # roll_acft,pitch_acft,hdg_acft,drift_acft,  # just for debug print lines
+        # azeast_ray,elhor_ray,  # just for debug print lines
 ):
+
+    print('=======> inside control_for_end_of_all_text_files')
 
     continue_processing = True
     # TODO these are constants, they should not be repeated here, figure out a better way to get this info here.
@@ -32,10 +53,11 @@ is_aft, isim, ipr_alt,
     MAXPORT=2000
     deg_lon0=111.32
     deg_lat=111.13
-
+    dmax_insitu=5.
 
     dgate_corr = np.zeros(MAXPORT, dtype=np.float32)
     dgate_true = np.zeros(MAXPORT, dtype=np.float32)
+    vdop_corr = np.full(MAXPORT, -999, dtype=np.float32)
     stilt = np.zeros(2, dtype=np.float32)
     stilt2 = np.zeros(2, dtype=np.float32)
     rota_start = np.full(2, -999, dtype=np.float32)
@@ -129,13 +151,14 @@ is_aft, isim, ipr_alt,
     cwe = 0.0 
     csn = 0.0 
     cnz = 0.0 
-    azeast_ray,elhor_ray,cxa, cya, cza, cwe, csn, cnz, cosinang = azel.azel( rota_ray+drota_guess+roll_acft
-              ,tilt_ray+dtilt_guess
-              ,hdg_acft+dhdg_guess,drift_acft
-              ,pitch_acft+dpitch_guess
-              ,azeast_ray,elhor_ray
-              ,cxa,cya,cza,cwe,csn,cnz,
-              cosinang)
+    azeast_ray,elhor_ray,cxa, cya, cza, cwe, csn, cnz, cosinang = azel.azel( rota_ray+drota_guess+roll_acft,
+              tilt_ray+dtilt_guess,
+              hdg_acft+dhdg_guess,drift_acft,
+              pitch_acft+dpitch_guess,
+              #,azeast_ray,elhor_ray
+              #,cxa,cya,cza,cwe,csn,cnz,
+              #cosinang
+              )
     if(np.sin(conv*(rota_ray+drota_guess+roll_acft)) < 0.):
         side=-1.
         ilr=1
@@ -257,16 +280,16 @@ is_aft, isim, ipr_alt,
     if(isim == 1):
       acftspd_we_true=acftspd_we
       acftspd_sn_true=acftspd_sn
-    endif
+    # endif
 #----------------------------------------------------------------------
-    acftspd_we=acftspd_we+duacft_dv*dvh_guess
-    acftspd_sn=acftspd_sn+dvacft_dv*dvh_guess
-    acftspd_hor=sqrt(acftspd_we*acftspd_we+acftspd_sn*acftspd_sn)
-    sacfthspd[iradar_ray]=sacfthspd[iradar_ray]+acftspd_hor
-    xp_acft[iradar_ray]=xp_acft[iradar_ray]+1.
-    su_acft[iradar_ray]=su_acft[iradar_ray]+acftspd_we
-    sv_acft[iradar_ray]=sv_acft[iradar_ray]+acftspd_sn
-    sw_acft[iradar_ray]=sw_acft[iradar_ray]+acftspd_nz
+    acftspd_we += duacft_dv*dvh_guess
+    acftspd_sn += dvacft_dv*dvh_guess
+    acftspd_hor=np.sqrt(acftspd_we*acftspd_we+acftspd_sn*acftspd_sn)
+    sacfthspd[iradar_ray] += acftspd_hor
+    xp_acft[iradar_ray] += 1.
+    su_acft[iradar_ray] += acftspd_we
+    sv_acft[iradar_ray] += acftspd_sn
+    sw_acft[iradar_ray] += acftspd_nz
     proj_acftspd=acftspd_we*cwe+acftspd_sn*csn+acftspd_nz*cnz
 #
 #******************************************************************
@@ -292,10 +315,10 @@ is_aft, isim, ipr_alt,
     # endif
     if(abs(wind_nz) <= 0. or abs(wind_nz) > 50.):
       wind_nz=0.
-    xp_wind[iradar_ray]=xp_wind[iradar_ray]+1.
-    su_wind[iradar_ray]=su_wind[iradar_ray]+wind_we
-    sv_wind[iradar_ray]=sv_wind[iradar_ray]+wind_sn
-    sw_wind[iradar_ray]=sw_wind[iradar_ray]+wind_nz
+    xp_wind[iradar_ray] += 1.
+    su_wind[iradar_ray] += wind_we
+    sv_wind[iradar_ray] += wind_sn
+    sw_wind[iradar_ray] += wind_nz
     proj_wind=wind_we*cwe+wind_sn*csn+wind_nz*cnz
     wa_we=wind_we-acftspd_we
     wa_sn=wind_sn-acftspd_sn
@@ -321,26 +344,53 @@ is_aft, isim, ipr_alt,
 ##!!!   endif
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    ze,vr,vu = dismiss_range_gates.dismiss_range_gates(ig_dismiss, ze, vr, vu)
-    ngates_insitu_max = set_ngates_insitu_max.set_ngates_insitu_max(selh, selhinsitu_max, MAXPORT, dgate_corr, dmax_insitu)
+    # dismiss... can be moved outside this function; ze,vr,vu are not needed before this point.
+    # ze,vr,vu = dismiss_range_gates.dismiss_range_gates(ig_dismiss, ze, vr, vu)
 
-    vdop_read, vdop_corr, ndop_ok, ze, vr, vu = ze_actions.ze_actions(
+    ngates_insitu_max = set_ngates_insitu_max.set_ngates_insitu_max(selh, 
+        # selhinsitu_max, 
+        MAXPORT, dgate_corr, dmax_insitu)
+
+    vdop_read, vdop_corr, ndop_ok, ze, vr, vu, ngates_max = ze_actions.ze_actions(
         iradar_ray,
-        ze, vr, vu, 
+        ncp, sw, ze, vr, vu, 
         ichoice_vdop,
         dgate_corr, 
+        vdop_corr,
         proj_acftspd,
         ngates,
         dmin, dmax,
-        xncp_min,
-        sw_max,
-        ref_mmin, ref_max,
+        ref_min0, ref_max,
         # vdop_max = 200.,  # use default value defined in function
+        # xncp_min=0.25, # use default
+        # sw_max=5. # use default
         )
 
-    nsup,nbtotals,nbon,nmauvais,ssurfins = kdzsurf_kvsurf_ge_1.kdzsurf_kvsurf_ge_1(
-        kdzsurf, kvsurf,
-        nsup,nbtotals,nbon,nmauvais,ssurfins) #  needs ze ...
+    # nsup,nbtotals,nbon,nmauvais,ssurfins = ???? maybe kdzsurf returns this? maybe not?
+    n_dzsurf, xmat_vsurf, vect_vsurf, corr_var = kdzsurf_kvsurf_ge_1.kdzsurf_kvsurf_ge_1(
+        selh, x_acft, y_acft, z_acft,
+        nb_ray,  # array (2) of int   nb_ray(iradar_ray) is just the ray number and here it is just for printing debug lines
+        iradar_ray,
+        n_dzsurf,
+        altdtm_min,
+        xmin_dtm,
+        xmax_dtm,
+        ymin_dtm,
+        ymax_dtm,
+        hx_dtm,
+        hy_dtm,
+        isim,
+        igstart_surf,
+        ngates_max,
+        dgate_corr,
+        ze,
+        celh,
+        caze,
+        saze,
+        alt_dtm,
+        )
+        # kdzsurf, kvsurf,
+        # nsup,nbtotals,nbon,nmauvais,ssurfins) #  needs ze ...
 #
 #******************************************************************
 #**** CASE "DVDOP_insitu"
@@ -348,7 +398,7 @@ is_aft, isim, ipr_alt,
 #******************************************************************
 #
     # ssurfins = dvdop_insitu(ssurfins) 
-    xmat_dvinsitu, vect_dvinsitu, xmat_vsurf, vi_dhor, vi_vdop, vi_vinsitu = dvdop_insitu(
+    xmat_dvinsitu, vect_dvinsitu, xmat_vsurf, vi_dhor, vi_vdop, vi_vinsitu = dvdop_insitu.dvdop_insitu(
         kdvinsit, ngates_insitu_max,
         ictrl_contray,
         dgate_corr, # array
@@ -372,12 +422,12 @@ is_aft, isim, ipr_alt,
 #**** STORE FOR NEXT RAY
 #******************************************************************
 #
-    istart_sweep[iradar_ray]=1
+    # istart_sweep[iradar_ray]=1 # not used
     swp_prev[iradar_ray]=swp[iradar_ray]
     vnyq_prev=vnyq
     rota_prev[iradar_ray]=rota_ray
     tilt_prev=tilt_ray
 #
     # return continue_processing, # swdzmsurf_tot
-    return nsup,nbtotals,nbon,nmauvais,ssurfins
+    return nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft
 

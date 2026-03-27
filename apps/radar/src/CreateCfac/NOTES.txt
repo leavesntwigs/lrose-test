@@ -230,3 +230,18 @@ THIS SEEMS TO FIX THE WEIRD ERRORS; THINGS ARE WORKING AGAIN
 
 process_ray and control_for_end_of... share variables.
 
+
+-------
+
+3/23/2026
+
+test TM_TS in docker container steps:
+i
+
+(base) eol-amalfi:CreateCfac brenda$ docker run -v .:/data -it cai-et-al:latest
+
+lrose@49ba3bd3e534:~$ cd /data
+lrose@49ba3bd3e534:/data$ /home/lrose/Airborne-Radar-QC/navigation/cns_eldo_cai DATA_cns_TM_TS.txt > docker_run_output_TM_TS.txt
+
+lrose@49ba3bd3e534:/data$ more corrections_TM_TS/cfac.aft
+both cfac.fore and cfac.aft are zeros. 

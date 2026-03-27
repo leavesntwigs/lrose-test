@@ -42,8 +42,11 @@ import write_cfac
 import write_cornav_file
 import write_sisel_file
 import write_surf_el
+import initialize_sweep_beginning
+import dismiss_range_gates
 
 def enough_points(ssurfins, ssurfins_min):
+    print("surfins > ssurfins_min ", ssurfins, " > ", ssurfins_min)
     return ssurfins > ssurfins_min
 
 # arg is a dictionary of parameters
@@ -213,16 +216,16 @@ def cns_eldo(input_parameters):
     vdop_corr = np.full(MAXPORT, -999, dtype=np.float32)
     xms = np.zeros(9, dtype=np.float32)
     xml = np.zeros(9, dtype=np.float32)
-    #rota_start = np.full(2, -999, dtype=np.float32)
-    #rota_end = np.full(2, -999, dtype=np.float32)
+    rota_start = np.full(2, -999, dtype=np.float32)
+    rota_end = np.full(2, -999, dtype=np.float32)
     xp = np.zeros(2, dtype=np.float32)
-    #ssc = np.zeros(2, dtype=np.float32)
-    #scc = np.zeros(2, dtype=np.float32)
-    #sxa = np.zeros(2, dtype=np.float32)
-    #sya = np.zeros(2, dtype=np.float32)
-    #sza = np.zeros(2, dtype=np.float32)
+    ssc = np.zeros(2, dtype=np.float32)
+    scc = np.zeros(2, dtype=np.float32)
+    sxa = np.zeros(2, dtype=np.float32)
+    sya = np.zeros(2, dtype=np.float32)
+    sza = np.zeros(2, dtype=np.float32)
     sacfthspd = np.zeros(2, dtype=np.float32)
-    # stime = np.zeros(2, dtype=np.float32)
+    stime = np.zeros(2, dtype=np.float32)
     xp_acft = np.zeros(2, dtype=np.float32)
     su_acft = np.zeros(2, dtype=np.float32)
     sv_acft = np.zeros(2, dtype=np.float32)
@@ -231,10 +234,9 @@ def cns_eldo(input_parameters):
     sv_wind = np.zeros(2, dtype=np.float32)
     sw_wind = np.zeros(2, dtype=np.float32)
     xp_wind = np.zeros(2, dtype=np.float32)
-    # stilt = np.zeros(2, dtype=np.float32)
-    # stilt2 = np.zeros(2, dtype=np.float32)
+    stilt = np.zeros(2, dtype=np.float32)
+    stilt2 = np.zeros(2, dtype=np.float32)
     xsweeps = np.zeros(2, dtype=np.float32)
-    # rota_prev(iradar)=-999
     rota_prev = np.full(2, -999, dtype=np.float32)
     swdzsurf_sweep = np.zeros(2, dtype=np.float32)
     dzsurfsweep_mean = np.zeros(2, dtype=np.float32)
@@ -299,9 +301,9 @@ def cns_eldo(input_parameters):
     ndismiss_vdopsurf = np.zeros(2, dtype=np.int32)
     swp = np.zeros(2, dtype=np.int32)
     swp_prev = np.zeros(2, dtype=np.int32)
-    ndop_ok = np.zeros(2, dtype=np.int32)
-    nref_ok = np.zeros(2, dtype=np.int32)
-    istart_sweep = np.zeros(2, dtype=np.int32)
+    # ndop_ok = np.zeros(2, dtype=np.int32) # moved to ze_actions.py
+    # nref_ok = np.zeros(2, dtype=np.int32) # moved to ze_actions.py
+    # istart_sweep = np.zeros(2, dtype=np.int32) # not used
     itab = np.zeros(nxysurfmax, dtype=np.int32)
     ihms_dtm = np.zeros(6, dtype=np.int32)
     # ialtsurf_wri = np.zeros(nxysurfmax, dtype=np.int32)
@@ -378,11 +380,11 @@ def cns_eldo(input_parameters):
     gradrefsurf_min0=50.
     dhsurf_max=999.
     vdopsurf_max=999.
-    dmax_insitu=5.
+    # dmax_insitu=5.  # moved to control_for_end_of_all_text_files_wo_gotos.py
     xpmin_contray=3.
     dvdop_max=10.
     dvdopinsitu_max=999.
-    selhinsitu_max=0.1
+    # selhinsitu_max=0.1  moved to set_ngates_insitu_max.py
     ssurfins_min=1.
     ssurfins=0.
 #
@@ -672,6 +674,7 @@ def cns_eldo(input_parameters):
     drotaaft_guess = float(input_parameters['drotaaft_guess'])
     drotafore_guess = float(input_parameters['drotafore_guess'])
     dhdg_guess = float(input_parameters['dhdg_guess'])
+    dvh_guess = float(input_parameters['dvh_guess'])
     dpitch_guess = float(input_parameters['dpitch_guess'])
     rdfore_guess = float(input_parameters['rdfore_guess'])
     rdaft_guess = float(input_parameters['rdaft_guess'])
@@ -681,6 +684,7 @@ def cns_eldo(input_parameters):
     isim = int(input_parameters['isim'])
     ipr_alt = int(input_parameters['ipr_alt'])
     dmax0 = float(input_parameters['dmax0'])
+    dmin = float(input_parameters['dmin'])
 
 
     # read ELDORA data (from text files originally, then move to CfRadial/binary files
@@ -697,13 +701,16 @@ def cns_eldo(input_parameters):
     
             try:
                 data = f.readline().strip().split()
-                counter, nsweep, NTIMES, nranges, start_year, start_mon, start_day, start_hour, start_min, start_sec, time, azimuth, elevation, latitude, longitude, altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction = map(float, data)
+                counter = map(float, data[0])
+                file_name = map(float, data[1])
+                nsweep, NTIMES, nranges, start_year, start_mon, start_day, start_hour, start_min, start_sec, time, azimuth, elevation, latitude, longitude, altitude, altitude_agl, heading, roll, pitch, drift, rotation, tilt, ew_velocity, ns_velocity, vertical_velocity, ew_wind, ns_wind, vertical_wind, azimuth_correction, elevation_correction, range_correction, longitude_correction, latitude_correction, pressure_altitude_correction, radar_altitude_correction, ew_ground_speed_correction, ns_ground_speed_correction, vertical_velocity_correction, heading_correction, roll_correction, pitch_correction, drift_correction, rotation_correction, tilt_correction = map(float, data[2:])
                 nranges = int(nranges)
                 ranges = np.zeros(nranges)
                 ZE = np.zeros(nranges)
                 NCP = np.zeros(nranges)
                 VR = np.zeros(nranges)
                 SW = np.zeros(nranges) 
+                vu = np.zeros(nranges) 
     
                 # for J in range(nranges):
                 #     data = f.readline().strip().split()
@@ -714,6 +721,14 @@ def cns_eldo(input_parameters):
                 counter = int(data[0]) 
                 for J in range(nranges):
                     ranges[J] = float(data[J+1])  # map(float, data)
+                for J in range(nranges):
+                    ZE[J] = float(data[J+1])  # map(float, data)
+                for J in range(nranges):
+                    NCP[J] = float(data[J+1])  # map(float, data)
+                for J in range(nranges):
+                    VR[J] = float(data[J+1])  # map(float, data)
+                for J in range(nranges):
+                    SW[J] = float(data[J+1])  # map(float, data)
         
                 # process ray / sweep  ...
                 corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, vent_we, vent_sn, vent_nz = process_ray.process_ray(nranges, ranges, MAXRAD, MAXPORAD, MAXPORT,
@@ -745,6 +760,8 @@ def cns_eldo(input_parameters):
             if ifile == nfile and lastfile == 1:
                 iend=2
             if True: #  I just don't want to change all the indents at the moment
+                print('+++++++++++ here ')
+
                 # various check for control flow: time, lat, lon, end of sweep, etc.
                 #c******************************************************************
                 #c**** CONTROL OF CURRENT TIME 
@@ -767,8 +784,10 @@ def cns_eldo(input_parameters):
                     if ihhmmss/10 > ihms_prev:
                         print(' HHMMSS:',ihhmmss,' < HHMMSS_min:',ihms_min)
                         ihms_prev=ihhmmss/10
-                    if iend !=  2: #  go to 1   ! only when end of text file not reached
-                        continue
+                    # TODO: I commented/removed this if as a hack to let the control flow through to other sections of the code.
+                    # if iend !=  2: #  go to 1   ! only when end of text file not reached
+                    #     continue           
+                print('####### after continue')
                 if time_ks > tmax:
                     iend=2
                     print(' ')
@@ -809,12 +828,12 @@ def cns_eldo(input_parameters):
                     #******************************************************************
                     #**** CONTROL FOR AN END OF SWEEP
                     #******************************************************************
-                    if(nb_ray(iradar_ray) == 1):
+                    if(nb_ray[iradar_ray] == 1):
                         tandrot=0.
                     else:
-                        tandrot=tan(conv*(rota_rdl-rota_prev(iradar_ray)))
+                        tandrot=np.tan(conv*(rota_rdl-rota_prev[iradar_ray]))
               
-                    if ( nb_ray(iradar_ray) > 1 and
+                    if ( nb_ray[iradar_ray] > 1 and
                         (swp[iradar_ray] != swp_prev[iradar_ray]) or (abs(tandrot) > 0.2) ):
                         iend=1
                 if iend >= 1:
@@ -833,7 +852,70 @@ def cns_eldo(input_parameters):
                     if iend == 2:
                         all_done = True
                         continue
-                    initialize_sweep_beginning()
+
+                    xsweeps[iradar_ray]=xsweeps[iradar_ray]+1.
+                    nb_ray[iradar_ray]=0
+                    nb_ray, stilt, stilt2, rota_prev, rota_start, rota_end, sxa, sya, sza,
+                    sacfthspd, stime, ssc, scc, xp_acft, su_acft, sv_acft, sw_acft, xp_wind,
+                    su_wind, sv_wind, sw_wind, n_dvinsitu, n_dzsurf, n_vsurf, ndismiss_vhacft,
+                    ndismiss_vdopcorr, ndismiss_vdopsurf, zs_rot, zs_el, zs_az, zs_dsurf, zs_dhor,
+                    zs_zsurf, zs_hsurf, vs_dhor, vs_vdopsurf, vi_dhor, vi_vdop, vi_vinsitu,
+                    swdzsurf_sweep, dzsurfsweep_mean, dzsurfsweep_rms, swvsurf_sweep, vsurfsweep_mean, vsurfsweep_rms,
+                    nsurf_wri, swinsitu_sweep, dvinsitusweep_mean, dvinsitusweep_rms,
+                    s_vpv, sv_vpv,
+                    svv_vpv = initialize_sweep_beginning.initialize_sweep_beginning(iradar_ray,
+                        nb_ray,
+                        stilt,
+                        stilt2,
+                        rota_prev,
+                        rota_start,
+                        rota_end,
+                        sxa,
+                        sya,
+                        sza,
+                        sacfthspd,
+                        stime,
+                        ssc,
+                        scc,
+                        xp_acft,
+                        su_acft,
+                        sv_acft,
+                        sw_acft,
+                        xp_wind,
+                        su_wind,
+                        sv_wind,
+                        sw_wind,
+                        n_dvinsitu,
+                        n_dzsurf,
+                        n_vsurf,
+                        ndismiss_vhacft,
+                        ndismiss_vdopcorr,
+                        ndismiss_vdopsurf,
+                        zs_rot,
+                        zs_el,
+                        zs_az,
+                        zs_dsurf,
+                        zs_dhor,
+                        zs_zsurf,
+                        zs_hsurf,
+                        vs_dhor,
+                        vs_vdopsurf,
+                        vi_dhor,
+                        vi_vdop,
+                        vi_vinsitu,
+                        swdzsurf_sweep,
+                        dzsurfsweep_mean,
+                        dzsurfsweep_rms,
+                        swvsurf_sweep,
+                        vsurfsweep_mean,
+                        vsurfsweep_rms,
+                        nsurf_wri,
+                        swinsitu_sweep,
+                        dvinsitusweep_mean,
+                        dvinsitusweep_rms,
+                        s_vpv,
+                        sv_vpv,
+                        svv_vpv,)
                  
                 print("end of tape or end of considered period: iend = 2")
                 # kdzsurf = int(input_parameters['kdzsurf'])
@@ -853,8 +935,16 @@ def cns_eldo(input_parameters):
                 # isim = int(input_parameters['isim'])
                 # ipr_alt = int(input_parameters['ipr_alt'])
                 # dmax0 = float(input_parameters['dmax0'])
+
+                ig_dismiss = input_parameters['ig_dismiss']
+                # I don't think vu is every set other than 0 or -999. 
+                ZE,VR,vu = dismiss_range_gates.dismiss_range_gates(ig_dismiss, ZE, VR, vu)
+
+                ichoice_vdop = input_parameters['ichoice_vdop']
+                ref_min0 = input_parameters['ref_min0']
+                ref_max = input_parameters['ref_max']
                 # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
-                nsup,nbtotals,nbon,nmauvais,ssurfins = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
+                nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
                     kdzsurf, kvsurf, kdvinsitu,
                     iradar_ray, nb_ray,
                     is_aft,
@@ -872,6 +962,7 @@ def cns_eldo(input_parameters):
                     dtiltfore_guess,
                     drotafore_guess,
                     dhdg_guess,
+                    dvh_guess,
                     dpitch_guess,
                     rdfore_guess,
                     rdaft_guess,
@@ -879,13 +970,18 @@ def cns_eldo(input_parameters):
                     dysn_guess,
                     dzacft_guess,
                     orig_lat, orig_lon,
-                    dmax0,
+                    dmin, dmax0,
 #, kdvinsitu, 
 #                    swv2surf_tot, swdvminsitu_tot, swdvinsitu_tot, swv2insitu_tot, xv_vpv, 
 #                    x_vpv, xvv_vpv,
                      # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
-                     nsup,nbtotals,nbon,nmauvais,ssurfins
-                    )
+                     nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft,su_acft,sv_acft,sw_acft,
+                     xp_wind,su_wind,sv_wind,sw_wind,
+                     NCP, SW, ZE, VR, vu,
+                     ichoice_vdop,
+                     ref_min0, ref_max,
+                     n_dzsurf, altdtm_min, xmin_dtm, xmax_dtm, ymin_dtm, ymax_dtm, hx_dtm, hy_dtm, igstart_surf, alt_dtm,  # needed by kdzsurf_kvsurf_ge_1
+                     )
     # end while
     if all_done:
         swdzmsurf_tot = 0
@@ -939,10 +1035,24 @@ def cns_eldo(input_parameters):
         tilt_corr_aft,
         tilt_corr_fore = calculate_navigational_errors(
             directory, fich_cornav,
-            yymmdd, rw_dzsurf,rw_vsurf,rw_dvinsitu,
-            idtmfile, iwrisurfile,
-            idtiltaft, idtiltfore, idrotaaft, idrotafore, idpitch, idhdg, irdaft, irdfore, idxwe,
-            idysn, idzacft, idvh,
+            yymmdd, 
+            rw_dzsurf,
+            rw_vsurf,
+            rw_dvinsitu,
+            idtmfile, 
+            iwrisurfile,
+            idtiltaft, 
+            idtiltfore, 
+            idrotaaft, 
+            idrotafore, 
+            idpitch, 
+            idhdg, 
+            irdaft, 
+            irdfore, 
+            idxwe,
+            idysn, 
+            idzacft, 
+            idvh,
             swdzsurf_tot,
             nvar,
             vect_dzsurf,

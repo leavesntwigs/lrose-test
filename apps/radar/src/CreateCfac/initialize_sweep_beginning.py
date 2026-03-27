@@ -1,13 +1,66 @@
 
-def initialize_sweep_beginning():
+def initialize_sweep_beginning(iradar_ray,
+    nb_ray,
+    stilt,
+    stilt2,
+    rota_prev,
+    rota_start,
+    rota_end,
+    sxa,
+    sya,
+    sza,
+    sacfthspd,
+    stime,
+    ssc,
+    scc,
+    xp_acft,
+    su_acft,
+    sv_acft,
+    sw_acft,
+    xp_wind,
+    su_wind,
+    sv_wind,
+    sw_wind,
+    n_dvinsitu,
+    n_dzsurf,
+    n_vsurf,
+    ndismiss_vhacft,
+    ndismiss_vdopcorr,
+    ndismiss_vdopsurf,
+    zs_rot,
+    zs_el,
+    zs_az,
+    zs_dsurf,
+    zs_dhor,
+    zs_zsurf,
+    zs_hsurf,
+    vs_dhor,
+    vs_vdopsurf,
+    vi_dhor,
+    vi_vdop,
+    vi_vinsitu,
+    swdzsurf_sweep,
+    dzsurfsweep_mean,
+    dzsurfsweep_rms,
+    swvsurf_sweep,
+    vsurfsweep_mean,
+    vsurfsweep_rms,
+    nsurf_wri,
+    swinsitu_sweep,
+    dvinsitusweep_mean,
+    dvinsitusweep_rms,
+    s_vpv,
+    sv_vpv,
+    svv_vpv,
+    ):
 
     #
     #******************************************************************
     #**** INITIALIZATIONS AT THE BEGINNING OF A SWEEP (if IEND=1)
     #******************************************************************
     #
-    istart_sweep[iradar_ray]=0
-    xsweeps[iradar_ray]=xsweeps[iradar_ray]+1.
+    # istart_sweep[iradar_ray]=0 # not used
+    # xsweeps[iradar_ray]=xsweeps[iradar_ray]+1. # moved to cns_eldo_cai
     nb_ray[iradar_ray]=0
     stilt[iradar_ray]=0.
     stilt2[iradar_ray]=0.

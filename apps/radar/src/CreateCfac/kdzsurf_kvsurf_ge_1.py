@@ -5,7 +5,7 @@ import variable_indexes
 # kvsurf = 1 ALWAYS!
 
 def kdzsurf_kvsurf_ge_1( # kdzsurf, kvsurf,
-    selh, selh_surf, x_acft, y_acft, z_acft, zacftmin_surf,
+    selh, x_acft, y_acft, z_acft,
     nb_ray,  # array (2) of int   nb_ray(iradar_ray) is just the ray number and here it is just for printing debug lines
     iradar_ray,
     n_dzsurf,
@@ -25,6 +25,8 @@ def kdzsurf_kvsurf_ge_1( # kdzsurf, kvsurf,
     caze,
     saze,
     alt_dtm,
+    selh_surf=-0.15,
+    zacftmin_surf=1.5,
     ):
 
     nvar = variable_indexes.nvar
@@ -42,6 +44,8 @@ def kdzsurf_kvsurf_ge_1( # kdzsurf, kvsurf,
 #****     OF THE SURFACE FOR THIS RAY
 #******************************************************************
 #
+    print("selh < selh_surf and z_acft > zacftmin_surf ", 
+        selh, " < ", selh_surf, " and ", z_acft, " > ", zacftmin_surf)
     if( #  (kdzsurf+kvsurf) >= 1 and  # ALWAYS TRUE!!!
         selh < selh_surf and
         z_acft > zacftmin_surf):
@@ -255,7 +259,7 @@ def kdzsurf_kvsurf_ge_1( # kdzsurf, kvsurf,
       #**** !!!! DHSURF_MAX=999. !!!! -> NOT IN USE !!!!
       #******************************************************************
       #
-                print('before line 209')
+                print('before line 209: abs(d_hsurf) < dhsurf_max ', abs(d_hsurf), ' < ', dhsurf_max)
                 if(abs(d_hsurf) < dhsurf_max):                         # D
                     ssurfins=ssurfins+wghtsurf_ray
       #
