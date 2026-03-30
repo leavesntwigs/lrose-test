@@ -256,9 +256,9 @@ def cns_eldo(input_parameters):
 
     xmat_dzsurf = np.zeros((nvar,nvar), dtype=np.float32)
     vect_vsurf = np.zeros((nvar), dtype=np.float32)
-    xmat_vsurf = np.zeros((nvar,nvar), dtype=np.float32)
-    vect_dvinsitu = np.zeros((nvar), dtype=np.float32)
-    xmat_dvinsitu = np.zeros((nvar,nvar), dtype=np.float32)
+    # xmat_vsurf = np.zeros((nvar,nvar), dtype=np.float32)
+    # vect_dvinsitu = np.zeros((nvar), dtype=np.float32)
+    # xmat_dvinsitu = np.zeros((nvar,nvar), dtype=np.float32)
     alt_dtm = np.zeros((nxysurfmax,nxysurfmax), dtype=np.float32)
     swdzsurf_wri = np.zeros((nxysurfmax,nxysurfmax), dtype=np.float32)
     sw_or_altsurf_wri = np.zeros((nxysurfmax,nxysurfmax), dtype=np.float32)
@@ -271,9 +271,9 @@ def cns_eldo(input_parameters):
     zs_hsurf = np.zeros((2,500), dtype=np.float32)
     vs_dhor = np.zeros((2,500), dtype=np.float32)
     vs_vdopsurf = np.zeros((2,500), dtype=np.float32)
-    vi_dhor = np.zeros((2,500), dtype=np.float32)
-    vi_vdop = np.zeros((2,500), dtype=np.float32)
-    vi_vinsitu = np.zeros((2,500), dtype=np.float32)
+    # vi_dhor = np.zeros((2,500), dtype=np.float32)
+    # vi_vdop = np.zeros((2,500), dtype=np.float32)
+    # vi_vinsitu = np.zeros((2,500), dtype=np.float32)
     
     rms_var_zsurf = np.zeros(nvar, dtype=np.float32)
     rms_var_vsurf = np.zeros(nvar, dtype=np.float32)
@@ -859,7 +859,8 @@ def cns_eldo(input_parameters):
                     sacfthspd, stime, ssc, scc, xp_acft, su_acft, sv_acft, sw_acft, xp_wind,
                     su_wind, sv_wind, sw_wind, n_dvinsitu, n_dzsurf, n_vsurf, ndismiss_vhacft,
                     ndismiss_vdopcorr, ndismiss_vdopsurf, zs_rot, zs_el, zs_az, zs_dsurf, zs_dhor,
-                    zs_zsurf, zs_hsurf, vs_dhor, vs_vdopsurf, vi_dhor, vi_vdop, vi_vinsitu,
+                    zs_zsurf, zs_hsurf, vs_dhor, vs_vdopsurf, 
+                    # vi_dhor, vi_vdop, vi_vinsitu, # these are set by dvdop_insitu.py
                     swdzsurf_sweep, dzsurfsweep_mean, dzsurfsweep_rms, swvsurf_sweep, vsurfsweep_mean, vsurfsweep_rms,
                     nsurf_wri, swinsitu_sweep, dvinsitusweep_mean, dvinsitusweep_rms,
                     s_vpv, sv_vpv,
@@ -900,9 +901,9 @@ def cns_eldo(input_parameters):
                         zs_hsurf,
                         vs_dhor,
                         vs_vdopsurf,
-                        vi_dhor,
-                        vi_vdop,
-                        vi_vinsitu,
+                        #vi_dhor,
+                        #vi_vdop,
+                        #vi_vinsitu,
                         swdzsurf_sweep,
                         dzsurfsweep_mean,
                         dzsurfsweep_rms,
@@ -944,7 +945,7 @@ def cns_eldo(input_parameters):
                 ref_min0 = input_parameters['ref_min0']
                 ref_max = input_parameters['ref_max']
                 # nb1,nb2,nb3,nb4,nb5,nb6,nb7,nb8,
-                nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
+                nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft,rota_ray = control_for_end_of_all_text_files_wo_gotos.control_for_end_of_all_text_files(
                     kdzsurf, kvsurf, kdvinsitu,
                     iradar_ray, nb_ray,
                     is_aft,
@@ -981,7 +982,28 @@ def cns_eldo(input_parameters):
                      ichoice_vdop,
                      ref_min0, ref_max,
                      n_dzsurf, altdtm_min, xmin_dtm, xmax_dtm, ymin_dtm, ymax_dtm, hx_dtm, hy_dtm, igstart_surf, alt_dtm,  # needed by kdzsurf_kvsurf_ge_1
+                     # needed by dvdop_insitu
+                     ihhmmss,  # just for debug print lines
+                     ims_ray,  # just for debug print lines
+                     # roll_acft,pitch_acft,hdg_acft,drift_acft,  # just for debug print lines
+                     # azeast_ray,elhor_ray,  # just for debug print lines
+                     # ictrl_contray,  # use default of 0
                      )
+
+            #
+            #******************************************************************
+            #**** STORE FOR NEXT RAY
+            #******************************************************************
+            #
+            # istart_sweep[iradar_ray]=1 # not used
+            swp_prev[iradar_ray]=swp[iradar_ray]
+            #vnyq_prev=vnyq                      # not used
+            rota_prev[iradar_ray]=rota_ray
+            #tilt_prev=tilt_ray                  # not used
+
+        
+
+
     # end while
     if all_done:
         swdzmsurf_tot = 0

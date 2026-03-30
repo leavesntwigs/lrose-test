@@ -10,7 +10,7 @@ import numpy as np
 
 # may not need this file
 def control_for_end_of_all_text_files(kdzsurf, kvsurf, kdvinsitu, iradar_ray, nb_ray,
-is_aft, isim, ipr_alt,
+    is_aft, isim, ipr_alt,
     time_ks,
     corr_azest, corr_elhor, corr_dist, corr_lon, corr_lat, corr_p_alt, corr_r_alt, corr_vwe_av, corr_vsn_av, corr_cap, corr_roul, corr_tang, corr_derv, corr_rota, corr_incl, nb_portes, d_porte, ih_rdl,     im_rdl, is_rdl, ims_rdl, ih_rdl1, im_rdl1, is_rdl1, ims_rdl1, azest_rdl, elhor_rdl, lat_av, lon_av, p_alt_av, r_alt_av, cap_av, roul_av, tang_av, derv_av, rota_rdl, incl_rdl, vwe_av, vsn_av, vnz_av, 
     vent_we, vent_sn, vent_nz,
@@ -38,11 +38,11 @@ is_aft, isim, ipr_alt,
     # needed by kdzsurf_kvsurf_ge_1
     n_dzsurf, altdtm_min, xmin_dtm, xmax_dtm, ymin_dtm, ymax_dtm, hx_dtm, hy_dtm, igstart_surf, alt_dtm,
     # needed by dvdop_insitu
-    kdvinsit, ngates_insitu_max, ictrl_contray,
-        ihhmmss,  # just for debug print lines
-        ims_ray,  # just for debug print lines
-        # roll_acft,pitch_acft,hdg_acft,drift_acft,  # just for debug print lines
-        # azeast_ray,elhor_ray,  # just for debug print lines
+    ihhmmss,  # just for debug print lines
+    ims_ray,  # just for debug print lines
+    # roll_acft,pitch_acft,hdg_acft,drift_acft,  # just for debug print lines
+    # azeast_ray,elhor_ray,  # just for debug print lines
+    ictrl_contray=0,
 ):
 
     print('=======> inside control_for_end_of_all_text_files')
@@ -399,7 +399,7 @@ is_aft, isim, ipr_alt,
 #
     # ssurfins = dvdop_insitu(ssurfins) 
     xmat_dvinsitu, vect_dvinsitu, xmat_vsurf, vi_dhor, vi_vdop, vi_vinsitu = dvdop_insitu.dvdop_insitu(
-        kdvinsit, ngates_insitu_max,
+        kdvinsitu, ngates_insitu_max,
         ictrl_contray,
         dgate_corr, # array
         ze,         # array
@@ -419,15 +419,15 @@ is_aft, isim, ipr_alt,
         conv)
 #
 #******************************************************************
-#**** STORE FOR NEXT RAY
+#**** STORE FOR NEXT RAY  --- moved to cns_eldo_cai
 #******************************************************************
 #
     # istart_sweep[iradar_ray]=1 # not used
-    swp_prev[iradar_ray]=swp[iradar_ray]
-    vnyq_prev=vnyq
-    rota_prev[iradar_ray]=rota_ray
-    tilt_prev=tilt_ray
+    # swp_prev[iradar_ray]=swp[iradar_ray]
+    # vnyq_prev=vnyq
+    # rota_prev[iradar_ray]=rota_ray
+    # tilt_prev=tilt_ray
 #
     # return continue_processing, # swdzmsurf_tot
-    return nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft
+    return nsup,nbtotals,nbon,nmauvais,ssurfins,sacfthspd,xp_acft,rota_ray
 

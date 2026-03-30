@@ -1,13 +1,13 @@
 import simulate_dv_dopinsitu_with_guess
 import ctrl_contray
+import numpy as np
 
 
 # fills xmat_dvinsitu, vect_dvinsitu
 #       xmat_vsurf,
 #       vi_dhor, vi_vdop, vi_vinsitu
 #
-def dvdop_insitu(kdvinsit, ngates_insitu_max,
-    ictrl_contray,
+def dvdop_insitu(kdvinsitu, ngates_insitu_max,
     dgate_corr, # array
     ze,         # array
     # ichoice_vdop,
@@ -29,6 +29,8 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
     isim, 
     wa_nz,
     conv,
+    dummy_nvar=12,
+    ictrl_contray=0,
     # drota_guess,
     # dpitch_guess,
     # dhdg_guess,
@@ -48,8 +50,17 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
     # dcwe_dh_true,
     # dcsn_dh_true,
     # dcnz_dh_true,
-
     ):
+
+    nvar=12
+
+    # xmat_dvinsitu = np.zeros((12,12)) # , dtype=np.float32)
+    xmat_dvinsitu = np.zeros((nvar,nvar)) # , dtype=np.float32)
+    vect_dvinsitu = np.zeros(nvar, dtype=np.float32)
+    xmat_vsurf = np.zeros((nvar,nvar), dtype=np.float32)
+    vi_dhor = np.zeros((2,500), dtype=np.float32)
+    vi_vdop = np.zeros((2,500), dtype=np.float32)
+    vi_vinsitu = np.zeros((2,500), dtype=np.float32)
 
 #******************************************************************
 #**** CASE "DVDOP_insitu"
@@ -64,7 +75,7 @@ def dvdop_insitu(kdvinsit, ngates_insitu_max,
 #******************************************************************
 #
         if(ictrl_contray == 1):    # always set to 0 in code, regardless of input param
-            ctrl_contray.ctrl_contray()
+            ctrl_contray.ctrl_contray_eq_1()
 #
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         itest=1

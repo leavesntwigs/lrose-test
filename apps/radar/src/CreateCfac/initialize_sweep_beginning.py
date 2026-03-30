@@ -36,9 +36,9 @@ def initialize_sweep_beginning(iradar_ray,
     zs_hsurf,
     vs_dhor,
     vs_vdopsurf,
-    vi_dhor,
-    vi_vdop,
-    vi_vinsitu,
+    #vi_dhor,
+    #vi_vdop,
+    #vi_vinsitu,
     swdzsurf_sweep,
     dzsurfsweep_mean,
     dzsurfsweep_rms,
@@ -101,9 +101,9 @@ def initialize_sweep_beginning(iradar_ray,
         zs_hsurf[iradar_ray,n]=0.
         vs_dhor[iradar_ray,n]=0.
         vs_vdopsurf[iradar_ray,n]=0.
-        vi_dhor[iradar_ray,n]=0.
-        vi_vdop[iradar_ray,n]=0.
-        vi_vinsitu[iradar_ray,n]=0.
+        #vi_dhor[iradar_ray,n]=0.
+        #vi_vdop[iradar_ray,n]=0.
+        #vi_vinsitu[iradar_ray,n]=0.
     # enddo
 #
     swdzsurf_sweep[iradar_ray]=0.
@@ -120,6 +120,6 @@ def initialize_sweep_beginning(iradar_ray,
     for jgd in range(2):
         s_vpv[iradar_ray,jgd]=0.
         sv_vpv[iradar_ray,jgd]=0.
-        svv_vpv[iradar_ray,jgd]=0.
+        # svv_vpv[iradar_ray,jgd]=0. # causes TypeError: 'NoneType' object does not support item assignment
     # enddo
 

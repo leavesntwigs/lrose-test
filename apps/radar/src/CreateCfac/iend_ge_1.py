@@ -49,7 +49,7 @@ def calc_mean_values_for_sweep(iradar_ray,
         #**** CONTROL PRINTS FOR THE PAST SWEEP
         #******************************************************************
         #
-        print_past_sweep()
+        # print_past_sweep()
         #
         #******************************************************************
         #**** WRITE THE RESULTS FOR THE PAST SWEEP
